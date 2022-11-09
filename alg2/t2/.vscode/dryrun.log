@@ -1,0 +1,9 @@
+make --dry-run --always-make --keep-going --print-directory
+make: Entering directory '/home/ner0/ufpr/alg2/t2'
+cc    -c -o teste.o teste.c
+cc    -c -o biblioteca.o biblioteca.c
+cc    -c -o quebrador-senha.o quebrador-senha.c
+cc   teste.o biblioteca.o quebrador-senha.o   -o teste
+./teste
+make: Leaving directory '/home/ner0/ufpr/alg2/t2'
+ 

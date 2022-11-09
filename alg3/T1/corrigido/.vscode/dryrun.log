@@ -1,0 +1,5 @@
+make teste --dry-run --keep-going --print-directory
+make: Entering directory '/home/ner0/ufpr/alg3/T1/corrigido'
+./myavl < teste.in
+make: Leaving directory '/home/ner0/ufpr/alg3/T1/corrigido'
+ 

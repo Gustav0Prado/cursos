@@ -1,0 +1,12 @@
+{
+   "makefile.launchConfigurations": [
+      {
+         "cwd": "/home/ner0/ufpr/prog1/t3",
+         "binaryPath": "/home/ner0/ufpr/prog1/t3/mundo",
+         "binaryArgs": []
+      }
+   ],
+   "files.associations": {
+      "stdio.h": "c"
+   }
+}

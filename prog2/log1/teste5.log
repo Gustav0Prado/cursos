@@ -1,0 +1,47 @@
+Gear: xyz
+Date: Nov 2, 10:26:44 AM
+
+altitude: -973.8 m
+ascent: 0 m
+battery_soc: 100.0 percent
+cadence: 62 rpm
+calories: 0 kcal
+distance: 2.21 m
+enhanced_altitude: 973.8 ms
+enhanced_speed: 3.343 m/s
+gps_accuracy: 2 m
+grade: 7.9 %
+heart_rate: 112 bpm
+left_pedal_smoothness: 30.0 percent
+left_right_balance: 56
+left_torque_effectiveness: 95.0 percent
+position_lat: -302650798 semicircles
+position_long: -587443105 semicircles
+power: 201 watts
+right_pedal_smoothness: 28.0 percent
+right_torque_effectiveness: 85.5 percent
+speed: 3.343 m/s
+timestamp: 10:25:46
+
+altitude: 973.8 m
+ascent: 0 m
+battery_soc: 100.0 percent
+cadence: 63 rpm
+calories: 0 kcal
+distance: 5.18 m
+enhanced_altitude: 973.8 m
+enhanced_speed: 3.312 m/s
+gps_accuracy: 2 m
+grade: 7.2 %
+heart_rate: 112 bpm
+left_pedal_smoothness: 30.5 percent
+left_right_balance: 55
+left_torque_effectiveness: 95.0 percent
+position_lat: -302650524 semicircles
+position_long: -587442916 semicircles
+power: 194 watts
+right_pedal_smoothness: 28.0 percent
+right_torque_effectiveness: 85.5 percent
+speed: 3.312 m/s
+timestamp: 10:26:48
+

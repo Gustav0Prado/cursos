@@ -1,0 +1,6 @@
+make all --dry-run --always-make --keep-going --print-directory
+make: Entering directory '/home/ner0/ufpr/alg3/T1'
+gcc -c libavl.c
+gcc libavl.o -o myavl myavl.c -g
+make: Leaving directory '/home/ner0/ufpr/alg3/T1'
+ 

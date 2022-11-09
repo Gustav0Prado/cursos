@@ -1,0 +1,9 @@
+make all --dry-run --always-make --keep-going --print-directory
+make: Entering directory '/home/ner0/ufpr/prog1/t3'
+gcc -c libmundo.c -lm -Wall
+gcc -c libconjunto.c -Wall
+gcc -c liblef.c -Wall
+gcc -c libfila.c -Wall
+gcc libconjunto.o liblef.o libmundo.o libfila.o -o mundo mundo.c -lm -Wall -g
+make: Leaving directory '/home/ner0/ufpr/prog1/t3'
+ 

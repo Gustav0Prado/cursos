@@ -1,0 +1,5 @@
+make --dry-run --always-make --keep-going --print-directory
+make: Entering directory '/home/ner0/ufpr/prog2/p1'
+gcc -o mysort mysort.c -Wall -g
+make: Leaving directory '/home/ner0/ufpr/prog2/p1'
+ 

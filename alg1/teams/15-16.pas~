@@ -1,0 +1,36 @@
+program triplas;
+var a, b, c, primraiz, segraiz : real;
+    qtdraizes : integer;
+
+function calcularaizes( a, b, c : real; var raiz1, raiz2 : real ) : integer;
+var delta : real;
+
+begin
+   delta:= (b * b) - 4 * a * c;
+   if delta >= 0 then
+      begin
+	 raiz1:= ( -b + sqrt( delta ) ) / ( 2 * a );
+	 raiz2:= ( -b - sqrt( delta ) ) / ( 2 * a );
+	 if raiz1 = raiz2 then
+	    calcularaizes:= 1
+	 else
+	    calcularaizes:= 2;
+      end
+   else
+      calcularaizes:= 0
+end;
+
+begin
+   read( a, b, c );
+   while ( a <> 0 ) OR ( b <> 0 ) OR ( c <> 0 )do
+      begin
+	 qtdraizes:= calcularaizes( a, b, c, primraiz, segraiz );
+	 if qtdraizes = 0 then
+	    writeln( 'Não existem raízes reais' )
+	 else if qtdraizes = 1 then
+	    writeln( 'A única raiz é: ', primraiz:0:1 )
+	 else
+	    writeln( 'As raízes são: ', primraiz:0:1, ' e ', segraiz:0:1 );
+	 read( a, b, c );
+      end;
+end.

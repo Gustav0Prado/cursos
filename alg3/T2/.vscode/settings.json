@@ -1,0 +1,13 @@
+{
+   "makefile.extensionOutputFolder": "./.vscode",
+   "files.associations": {
+      "libht.h": "c"
+   },
+   "makefile.launchConfigurations": [
+      {
+         "cwd": "/home/ner0/ufpr/alg3/T2",
+         "binaryPath": "/home/ner0/ufpr/alg3/T2/myht",
+         "binaryArgs": []
+      }
+   ]
+}

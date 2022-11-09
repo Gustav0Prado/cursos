@@ -1,0 +1,13 @@
+make --dry-run --always-make --keep-going --print-directory
+make: Entering directory '/home/ner0/ufpr/prog1/t2'
+gcc -c testa_conjunto.c -Wall
+gcc -c libconjunto.c -Wall
+gcc -o testa_conjunto testa_conjunto.o libconjunto.o -Wall
+gcc -c testa_lista.c -Wall
+gcc -c liblista.c -Wall
+gcc -o testa_lista testa_lista.o liblista.o -Wall
+gcc -c testa_fila.c -Wall
+gcc -c libfila.c -Wall
+gcc -o testa_fila testa_fila.o libfila.o -Wall
+make: Leaving directory '/home/ner0/ufpr/prog1/t2'
+ 

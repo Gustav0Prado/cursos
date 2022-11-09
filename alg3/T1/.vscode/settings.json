@@ -1,0 +1,9 @@
+{
+   "makefile.launchConfigurations": [
+      {
+         "cwd": "/home/ner0/ufpr/alg3/T1",
+         "binaryPath": "/home/ner0/ufpr/alg3/T1/myavl",
+         "binaryArgs": []
+      }
+   ]
+}

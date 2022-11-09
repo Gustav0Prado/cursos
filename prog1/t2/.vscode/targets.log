@@ -1,0 +1,453 @@
+make all --print-data-base --no-builtin-variables --no-builtin-rules --question
+# GNU Make 4.3
+# Built for x86_64-pc-linux-gnu
+# Copyright (C) 1988-2020 Free Software Foundation, Inc.
+# License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+# This is free software: you are free to change and redistribute it.
+# There is NO WARRANTY, to the extent permitted by law.
+
+# Make data base, printed on Tue Dec 14 11:10:33 2021
+
+# Variables
+
+# environment
+GDK_BACKEND = x11
+# environment
+LC_ALL = C
+# environment
+GTK_RC_FILES = /etc/gtk/gtkrc:/home/ner0/.gtkrc:/home/ner0/.config/gtkrc
+# environment
+VSCODE_IPC_HOOK_EXTHOST = /run/user/1000/vscode-ipc-53c6f582-409a-4d0e-bc27-3469b9065237.sock
+# environment
+MANDATORY_PATH = /usr/share/gconf/plasma.mandatory.path
+# environment
+KONSOLE_DBUS_SERVICE = :1.74
+# environment
+ 
+VSCODE_CWD = /home/ner0/ufpr/prog1/t2
+# environment
+WINDOWID = 73400327
+# environment
+GDM_LANG = pt_BR
+# default
+MAKE_COMMAND := make
+# environment
+QT_ACCESSIBILITY = 1
+# automatic
+@D = $(patsubst %/,%,$(dir $@))
+# environment
+KONSOLE_VERSION = 210801
+# environment
+VSCODE_HANDLES_UNCAUGHT_ERRORS = true
+# default
+.VARIABLES := 
+# environment
+PWD = /home/ner0/ufpr/prog1/t2
+# automatic
+%D = $(patsubst %/,%,$(dir $%))
+# environment
+LSCOLORS = Gxfxcxdxbxegedabagacad
+# environment
+XDG_DATA_DIRS = /usr/share/plasma:/usr/local/share:/usr/share:/var/lib/snapd/desktop
+# environment
+OLDPWD = /home/ner0
+# environment
+KONSOLE_DBUS_WINDOW = /Windows/1
+# automatic
+^D = $(patsubst %/,%,$(dir $^))
+# environment
+VSCODE_LOG_STACK = false
+# automatic
+%F = $(notdir $%)
+# environment
+VSCODE_CODE_CACHE_PATH = /home/ner0/.config/Code/CachedData/7db1a2b88f7557e0a43fec75b6ba7e50b3e9f77e
+# environment
+XDG_SESSION_PATH = /org/freedesktop/DisplayManager/Session0
+# environment
+LANG = C
+# environment
+XAUTHORITY = /home/ner0/.Xauthority
+# default
+.LOADED := 
+# default
+.INCLUDE_DIRS = /usr/local/include /usr/include /usr/include
+# environment
+COLORFGBG = 15;0
+# makefile
+MAKEFLAGS = pqrR
+# makefile
+CURDIR := /home/ner0/ufpr/prog1/t2
+# environment
+VSCODE_PIPE_LOGGING = true
+# environment
+APPLICATION_INSIGHTS_NO_DIAGNOSTIC_CHANNEL = true
+# automatic
+*D = $(patsubst %/,%,$(dir $*))
+# environment
+PAM_KWALLET5_LOGIN = /run/user/1000/kwallet5.socket
+# environment
+MFLAGS = -pqrR
+# default
+.SHELLFLAGS := -c
+# environment
+XDG_CONFIG_DIRS = /home/ner0/.config/kdedefaults:/etc/xdg/xdg-plasma:/etc/xdg:/usr/share/kubuntu-default-settings/kf5-settings
+# automatic
++D = $(patsubst %/,%,$(dir $+))
+# environment
+P9K_SSH = 0
+# environment
+XCURSOR_THEME = Nordzy-cursors-white
+# environment
+VSCODE_CRASH_REPORTER_START_OPTIONS = {"companyName":"Microsoft","productName":"VSCode","submitURL":"appcenter://code?aid=fba07a4d-84bd-4fc8-a125-9640fc8ce171&uid=4f435451-1231-47f7-bd2b-f1af98cff99d&iid=4f435451-1231-47f7-bd2b-f1af98cff99d&sid=4f435451-1231-47f7-bd2b-f1af98cff99d","uploadToServer":true}
+# environment
+XDG_SESSION_DESKTOP = plasma
+# makefile (from 'makefile', line 1)
+MAKEFILE_LIST := makefile
+# automatic
+@F = $(notdir $@)
+# environment
+ZSH = /home/ner0/.oh-my-zsh
+# environment
+VSCODE_VERBOSE_LOGGING = true
+# environment
+VSCODE_PID = 2542
+# environment
+XDG_SESSION_TYPE = x11
+# automatic
+?D = $(patsubst %/,%,$(dir $?))
+# environment
+SESSION_MANAGER = local/ner0-desktop:@/tmp/.ICE-unix/1626,unix/ner0-desktop:/tmp/.ICE-unix/1626
+# automatic
+*F = $(notdir $*)
+# environment
+CHROME_DESKTOP = code-url-handler.desktop
+# environment
+DBUS_SESSION_BUS_ADDRESS = unix:path=/run/user/1000/bus
+# automatic
+<D = $(patsubst %/,%,$(dir $<))
+# environment
+P9K_TTY = old
+# environment
+VSCODE_NLS_CONFIG = {"locale":"pt-br","availableLanguages":{"*":"pt-br"},"_languagePackId":"6117a4de48347fcac958e23476791f15.pt-br","_translationsConfigFile":"/home/ner0/.config/Code/clp/6117a4de48347fcac958e23476791f15.pt-br/tcf.json","_cacheRoot":"/home/ner0/.config/Code/clp/6117a4de48347fcac958e23476791f15.pt-br","_resolvedLanguagePackCoreLocation":"/home/ner0/.config/Code/clp/6117a4de48347fcac958e23476791f15.pt-br/7db1a2b88f7557e0a43fec75b6ba7e50b3e9f77e","_corruptedFile":"/home/ner0/.config/Code/clp/6117a4de48347fcac958e23476791f15.pt-br/corrupted.info","_languagePackSupport":true}
+# environment
+BREAKPAD_DUMP_LOCATION = /home/ner0/.config/Code/exthost Crash Reports
+# default
+MAKE_HOST := x86_64-pc-linux-gnu
+# makefile
+SHELL = /bin/sh
+# default
+MAKECMDGOALS := all
+# environment
+XMODIFIERS = @im=ibus
+# environment
+SHLVL = 1
+# environment
+PROFILEHOME = 
+# environment
+MAKELEVEL := 0
+# default
+MAKE = $(MAKE_COMMAND)
+# environment
+PATH = /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/home/ner0/.local/bin
+# default
+MAKEFILES := 
+# environment
+LANGUAGE = pt_BR:pt:en
+# automatic
+^F = $(notdir $^)
+# environment
+VSCODE_LOG_NATIVE = false
+# automatic
+?F = $(notdir $?)
+# environment
+KDE_APPLICATIONS_AS_SCOPE = 1
+# environment
+XDG_SEAT = seat0
+# environment
+GTK_IM_MODULE = ibus
+# environment
+XDG_CURRENT_DESKTOP = KDE
+# environment
+LS_COLORS = rs=0:di=01;34:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:mi=00:su=37;41:sg=30;43:ca=30;41:tw=30;42:ow=34;42:st=37;44:ex=01;32:*.tar=01;31:*.tgz=01;31:*.arc=01;31:*.arj=01;31:*.taz=01;31:*.lha=01;31:*.lz4=01;31:*.lzh=01;31:*.lzma=01;31:*.tlz=01;31:*.txz=01;31:*.tzo=01;31:*.t7z=01;31:*.zip=01;31:*.z=01;31:*.dz=01;31:*.gz=01;31:*.lrz=01;31:*.lz=01;31:*.lzo=01;31:*.xz=01;31:*.zst=01;31:*.tzst=01;31:*.bz2=01;31:*.bz=01;31:*.tbz=01;31:*.tbz2=01;31:*.tz=01;31:*.deb=01;31:*.rpm=01;31:*.jar=01;31:*.war=01;31:*.ear=01;31:*.sar=01;31:*.rar=01;31:*.alz=01;31:*.ace=01;31:*.zoo=01;31:*.cpio=01;31:*.7z=01;31:*.rz=01;31:*.cab=01;31:*.wim=01;31:*.swm=01;31:*.dwm=01;31:*.esd=01;31:*.jpg=01;35:*.jpeg=01;35:*.mjpg=01;35:*.mjpeg=01;35:*.gif=01;35:*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:*.ppm=01;35:*.tga=01;35:*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:*.svg=01;35:*.svgz=01;35:*.mng=01;35:*.pcx=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.m2v=01;35:*.mkv=01;35:*.webm=01;35:*.webp=01;35:*.ogm=01;35:*.mp4=01;35:*.m4v=01;35:*.mp4v=01;35:*.vob=01;35:*.qt=01;35:*.nuv=01;35:*.wmv=01;35:*.asf=01;35:*.rm=01;35:*.rmvb=01;35:*.flc=01;35:*.avi=01;35:*.fli=01;35:*.flv=01;35:*.gl=01;35:*.dl=01;35:*.xcf=01;35:*.xwd=01;35:*.yuv=01;35:*.cgm=01;35:*.emf=01;35:*.ogv=01;35:*.ogx=01;35:*.aac=00;36:*.au=00;36:*.flac=00;36:*.m4a=00;36:*.mid=00;36:*.midi=00;36:*.mka=00;36:*.mp3=00;36:*.mpc=00;36:*.ogg=00;36:*.ra=00;36:*.wav=00;36:*.oga=00;36:*.opus=00;36:*.spx=00;36:*.xspf=00;36:
+# automatic
++F = $(notdir $+)
+# environment
+XDG_SEAT_PATH = /org/freedesktop/DisplayManager/Seat0
+# environment
+LESS = -R
+# environment
+DESKTOP_SESSION = plasma
+# environment
+ORIGINAL_XDG_CURRENT_DESKTOP = KDE
+# 'override' directive
+GNUMAKEFLAGS := 
+# environment
+CLUTTER_IM_MODULE = ibus
+# environment
+LOGNAME = ner0
+# environment
+XDG_VTNR = 7
+# makefile
+.DEFAULT_GOAL := all
+# environment
+SYSTEMD_EXEC_PID = 1324
+# environment
+DISPLAY = :0
+# environment
+USER = ner0
+# environment
+DEFAULTS_PATH = /usr/share/gconf/plasma.default.path
+# environment
+KDE_SESSION_UID = 1000
+# default
+MAKE_VERSION := 4.3
+# environment
+KONSOLE_DBUS_SESSION = /Sessions/1
+# environment
+PAGER = less
+# environment
+_ = /usr/bin/code
+# environment
+XDG_RUNTIME_DIR = /run/user/1000
+# environment
+GPG_AGENT_INFO = /run/user/1000/gnupg/S.gpg-agent:0:1
+# environment
+COLORTERM = truecolor
+# environment
+XDG_SESSION_CLASS = user
+# environment
+VSCODE_AMD_ENTRYPOINT = vs/workbench/services/extensions/node/extensionHostProcess
+# environment
+GTK2_RC_FILES = /etc/gtk-2.0/gtkrc:/home/ner0/.gtkrc-2.0:/home/ner0/.config/gtkrc-2.0
+# environment
+HOME = /home/ner0
+# environment
+QT_IM_MODULE = ibus
+# environment
+ELECTRON_RUN_AS_NODE = 1
+# environment
+VSCODE_IPC_HOOK = /run/user/1000/vscode-c6efa6c8-1.63.0-main.sock
+# environment
+TERM = xterm-256color
+# environment
+XDG_SESSION_ID = c2
+# environment
+XCURSOR_SIZE = 24
+# environment
+IM_CONFIG_PHASE = 1
+# default
+.RECIPEPREFIX := 
+# automatic
+<F = $(notdir $<)
+# default
+SUFFIXES := 
+# environment
+QT_AUTO_SCREEN_SCALE_FACTOR = 0
+# environment
+_P9K_TTY = /dev/pts/1
+# environment
+VSCODE_CLI = 1
+# environment
+ELECTRON_NO_ATTACH_CONSOLE = 1
+# environment
+XDG_GREETER_DATA_DIR = /var/lib/lightdm-data/ner0
+# environment
+SHELL_SESSION_ID = 7cd65abb7852439eb970f18b67c8e78e
+# environment
+KDE_SESSION_VERSION = 5
+# default
+.FEATURES := target-specific order-only second-expansion else-if shortest-stem undefine oneshell nocomment grouped-target extra-prereqs archives jobserver output-sync check-symlink load
+# environment
+KDE_FULL_SESSION = true
+# environment
+GDMSESSION = plasma
+# variable set hash-table stats:
+# Load=125/1024=12%, Rehash=0, Collisions=12/155=8%
+
+# Pattern-specific Variable Values
+
+# No pattern-specific variable values.
+
+# Directories
+
+# . (device 2067, inode 5112089): 24 files, no impossibilities.
+
+# 24 files, no impossibilities in 1 directories.
+
+# Implicit Rules
+
+# No implicit rules.
+
+# Files
+
+testa_conjunto.o: testa_conjunto.c
+#  Implicit rule search has not been done.
+#  Last modified 2021-12-06 18:48:08.592232962
+#  File has been updated.
+#  Successfully updated.
+#  recipe to execute (from 'makefile', line 6):
+	gcc -c testa_conjunto.c -Wall
+
+libconjunto.o: libconjunto.c
+#  Implicit rule search has not been done.
+#  Last modified 2021-12-06 18:46:59.638786432
+#  File has been updated.
+#  Successfully updated.
+#  recipe to execute (from 'makefile', line 8):
+	gcc -c libconjunto.c -Wall
+
+clean:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+#  recipe to execute (from 'makefile', line 25):
+	rm testa_fila testa_lista testa_conjunto *.o
+
+# Not a target:
+liblista.c:
+#  Implicit rule search has been done.
+#  Last modified 2021-12-10 09:30:30.370745354
+#  File has been updated.
+#  Successfully updated.
+
+testa_fila: testa_fila.o libfila.o
+#  Implicit rule search has not been done.
+#  Last modified 2021-12-10 17:54:00.607883598
+ 
+#  File has been updated.
+#  Successfully updated.
+#  recipe to execute (from 'makefile', line 18):
+	gcc -o testa_fila testa_fila.o libfila.o -Wall
+
+# Not a target:
+libconjunto.c:
+#  Implicit rule search has been done.
+#  Last modified 2021-12-06 17:41:12.404788
+#  File has been updated.
+#  Successfully updated.
+
+testa_lista.o: testa_lista.c
+#  Implicit rule search has not been done.
+#  Last modified 2021-12-10 09:29:11.928485108
+#  File has been updated.
+#  Successfully updated.
+#  recipe to execute (from 'makefile', line 13):
+	gcc -c testa_lista.c -Wall
+
+# Not a target:
+testa_conjunto.c:
+#  Implicit rule search has been done.
+#  Last modified 2021-12-06 18:47:42.507674219
+#  File has been updated.
+#  Successfully updated.
+
+remake: clean all
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+
+liblista.o: liblista.c
+#  Implicit rule search has not been done.
+#  Last modified 2021-12-10 09:30:35.222878594
+#  File has been updated.
+#  Successfully updated.
+#  recipe to execute (from 'makefile', line 15):
+	gcc -c liblista.c -Wall
+
+# Not a target:
+.DEFAULT:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+
+libfila.o: libfila.c
+#  Implicit rule search has not been done.
+#  Last modified 2021-12-10 17:54:00.559883114
+#  File has been updated.
+#  Successfully updated.
+#  recipe to execute (from 'makefile', line 22):
+	gcc -c libfila.c -Wall
+
+all: testa_conjunto testa_lista testa_fila
+#  Command line target.
+#  Implicit rule search has been done.
+#  File does not exist.
+#  File has been updated.
+#  Successfully updated.
+
+run: all
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+#  recipe to execute (from 'makefile', line 27):
+	./testa_conjunto && ./testa_fila && ./testa_lista
+
+# Not a target:
+testa_lista.c:
+#  Implicit rule search has been done.
+#  Last modified 2021-12-10 09:28:45.487671153
+#  File has been updated.
+#  Successfully updated.
+
+# Not a target:
+makefile:
+#  Implicit rule search has been done.
+#  Last modified 2021-12-06 18:47:06.690929656
+#  File has been updated.
+#  Successfully updated.
+
+testa_conjunto: testa_conjunto.o libconjunto.o
+#  Implicit rule search has not been done.
+#  Last modified 2021-12-06 18:48:08.608233308
+#  File has been updated.
+#  Successfully updated.
+#  recipe to execute (from 'makefile', line 4):
+	gcc -o testa_conjunto testa_conjunto.o libconjunto.o -Wall
+
+testa_fila.o: testa_fila.c
+#  Implicit rule search has not been done.
+#  Last modified 2021-12-06 18:50:03.20281961
+#  File has been updated.
+#  Successfully updated.
+#  recipe to execute (from 'makefile', line 20):
+	gcc -c testa_fila.c -Wall
+
+# Not a target:
+testa_fila.c:
+#  Implicit rule search has been done.
+#  Last modified 2021-12-06 18:49:26.561972362
+#  File has been updated.
+#  Successfully updated.
+
+# Not a target:
+libfila.c:
+#  Implicit rule search has been done.
+#  Last modified 2021-12-10 17:52:21.470885215
+#  File has been updated.
+#  Successfully updated.
+
+testa_lista: testa_lista.o liblista.o
+#  Implicit rule search has not been done.
+#  Last modified 2021-12-10 17:54:00.263880133
+#  File has been updated.
+#  Successfully updated.
+#  recipe to execute (from 'makefile', line 11):
+	gcc -o testa_lista testa_lista.o liblista.o -Wall
+
+# files hash-table stats:
+# Load=22/1024=2%, Rehash=0, Collisions=0/60=0%
+# VPATH Search Paths
+
+# No 'vpath' search paths.
+
+# No general ('VPATH' variable) search path.
+
+# strcache buffers: 1 (0) / strings = 32 / storage = 346 B / avg = 10 B
+# current buf: size = 8162 B / used = 346 B / count = 32 / avg = 10 B
+
+# strcache performance: lookups = 77 / hit rate = 58%
+# hash-table stats:
+# Load=32/8192=0%, Rehash=0, Collisions=0/77=0%
+# Finished Make data base on Tue Dec 14 11:10:33 2021
+
+ 

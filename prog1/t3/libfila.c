@@ -1,0 +1,171 @@
+#include "libfila.h"
+#include <stdlib.h>
+#include <stdio.h>
+
+/*
+ * Cria uma fila vazia e a retorna, se falhar retorna NULL.
+*/
+fila_t * cria_fila (){
+   fila_t *f = malloc(sizeof(fila_t));
+
+   if(f != NULL){
+      f->ini = NULL;
+      f->fim = NULL;
+      f->atual = NULL;
+      f->tamanho = 0;
+
+      return f;
+   }
+   return NULL;
+
+}
+
+/*
+ * Remove todos os elementos da fila, libera espaco e devolve NULL.
+*/
+fila_t * destroi_fila (fila_t *f){
+   int elemento;
+
+   while(!fila_vazia(f)){
+      retira_fila(f, &elemento);
+   }
+   f->atual = NULL;
+   f->fim = NULL;
+   f->ini = NULL;
+   free(f);
+   return NULL;
+}
+
+/*
+ * Retorna 1 se a fila esta vazia e 0 caso contrario.
+*/
+int fila_vazia (fila_t *f){
+   return (f->tamanho == 0);
+}
+
+/*
+ * Retorna o tamanho da fila, isto eh, o numero de elementos presentes nela.
+*/
+int tamanho_fila (fila_t *f){
+   return f->tamanho;
+}
+
+/*
+ * Insere o elemento no final da fila (politica FIFO).
+ * Retorna 1 se a operacao foi bem sucedida e 0 caso contrario.
+*/
+int insere_fila (fila_t *f, int elemento){
+   nodo_f_t *n = malloc(sizeof(nodo_f_t));
+   nodo_f_t *fim = f->fim;
+
+   if(n != NULL){
+      if(fim != NULL){
+         n->chave = elemento;
+         n->prox = NULL;
+         fim->prox = n;
+         f->fim = n;
+         f->tamanho++;
+
+         return 1;
+      }
+      /*fila vazia*/
+      else{
+         n->chave = elemento;
+         n->prox = NULL;
+         f->ini = n;
+         f->fim = n;
+         f->tamanho++;
+
+         return 1;
+      }
+   }
+   return 0;
+}
+
+/*
+ * Remove o elemento do inicio da fila (politica FIFO) e o retorna.
+ * Retorna 1 se a operacao foi bem sucedida e 0 caso contrario.
+*/
+int retira_fila (fila_t *f, int *elemento){
+   nodo_f_t *ini = f->ini;
+   nodo_f_t *prox;
+      
+   if(ini != NULL){
+      prox = ini->prox;
+      *elemento = ini->chave;
+      f->ini = prox;
+      free(ini);
+      ini = NULL;
+      f->tamanho--;
+      /*caso seja o unico elemento, torna a fila vazia*/
+      if(f->tamanho == 0){
+         f->fim = NULL;
+      }
+
+      return 1;
+   }
+   return 0;
+}
+
+/*
+ * As funcoes abaixo permitem quebrar a politica FIFO da fila,
+ * Permite acesso a elementos apontados pelo ponteiro 'atual'.
+ * Este ponteiro pode ser inicializado e incrementado, viabilizando
+ * a implementacao de um mecanismo iterador.
+*/
+
+/*
+ * Inicializa o ponteiro atual para o primeiro elemento da fila.
+ * Retorna 1 se a operacao foi bem sucedida e zero caso contrario.
+*/
+int inicializa_atual_fila (fila_t *f){
+   if(f->ini != NULL){
+      f->atual = f->ini;
+      return 1;
+   }
+   return 0;
+}
+
+/*
+ * Faz o ponteiro atual apontar para o próximo nodo da fila f.
+*/
+void incrementa_atual_fila (fila_t *f){
+   f->atual = (f->atual)->prox;
+}
+
+/*
+ * Retorna em *elemento o valor contido na chave apontada pelo ponteiro atual. 
+ * Se atual não for válido a função retorna zero senão retorna 1.
+*/
+int consulta_atual_fila (fila_t *atual, int *elemento){
+   if(atual != NULL){
+      *elemento = (atual->atual)->chave;
+      return 1;
+   }
+   return 0;
+}
+
+/*
+ * Remove o elemento apontado por atual da fila f e o retorna em *elemento.
+ * Faz o atual apontar para o sucessor do nodo removido.
+ * Retorna 1 se houve sucesso e zero caso contrario.
+*/
+int retira_atual_fila (fila_t *f, int *elemento){
+   nodo_f_t *n = f->atual;
+   nodo_f_t *m = f->ini;
+
+   if(n != NULL && m != NULL){
+      while(m->prox != n){
+         m = m->prox;
+      }
+      m->prox = n->prox;
+      f->atual = n->prox;
+      f->tamanho --;
+      *elemento = n->chave;
+      free(n);
+      n = NULL;
+
+      return 1;
+   }
+   return 0;
+}

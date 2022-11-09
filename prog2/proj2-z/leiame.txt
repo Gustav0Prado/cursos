@@ -1,0 +1,25 @@
+1.Particularidades:
+    Eu usei uma lista ligada para guardar aos blocos, já que qualquer um pode ser deletado a qualquer momento
+    Um array com realloc para as bolinhas, visto que o mesmo nunca diminui, apenas aumenta
+    Uma fila para gerir o tempo em que cada bolinhas sai e qual sai primeiro
+    São usadas duas máquinas de estados com tipos enumerados
+        I."Externa": máquina no arquivo principal (main.c), redireciona para as telas principais(jogo, menu, fim, etc)
+        II."Interna": máquina dentro do jogo em si(jogo.c), controla o fluxo do jogo, como mirar, se mover, esperaras bolas, etc
+
+2.Easter Egg:
+    Ao digitar clonedassombras (tudo junto, em minunscula) o número de bolas na tela é duplicado, se errar na digitação, a tecla F5 vai limpar o que foi digitado e começar de novo
+
+3.Imagens e músicas:
+    Som de pegar um item: https://opengameart.org/content/ui-and-item-sounds-sample-1
+    Som de bater em um bloco: https://opengameart.org/content/pop-sounds
+    Som de gameover: https://opengameart.org/content/game-over-bad-chest-sfx
+    Som do Easter Egg: https://www.youtube.com/watch?v=c-4BFurRRzI
+    Musicas do menu e fundo do jogo: https://opengameart.org/content/8bit-style-music
+    Todas as imagens foram feitas por mim usando o GIMP, menos "Info2.png" que é editada baseada em uma screenshot do jogo Ballz original
+
+Inspirado no jogo de celular Ballz
+Jogo programado por Gustavo Do Prado Silva
+para a matéria CI1002 - Programação 2
+Link no Github: https://github.com/Gustav0Prado/ballz
+
+Domingo, 04/09/2022
