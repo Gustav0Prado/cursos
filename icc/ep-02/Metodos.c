@@ -195,11 +195,11 @@ int gaussSeidel (SistLinear_t *SL, real_t *x, real_t erro, double *tTotal)
       x[i] = (1/SL->A[i][i])*(SL->b[i]+soma);
     }
 
-    /* calcula erro entre atual e anterior */
+    /* calcula diferença absoluta entre atual e anterior */
     errAcum = fabs(x[0] - errAcum);
 
     it++;
-  }while(errAcum > erro);
+  }while(errAcum > erro && it < MAXIT);
 
   //calcula tempo gasto
   *tTotal = timestamp() - tempo;
