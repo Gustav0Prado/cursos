@@ -199,18 +199,14 @@ int gaussSeidel (SistLinear_t *SL, real_t *x, real_t erro, double *tTotal)
     }
 
     /* calcula erro entre atual e anterior */
-    if(it > 0){
-      errAcum = fabs(x[0] - errAcum);
-      printf("%1.9e  -  %1.9e\n", errAcum, erro);
-    }
+    errAcum = fabs(x[0] - errAcum);
 
     it++;
-  }while(errAcum < erro);
+  }while(errAcum > erro);
 
   //calcula tempo gasto
   *tTotal = timestamp() - tempo;
 
-  printf("%d\n", it);
   return it;
 }
 

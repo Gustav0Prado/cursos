@@ -29,64 +29,55 @@ int main ()
   // inicializa gerador de números aleatóreos
   srand(202202);
   
-  int TAM_MATRIZES[8] = {10, 30, 50, 128, 256, 512, 1000, 2000};
+  int TAM_MATRIZES[6] = {10, 30, 50, 128, 256, 512};
 
   SistLinear_t *SL;
   SistLinear_t *SLOrig;
   real_t *x;
   double tTotal = 0.0;
 
-  int tam = 3;
-
-  // printf("Eliminação de Gauss: \n");
-  // for(int i = 0; i < 8; i++){
-  //   int tam = TAM_MATRIZES[i];
-
-  //   SL = alocaSisLin(tam);
-  //   SLOrig = alocaSisLin(tam);
-  //   x = malloc(sizeof(real_t)*tam);
-
-  //   //if SL -> testa ponteiro
-  //   iniSisLin(SL, diagDominante, 10.0);
-  //   copiaMatriz(SLOrig, SL, tam);
-
-  //   /* eliminacao de gauss */
-  //   eliminacaoGauss(SLOrig, SL, x, &tTotal);
-  //   printf("Tamanho da Matriz: %4d  Tempo de execução: %10g\n", tam, tTotal);
-
-  //   /* Desaloca estruturas */
-  //   liberaSisLin(SL);
-  //   liberaSisLin(SLOrig);
-  //   free(x);
-  // }
-
-
-  //Teste Eliminação Gauss
   printf("Eliminação de Gauss: \n");
-  SL = alocaSisLin(tam);
-  SLOrig = alocaSisLin(tam);
-  iniSisLin(SL, diagDominante, 10.0);
-  copiaMatriz(SLOrig, SL, tam);
-  x = malloc(sizeof(real_t)*tam);
+  for(int i = 0; i < 6; i++){
+    int tam = TAM_MATRIZES[i];
 
-  eliminacaoGauss(SLOrig, SL, x, &tTotal);
-  prnVetor(x, tam);
-  printf("%10g\n", tTotal);
+    SL = alocaSisLin(tam);
+    SLOrig = alocaSisLin(tam);
+    x = malloc(sizeof(real_t)*tam);
 
-  free(SL);
-  free(x);
+    //if SL -> testa ponteiro
+    iniSisLin(SL, diagDominante, 10.0);
+    copiaMatriz(SLOrig, SL, tam);
 
-  //Teste Gauss-Seidel
+    /* eliminacao de gauss */
+    eliminacaoGauss(SLOrig, SL, x, &tTotal);
+    printf("Tamanho da Matriz: %4d  Tempo de execução: %10g\n", tam, tTotal);
+
+    /* Desaloca estruturas */
+    liberaSisLin(SL);
+    liberaSisLin(SLOrig);
+    free(x);
+  }
+
   printf("Gauss-Seidel: \n");
-  SL = alocaSisLin(tam);
-  copiaMatriz(SL, SLOrig, tam);
-  x = malloc(sizeof(real_t)*tam);
+  for(int i = 0; i < 6; i++){
+    int tam = TAM_MATRIZES[i];
 
-  gaussSeidel(SL, x, 1e-10, &tTotal);
-  prnVetor(x, tam);
-  printf("%10g\n", tTotal);
+    SL = alocaSisLin(tam);
+    SLOrig = alocaSisLin(tam);
+    x = malloc(sizeof(real_t)*tam);
 
-  free(SL);
-  free(x);
+    //if SL -> testa ponteiro
+    iniSisLin(SL, diagDominante, 10.0);
+    copiaMatriz(SLOrig, SL, tam);
+
+    /* eliminacao de gauss */
+    int it = gaussSeidel(SL, x, ERRO, &tTotal);
+    printf("Tamanho da Matriz: %4d  Tempo de execução: %10g  Iterações: %d\n", tam, tTotal, it);
+
+    /* Desaloca estruturas */
+    liberaSisLin(SL);
+    liberaSisLin(SLOrig);
+    free(x);
+  }
 }
 
