@@ -99,7 +99,7 @@ int checaSolucao(SistLinear_t *SL, real_t *x)
 
   \return código de erro. 0 em caso de sucesso.
 */
-int eliminacaoGauss (SistLinear_t *SLOrig, SistLinear_t *SL, real_t *x, double *tTotal)
+int eliminacaoGauss (SistLinear_t *SL, real_t *x, double *tTotal)
 {
   /* comeca a contar o tempo */
   double tempo = timestamp();
@@ -127,16 +127,13 @@ int eliminacaoGauss (SistLinear_t *SLOrig, SistLinear_t *SL, real_t *x, double *
   }
 
   retrossubs(SL, x);
-  /* variavel para retorno separada só para colocar dentro da contagem de tempo */
-  int ret = checaSolucao(SLOrig, x);
 
   /* mede tempo ao final */
-  tempo = timestamp() - tempo;
-  *tTotal = tempo;
+  *tTotal = timestamp() - tempo;
 
   /* checar se realmente zerou as colunas? */
   /* checar solução? */
-  return ret;
+  return 0;
 }
 
 

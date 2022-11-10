@@ -9,7 +9,7 @@
 real_t normaL2Residuo(SistLinear_t *SL, real_t *x);
 
 // Método da Eliminação de Gauss
-int eliminacaoGauss (SistLinear_t *SLOrig, SistLinear_t *SL, real_t *x, double *tTotal);
+int eliminacaoGauss (SistLinear_t *SL, real_t *x, double *tTotal);
 
 // Método de Refinamento
 int refinamento (SistLinear_t *SL, real_t *x, real_t erro, double *tTotal);

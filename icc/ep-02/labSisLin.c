@@ -1,5 +1,9 @@
 // Gustavo do Prado Silva - GRR20203942
 
+/*
+  EGP mais rapido que GS em sistemas menores???
+*/
+
 #include <stdio.h>
 #include <math.h>
 #include <string.h>
@@ -31,53 +35,48 @@ int main ()
   
   int TAM_MATRIZES[6] = {10, 30, 50, 128, 256, 512};
 
-  SistLinear_t *SL;
-  SistLinear_t *SLOrig;
-  real_t *x;
+  //SistLinear_t *SL;
+  //SistLinear_t *SLOrig;
+  SistLinear_t *SL1, *SL2;
+  //real_t *x;
+  real_t *x1, *x2;
   double tTotal = 0.0;
 
-  printf("Eliminação de Gauss: \n");
+  printf("Diagonal Dominante: \n");
   for(int i = 0; i < 6; i++){
     int tam = TAM_MATRIZES[i];
 
-    SL = alocaSisLin(tam);
-    SLOrig = alocaSisLin(tam);
-    x = malloc(sizeof(real_t)*tam);
+    SL1 = alocaSisLin(tam);
+    SL2 = alocaSisLin(tam);
+    x1 = malloc(sizeof(real_t)*tam);
+    x2 = malloc(sizeof(real_t)*tam);
 
     //if SL -> testa ponteiro
-    iniSisLin(SL, diagDominante, 10.0);
-    copiaMatriz(SLOrig, SL, tam);
+    iniSisLin(SL1, diagDominante, 10.0);
+    copiaMatriz(SL2, SL1, tam);
+
+    printf("Tamanho: %d\n", tam);
 
     /* eliminacao de gauss */
-    eliminacaoGauss(SLOrig, SL, x, &tTotal);
-    printf("Tamanho da Matriz: %4d  Tempo de execução: %10g\n", tam, tTotal);
+    eliminacaoGauss(SL1, x1, &tTotal);
+    printf("Eliminação Gauss:   %g\n", tTotal);
+
+    int it = gaussSeidel(SL2, x2, ERRO, &tTotal);
+    printf("Gauss-Seidel:       %g\n", tTotal, it);
+    printf("-----------------------------------\n");
+
+    /* comparar vetores x? */
+    for(int i = 0; i < tam; i++){
+      if(fabs(x1[i] - x2[i]) > ERRO){
+        printf("RESULTADOS DIFERENTES!!!!!!!\n");
+      }
+    }
 
     /* Desaloca estruturas */
-    liberaSisLin(SL);
-    liberaSisLin(SLOrig);
-    free(x);
-  }
-
-  printf("Gauss-Seidel: \n");
-  for(int i = 0; i < 6; i++){
-    int tam = TAM_MATRIZES[i];
-
-    SL = alocaSisLin(tam);
-    SLOrig = alocaSisLin(tam);
-    x = malloc(sizeof(real_t)*tam);
-
-    //if SL -> testa ponteiro
-    iniSisLin(SL, diagDominante, 10.0);
-    copiaMatriz(SLOrig, SL, tam);
-
-    /* eliminacao de gauss */
-    int it = gaussSeidel(SL, x, ERRO, &tTotal);
-    printf("Tamanho da Matriz: %4d  Tempo de execução: %10g  Iterações: %d\n", tam, tTotal, it);
-
-    /* Desaloca estruturas */
-    liberaSisLin(SL);
-    liberaSisLin(SLOrig);
-    free(x);
+    liberaSisLin(SL1);
+    liberaSisLin(SL2);
+    free(x1);
+    free(x2);
   }
 }
 
