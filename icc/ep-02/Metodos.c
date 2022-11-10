@@ -171,7 +171,47 @@ real_t normaL2Residuo(SistLinear_t *SL, real_t *x)
   */
 int gaussSeidel (SistLinear_t *SL, real_t *x, real_t erro, double *tTotal)
 {
-  
+  /* conta num de iteracoes?? */
+  int it = 0;
+  real_t errAcum = 0.0;
+
+  double tempo = timestamp();
+
+  /* chute inicial = 0 */
+  for(int i = 0; i < SL->n; i++){
+    x[i] = 0;
+  }
+
+  do{
+    errAcum = x[0];
+
+    /* para cada linha, calcula o novo x baseado no chute */
+    for(int i = 0; i < SL->n; i++){
+      real_t soma  = 0.0;
+      /* realiza a soma baseada nos valores das soluções */
+      for(int j = 0; j < SL->n; j++){
+        if(i != j){
+          soma -= SL->A[i][j]*x[j];
+        }
+      }
+      /* calcula o novo x[i] */
+      x[i] = (1/SL->A[i][i])*(SL->b[i]+soma);
+    }
+
+    /* calcula erro entre atual e anterior */
+    if(it > 0){
+      errAcum = fabs(x[0] - errAcum);
+      printf("%1.9e  -  %1.9e\n", errAcum, erro);
+    }
+
+    it++;
+  }while(errAcum < erro);
+
+  //calcula tempo gasto
+  *tTotal = timestamp() - tempo;
+
+  printf("%d\n", it);
+  return it;
 }
 
 
