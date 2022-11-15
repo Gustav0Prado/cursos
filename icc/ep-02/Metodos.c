@@ -67,30 +67,6 @@ void retrossubs(SistLinear_t *SL, real_t *x)
 }
 
 /*!
-  \brief Substitui vetor resultado no sistema original para checar soluções
-
-  \param SL Ponteiro para o sistema linear
-  \param x ponteiro para o vetor solução
-
-  \return 1 caso soluções não confiram ou 0 caso confiram
-*/
-int checaSolucao(SistLinear_t *SL, real_t *x)
-{
-  real_t *check = malloc(sizeof(real_t)*SL->n);
-  for(int i = 0; i < SL->n; i++){
-    check[i] = SL->A[i][0]*x[0] + SL->A[i][1]*x[1] + SL->A[i][2]*x[2];
-    /* compara se iguais */
-    if(fabs(check[i] - SL->b[i]) >= ERRO){
-      return 1;
-    }
-  }
-
-  free(check);
-
-  return 0;
-}
-
-/*!
   \brief Método da Eliminação de Gauss
 
   \param SL Ponteiro para o sistema linear
@@ -126,32 +102,14 @@ int eliminacaoGauss (SistLinear_t *SL, real_t *x, double *tTotal)
     }
   }
 
+  /* faz retrossubstituicao e coloca resultados no vetor x */
   retrossubs(SL, x);
 
   /* mede tempo ao final */
   *tTotal = timestamp() - tempo;
 
   /* checar se realmente zerou as colunas? */
-  /* checar solução? */
   return 0;
-}
-
-
-/*!
-  \brief Essa função calcula a norma L2 do resíduo de um sistema linear 
-
-  \param SL Ponteiro para o sistema linear
-  \param x Solução do sistema linear
-*/
-real_t normaL2Residuo(SistLinear_t *SL, real_t *x)
-{
-  /* ??????????????????? */
-  real_t somaq = 0.0;
-  for(int i = 0; i < SL->n; i++){
-    somaq += (x[i] * x[i]);
-  }
-
-  return sqrt(somaq);
 }
 
 
@@ -168,7 +126,8 @@ real_t normaL2Residuo(SistLinear_t *SL, real_t *x)
   */
 int gaussSeidel (SistLinear_t *SL, real_t *x, real_t erro, double *tTotal)
 {
-  /* conta num de iteracoes?? */
+  /* resultado errado quando matriz eh generica ou hilbert */
+  /* testar se converge */
   int it = 0;
   real_t errAcum = 0.0;
 
@@ -204,7 +163,69 @@ int gaussSeidel (SistLinear_t *SL, real_t *x, real_t erro, double *tTotal)
   //calcula tempo gasto
   *tTotal = timestamp() - tempo;
 
+  /* erro se gerar nan ou inf */
   return it;
+}
+
+/* algoritmo de kahan */
+real_t somaKahanQ( real_t *dados, int tam ){
+	real_t soma = 0.0f;
+	real_t c = 0.0f;
+
+	for(int i = 0; i < tam; i++){
+		real_t y = (dados[i]*dados[i]) - c;
+		real_t t = soma + y;
+		c = (t - soma) - y;
+		soma = t;
+	}
+
+	return soma;
+}
+
+
+
+real_t somaParQ( real_t *dados, int tam )
+{
+	if (tam == 2)
+		return (dados[0]*dados[0]) + (dados[1]*dados[1]);
+	if (tam == 1)
+		return (dados[0]*dados[0]);
+
+	unsigned int div = tam / 2;
+
+	return somaParQ(dados, div) + somaParQ(dados+div, tam-div);
+}
+
+
+/*!
+  \brief Essa função calcula a norma L2 do resíduo de um sistema linear 
+
+  \param SL Ponteiro para o sistema linear
+  \param r Vetor com o Residuo
+*/
+real_t normaL2Residuo(SistLinear_t *SL, real_t *r)
+{
+  /* achar jeito melhor de calcular pra evitar erro -> Kahan????? */
+  real_t somaq = 0.0;
+  for(int i = 0; i < SL->n; i++){
+    somaq += (r[i] * r[i]);
+  }
+
+  return sqrt(somaq);
+}
+
+
+/*
+
+*/
+void calculaResiduo (SistLinear_t *SL, real_t *x, real_t *r)
+{
+  for(int i = 0; i < SL->n; i++){
+    for(int j = 0; j < SL->n; j++){
+      r[i] += SL->A[i][j] * x[j];
+    }
+    r[i] =  SL->b[i] - r[i];
+  }
 }
 
 
@@ -221,5 +242,56 @@ int gaussSeidel (SistLinear_t *SL, real_t *x, real_t erro, double *tTotal)
   */
 int refinamento (SistLinear_t *SL, real_t *x, real_t erro, double *tTotal)
 {
+  double tParcial;
+  double somatParc = 0.0;
+  real_t *r = malloc(sizeof(real_t)*SL->n);
+  real_t *w = malloc(sizeof(real_t)*SL->n);
+  SistLinear_t *A = alocaSisLin(SL->n);
+  double tempo = timestamp();
+  int it = 0;
 
+  for(int i = 0; i < SL->n; i++){
+    r[i] = 0.0;
+  }
+
+  /* r = b-Ax */
+  calculaResiduo(SL, x, r);
+
+  /* para quando norma < erro ou it >= MAXIT */
+  do{
+    /* cria novo sistema linear com r como variaveis independentes */
+    for(int i = 0; i < SL->n; i++){
+      for(int j = 0; j < SL->n; j++){
+        A->A[i][j] = SL->A[i][j];
+      }
+    }
+    
+    for(int i = 0; i < SL->n; i++){
+      A->b[i] = r[i];
+    }
+
+    A->n = SL->n;
+
+    /* chama eliminacaoGauss para resolver o sistma */
+    eliminacaoGauss(A, w, &tParcial);
+
+    /* obtem proxima solucao -> x(i+1) = x(i) + w */
+    for(int i = 0; i < SL->n; i++){
+      x[i] += w[i];
+    }
+
+    /* r = b-Ax */
+    calculaResiduo(SL, x, r);
+
+    it++;
+    somatParc += tParcial;
+  } while(normaL2Residuo(SL, r) > erro && it < 15);
+
+  *tTotal = timestamp() - tempo + somatParc; 
+
+  liberaSisLin(A);
+  free(w);
+  free(r);
+
+  return it;
 }
