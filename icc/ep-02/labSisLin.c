@@ -37,7 +37,7 @@ int main ()
   srand(202202);
   
   //int TAM_MATRIZES[QTD_MAT] = {10, 30, 50, 128, 256, 512};
-  int TAM_MATRIZES[QTD_MAT] = {256};
+  int TAM_MATRIZES[QTD_MAT] = {10};
 
   SistLinear_t *SL1, *SL2;
   real_t *x1, *x2, *x3;
@@ -54,7 +54,7 @@ int main ()
     x3 = malloc(sizeof(real_t)*tam);
 
     //if SL -> testa ponteiro
-    iniSisLin(SL1, generico, 15.0);
+    iniSisLin(SL1, diagDominante, 32.0);
     copiaMatriz(SL2, SL1, tam);
 
     printf("   Tamanho: %d\n", tam);
