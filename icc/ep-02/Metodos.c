@@ -208,9 +208,12 @@ real_t normaL2Residuo(SistLinear_t *SL, real_t *r)
   return sqrt(somaq);
 }
 
-
-/*
-
+/*!
+  \brief Calcula residuo de um sistema dado um vetor resultado (x)
+  
+  \param SL Ponteiro para o sistema linear
+  \param x ponteiro para o vetor solução
+  \param r ponteiro para o vetor com residuo
 */
 void calculaResiduo (SistLinear_t *SL, real_t *x, real_t *r)
 {
