@@ -142,3 +142,21 @@ void prnVetor (real_t *v, unsigned int n)
 
 }
 
+
+
+/*!
+  \brief Essa função calcula o resíduo de um sistema linear dado um vetor solucao 
+
+  \param SL Ponteiro para o sistema linear
+  \param r Vetor com o Residuo
+  \param x Ponteiro com o Vetor solução do sistema 
+*/
+void calculaResiduo (SistLinear_t *SL, real_t *x, real_t *r)
+{
+  for(int i = 0; i < SL->n; i++){
+    r[i] = SL->b[i];
+    for(int j = 0; j < SL->n; j++){
+      r[i] -= SL->A[i][j] * x[j];
+    }
+  }
+}

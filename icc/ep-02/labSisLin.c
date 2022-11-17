@@ -39,7 +39,7 @@ int main ()
 
 
   SistLinear_t *SL1, *SL2;
-  real_t *x1, *x2, *x3;
+  real_t *x1, *x2, *x3, *r1, *r2, *r3;
   double tEGP = 0.0, tGS = tEGP, tREF = tEGP;
 
   printf("Diagonal Dominante: \n");
@@ -57,7 +57,11 @@ int main ()
     x2 = malloc(sizeof(real_t)*tam);
     x3 = malloc(sizeof(real_t)*tam);
 
-    iniSisLin(SL1, diagDominante, 32.0);
+    r1 = malloc(sizeof(real_t)*tam);
+    r2 = malloc(sizeof(real_t)*tam);
+    r3 = malloc(sizeof(real_t)*tam);
+
+    iniSisLin(SL1, diagDominante, 100.0);
     copiaMatriz(SL2, SL1, tam);
 
     /* eliminacao de gauss */
@@ -75,13 +79,19 @@ int main ()
     int itREF = refinamento(SL2, x3, ERRO, &tREF);
 
     /* calcular residuo para todos */
+    calculaResiduo(SL2, x1, r1);
+    calculaResiduo(SL2, x2, r2);
+    calculaResiduo(SL2, x3, r3);
 
-    printf("%4d   |%10g |   %10g     | %10g |   %4d    |   %10g    |", tam, tEGP, 0.015472, tGS, itGS, 0.015472);
-    printf("%10g |    %4d    |   %10g     \n", tREF, itREF, 0.015472);
+    printf("%4d   |%10g |   %10g    | %10g |   %4d    |%15g  |", tam, tEGP, normaL2Residuo(SL2, r1), tGS, itGS, normaL2Residuo(SL2, r2));
+    printf("%10g |    %4d    |   %10g   |\n", tREF, itREF, normaL2Residuo(SL2, r3));
 
     /* Desaloca estruturas */
     liberaSisLin(SL1);
     liberaSisLin(SL2);
+    free(r1);
+    free(r2);
+    free(r3);
     free(x1);
     free(x2);
     free(x3);
@@ -95,14 +105,18 @@ int main ()
   for(int i = 0; i < QTD_MAT; i++){
     int tam = TAM_MATRIZES[i];
 
+    /* Testar ponteiros */
     SL1 = alocaSisLin(tam);
     SL2 = alocaSisLin(tam);
     x1 = malloc(sizeof(real_t)*tam);
     x2 = malloc(sizeof(real_t)*tam);
     x3 = malloc(sizeof(real_t)*tam);
 
-    //if SL -> testa ponteiro
-    iniSisLin(SL1, generico, 32.0);
+    r1 = malloc(sizeof(real_t)*tam);
+    r2 = malloc(sizeof(real_t)*tam);
+    r3 = malloc(sizeof(real_t)*tam);
+
+    iniSisLin(SL1, generico, 100.0);
     copiaMatriz(SL2, SL1, tam);
 
     /* eliminacao de gauss */
@@ -119,12 +133,20 @@ int main ()
     /* refinamento */
     int itREF = refinamento(SL2, x3, ERRO, &tREF);
 
-    printf("%4d   |%10g |   %10g     | %10g |   %4d    |   %10g    |", tam, tEGP, 0.015472, tGS, itGS, 0.015472);
-    printf("%10g |    %4d    |   %10g     \n", tREF, itREF, 0.015472);
+    /* calcular residuo para todos */
+    calculaResiduo(SL2, x1, r1);
+    calculaResiduo(SL2, x2, r2);
+    calculaResiduo(SL2, x3, r3);
+
+    printf("%4d   |%10g |   %10g    | %10g |   %4d    |%15g  |", tam, tEGP, normaL2Residuo(SL2, r1), tGS, itGS, normaL2Residuo(SL2, r2));
+    printf("%10g |    %4d    |   %10g   |\n", tREF, itREF, normaL2Residuo(SL2, r3));
 
     /* Desaloca estruturas */
     liberaSisLin(SL1);
     liberaSisLin(SL2);
+    free(r1);
+    free(r2);
+    free(r3);
     free(x1);
     free(x2);
     free(x3);
@@ -138,14 +160,18 @@ int main ()
   for(int i = 0; i < QTD_MAT; i++){
     int tam = TAM_MATRIZES[i];
 
+    /* Testar ponteiros */
     SL1 = alocaSisLin(tam);
     SL2 = alocaSisLin(tam);
     x1 = malloc(sizeof(real_t)*tam);
     x2 = malloc(sizeof(real_t)*tam);
     x3 = malloc(sizeof(real_t)*tam);
 
-    //if SL -> testa ponteiro
-    iniSisLin(SL1, hilbert, 32.0);
+    r1 = malloc(sizeof(real_t)*tam);
+    r2 = malloc(sizeof(real_t)*tam);
+    r3 = malloc(sizeof(real_t)*tam);
+
+    iniSisLin(SL1, hilbert, 100.0);
     copiaMatriz(SL2, SL1, tam);
 
     /* eliminacao de gauss */
@@ -162,12 +188,20 @@ int main ()
     /* refinamento */
     int itREF = refinamento(SL2, x3, ERRO, &tREF);
 
-    printf("%4d   |%10g |   %10g     | %10g |   %4d    |   %10g    |", tam, tEGP, 0.015472, tGS, itGS, 0.015472);
-    printf("%10g |    %4d    |   %10g     \n", tREF, itREF, 0.015472);
+    /* calcular residuo para todos */
+    calculaResiduo(SL2, x1, r1);
+    calculaResiduo(SL2, x2, r2);
+    calculaResiduo(SL2, x3, r3);
+
+    printf("%4d   |%10g |   %10g     | %10g |   %4d    |%15g  |", tam, tEGP, normaL2Residuo(SL2, r1), tGS, itGS, normaL2Residuo(SL2, r2));
+    printf("%10g |    %4d    | %15g |\n", tREF, itREF, normaL2Residuo(SL2, r3));
 
     /* Desaloca estruturas */
     liberaSisLin(SL1);
     liberaSisLin(SL2);
+    free(r1);
+    free(r2);
+    free(r3);
     free(x1);
     free(x2);
     free(x3);

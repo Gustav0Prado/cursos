@@ -1,3 +1,2 @@
-if it_gs == -1 -> inf/nan -> printar na saida
+if it_gs == -1 -> inf/nan -> printar na saida e colocar tracinho em tudo
 testar convergencia em GS
-calcular residuo para cada metodo ao final e substituir no printf

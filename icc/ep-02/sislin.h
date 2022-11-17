@@ -29,5 +29,7 @@ SistLinear_t *lerSisLin ();
 void prnSisLin (SistLinear_t *SL);
 void prnVetor (real_t *vet, unsigned int n);
 
+void calculaResiduo (SistLinear_t *SL, real_t *x, real_t *r);
+
 #endif // __SISLIN_H__
 
