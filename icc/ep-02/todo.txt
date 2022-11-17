@@ -1,2 +1,3 @@
 if it_gs == -1 -> inf/nan -> printar na saida e colocar tracinho em tudo
 testar convergencia em GS
+apagar esse arquivo para fazer o .tar

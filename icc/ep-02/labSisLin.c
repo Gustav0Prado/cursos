@@ -12,7 +12,8 @@
 #include "sislin.h"
 #include "Metodos.h"
 
-#define QTD_MAT 6
+//#define QTD_MAT 6
+#define QTD_MAT 4
 
 /*!
   \brief Copia valores de uma matriz para outra
@@ -35,7 +36,7 @@ int main ()
   // inicializa gerador de números aleatóreos
   srand(202202);
   
-  int TAM_MATRIZES[QTD_MAT] = {10, 30, 50, 128, 256, 512};
+  int TAM_MATRIZES[QTD_MAT] = {10, 30, 50, 128};
 
 
   SistLinear_t *SL1, *SL2;
