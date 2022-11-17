@@ -17,8 +17,8 @@
 /*!
   \brief Copia valores de uma matriz para outra
 
-  \param SL Ponteiro para o sistema linear de origem
-  \param SL Ponteiro para o sistema linear de destino
+  \param SLOrig Ponteiro para o sistema linear de origem
+  \param SLDest Ponteiro para o sistema linear de destino
 */
 void copiaMatriz(SistLinear_t *SLDest, SistLinear_t *SLOrig, int tam)
 {
@@ -50,13 +50,13 @@ int main ()
   for(int i = 0; i < QTD_MAT; i++){
     int tam = TAM_MATRIZES[i];
 
+    /* Testar ponteiros */
     SL1 = alocaSisLin(tam);
     SL2 = alocaSisLin(tam);
     x1 = malloc(sizeof(real_t)*tam);
     x2 = malloc(sizeof(real_t)*tam);
     x3 = malloc(sizeof(real_t)*tam);
 
-    //if SL -> testa ponteiro
     iniSisLin(SL1, diagDominante, 32.0);
     copiaMatriz(SL2, SL1, tam);
 
@@ -73,6 +73,8 @@ int main ()
 
     /* refinamento */
     int itREF = refinamento(SL2, x3, ERRO, &tREF);
+
+    /* calcular residuo para todos */
 
     printf("%4d   |%10g |   %10g     | %10g |   %4d    |   %10g    |", tam, tEGP, 0.015472, tGS, itGS, 0.015472);
     printf("%10g |    %4d    |   %10g     \n", tREF, itREF, 0.015472);

@@ -172,6 +172,9 @@ int gaussSeidel (SistLinear_t *SL, real_t *x, real_t erro, double *tTotal)
 
       /* calcula o novo x[i] */
       soma /= SL->A[i][i];
+      if( isinf(soma) || isnan(soma) ){
+        return INFNAN;
+      }
       /* checar se soma nao eh inf ou nan */
       x[i] = soma;
 

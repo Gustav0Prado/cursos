@@ -5,6 +5,9 @@
 #define MAXIT 100     // número máximo de iterações para métodos iterativos
 #define ERRO 1.0e-10  // Tolerância para critérios de parada em métodos iterativos
 
+#define INFNAN -1
+#define ALLOC  -2
+
 // Calcula a normaL2 do resíduo
 real_t normaL2Residuo(SistLinear_t *SL, real_t *x);
 
