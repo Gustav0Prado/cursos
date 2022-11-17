@@ -1,5 +1,5 @@
     CC     = gcc -g
-    CFLAGS = 
+    CFLAGS = -Wall
     LFLAGS = -lm
 
       PROG = labSisLin
