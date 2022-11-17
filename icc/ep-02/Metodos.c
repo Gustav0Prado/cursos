@@ -144,7 +144,6 @@ int gaussSeidel (SistLinear_t *SL, real_t *x, real_t erro, double *tTotal)
   /* resultado errado quando matriz eh generica ou hilbert */
   /* testar se converge */
   int it = 0;
-  real_t *xAnt = malloc(sizeof(real_t)*SL->n);
   real_t maxErr;
 
   double tempo = timestamp();
@@ -157,39 +156,38 @@ int gaussSeidel (SistLinear_t *SL, real_t *x, real_t erro, double *tTotal)
   }
 
   do{
-    /* copia o x para xAntigo para usar no criterio de parada */
-    memcpy(xAnt, x, sizeof(real_t)*SL->n);
-
     /* para cada linha, calcula o novo x baseado no chute */
     for(int i = 0; i < SL->n; i++){
-      real_t soma  = 0.0;
+      real_t soma  = SL->b[i];
+      real_t err = x[i];
+      maxErr = -1.0;
+
       /* realiza a soma baseada nos valores das soluções */
       for(int j = 0; j < SL->n; j++){
+        /* soma todos os elementos menos A[i][i] */
         if(i != j){
           soma -= SL->A[i][j]*x[j];
         }
       }
+
       /* calcula o novo x[i] */
-      x[i] = (SL->b[i]+soma)/SL->A[i][i];
-      /* checar se nao eh inf ou nan */
+      soma /= SL->A[i][i];
+      /* checar se soma nao eh inf ou nan */
+      x[i] = soma;
+
+      real_t diff = fabs(x[i] - err);
+      /* se diferenca atual > maxErr, atualiza maxErr */
+      maxErr = (diff > maxErr) ? diff : maxErr;
     }
-
-    /* calcula a maior diferença absoluta entre atual e anterior */
-    /* calcular dentro do for em cada linha */
-    maxErr = normaMax(xAnt, x, SL->n);
-
     it++;
   } while(maxErr > erro && it < MAXIT);
-
-  /* usar isgreater nas comparacoes???? */
 
   //calcula tempo gasto
   *tTotal = timestamp() - tempo;
 
-  free(xAnt);
-  /* erro se gerar nan ou inf */
   return it;
 }
+
 
 /*!
   \brief Essa função calcula a norma L2 do resíduo de um sistema linear 
@@ -208,12 +206,13 @@ real_t normaL2Residuo(SistLinear_t *SL, real_t *r)
   return sqrt(somaq);
 }
 
+
 /*!
-  \brief Calcula residuo de um sistema dado um vetor resultado (x)
-  
+  \brief Essa função calcula o resíduo de um sistema linear dado um vetor solucao 
+
   \param SL Ponteiro para o sistema linear
-  \param x ponteiro para o vetor solução
-  \param r ponteiro para o vetor com residuo
+  \param r Vetor com o Residuo
+  \param x Ponteiro com o Vetor solução do sistema 
 */
 void calculaResiduo (SistLinear_t *SL, real_t *x, real_t *r)
 {
@@ -280,7 +279,7 @@ int refinamento (SistLinear_t *SL, real_t *x, real_t erro, double *tTotal)
     /* cancelamento subtrativo????????? */
     /* obtem proxima solucao -> x(i+1) = x(i) + w */
     for(int i = 0; i < SL->n; i++){
-      x[i] = x[i] + w[i];
+      x[i] += w[i];
     }
 
     /* r = b-Ax */

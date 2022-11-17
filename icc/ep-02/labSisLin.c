@@ -37,7 +37,7 @@ int main ()
   srand(202202);
   
   //int TAM_MATRIZES[QTD_MAT] = {10, 30, 50, 128, 256, 512};
-  int TAM_MATRIZES[QTD_MAT] = {10};
+  int TAM_MATRIZES[QTD_MAT] = {3};
 
   SistLinear_t *SL1, *SL2;
   real_t *x1, *x2, *x3;
