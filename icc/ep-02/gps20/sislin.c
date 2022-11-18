@@ -215,7 +215,7 @@ void checaErros(int *retornos){
   \param t Tipo do sistema linear (Diag. Dominante, Genérico ou Hilbert)
 */
 void testaMatrizes(tipoSistLinear_t t){
-  int TAM_MATRIZES[QTD_MAT] = {10, 30, 50, 128, 256, 512, 1000/*, 2000, 3000*/};
+  int TAM_MATRIZES[QTD_MAT] = {10, 30, 50, 128, 256, 512, 1000, 2000, 3000};
 
   SistLinear_t *SL1, *SL2;
   real_t *x1, *x2, *x3, *r1, *r2, *r3;
