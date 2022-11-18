@@ -1,3 +1,5 @@
+// Gustavo do Prado Silva - GRR20203942
+
 #include <stdio.h>
 #include <math.h>
 #include <stdlib.h>
