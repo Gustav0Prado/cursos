@@ -55,16 +55,25 @@ int encontraMax(SistLinear_t *SL, int linha)
 
   \param SL Ponteiro para o sistema linear
   \param x ponteiro para o vetor solução
+
+  \return código de erro. 0 em caso de sucesso.
 */
-void retrossubs(SistLinear_t *SL, real_t *x)
+int retrossubs(SistLinear_t *SL, real_t *x)
 {
+  /*Checa se sistema eh indeterminado*/
   for(int i = SL->n-1; i >= 0; i--){
     x[i] = SL->b[i];
     for(int j = i+1; j < SL->n; j++){
       x[i] -= SL->A[i][j] * x[j];
     }
+    if(!x[i] && !SL->b[i])
+      return INDET;
+    else if(!x[i] && SL->b[i] != 0)
+      return IMPOSS;
     x[i] /= SL->A[i][i];
   }
+
+  return 0;
 }
 
 /*!
@@ -106,13 +115,13 @@ int eliminacaoGauss (SistLinear_t *SL, real_t *x, double *tTotal)
 
   /* faz retrossubstituicao e coloca resultados no vetor x */
   /* checa se retrosubs nao retornou erro */
-  retrossubs(SL, x);
+  int retro = retrossubs(SL, x);
 
   /* mede tempo ao final */
   *tTotal = timestamp() - tempo;
 
   /* checar se realmente zerou as colunas? */
-  return 0;
+  return retro;
 }
 
 real_t normaMax(real_t *ant, real_t *novo, int tam)
@@ -144,6 +153,7 @@ int gaussSeidel (SistLinear_t *SL, real_t *x, real_t erro, double *tTotal)
   /* resultado errado quando matriz eh generica ou hilbert */
   /* testar se converge */
   int it = 0;
+  int ret;
   real_t maxErr;
 
   double tempo = timestamp();
@@ -173,7 +183,7 @@ int gaussSeidel (SistLinear_t *SL, real_t *x, real_t erro, double *tTotal)
       /* calcula o novo x[i] */
       soma /= SL->A[i][i];
       if( isinf(soma) || isnan(soma) ){
-        return INFNAN;
+        ret = INFNAN;
       }
       /* checar se soma nao eh inf ou nan */
       x[i] = soma;
@@ -188,7 +198,9 @@ int gaussSeidel (SistLinear_t *SL, real_t *x, real_t erro, double *tTotal)
   //calcula tempo gasto
   *tTotal = timestamp() - tempo;
 
-  return it;
+  ret = (ret == INFNAN) ? ret : it;
+
+  return ret;
 }
 
 
@@ -203,6 +215,10 @@ real_t normaL2Residuo(SistLinear_t *SL, real_t *r)
   /* achar jeito melhor de calcular pra evitar erro -> Kahan????? */
   real_t somaq = 0.0;
   for(int i = 0; i < SL->n; i++){
+    if(isnan(r[i]) || isinf(r[i])){
+      fprintf(stderr, "\tERRO: GERAÇÃO DE VALORES INF/NAN - Calculo da Norma\n");
+      return -1;
+    }
     somaq += pow(r[i], 2);
   }
 
@@ -231,6 +247,8 @@ int refinamento (SistLinear_t *SL, real_t *x, real_t erro, double *tTotal)
   SistLinear_t *A = alocaSisLin(SL->n);
   double tempo = timestamp();
   int it = 0;
+  real_t norma;
+  int ret = 0;
 
   for(int i = 0; i < SL->n; i++){
     r[i] = 0.0;
@@ -272,13 +290,21 @@ int refinamento (SistLinear_t *SL, real_t *x, real_t erro, double *tTotal)
 
     it++;
     somatParc += tParcial;
-  } while(normaL2Residuo(SL, r) > erro && it < MAXIT);
+    norma = normaL2Residuo(SL, r);
+  } while(norma > erro && it < MAXIT);
+
+  /* se norma for MUITO grande, nao converge */
 
   *tTotal = timestamp() - tempo + somatParc; 
+
+  /* funcao pra checar ret */
+  if(ret != INFNAN){
+    ret = it;
+  }
 
   liberaSisLin(A);
   free(w);
   free(r);
 
-  return it;
+  return ret;
 }

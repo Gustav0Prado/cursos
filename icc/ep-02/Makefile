@@ -21,7 +21,7 @@ clean:
 
 purge:   clean
 	@rm -f *.o core a.out
-	@rm -f $(PROG)
+	@rm -f $(PROG) saida.txt
 
 run:   $(PROG)
-	@./labSisLin
+	@./labSisLin > saida.txt && less ./saida.txt
