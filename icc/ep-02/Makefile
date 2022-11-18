@@ -1,4 +1,4 @@
-    CC     = gcc -g -O3
+    CC     = gcc -g
     CFLAGS = -Wall
     LFLAGS = -lm
 

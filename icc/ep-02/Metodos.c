@@ -217,7 +217,6 @@ real_t normaL2Residuo(SistLinear_t *SL, real_t *r)
     real_t y = pow(r[i], 2) - c;
     real_t t = somaq + y;
     if( isnan(t) || isinf(t) ){
-      fprintf(stderr, "\tERRO: GERAÇÃO DE VALORES INF/NAN - Calculo da Norma\n");
       return -1;
     }
     c = (t - somaq) - y;
@@ -278,7 +277,7 @@ int refinamento (SistLinear_t *SL, real_t *x, real_t erro, double *tTotal)
     A->n = SL->n;
 
     int egp = eliminacaoGauss(A, w, &tParcial);
-    if(egp != 0){
+    if(egp < 0){
       ret = egp;
       break;
     }
@@ -290,6 +289,9 @@ int refinamento (SistLinear_t *SL, real_t *x, real_t erro, double *tTotal)
 
     calculaResiduo(SL, x, r);
     norma = normaL2Residuo(SL, r);
+    if(norma < 0){
+      fprintf(stderr, "\tERRO: GERAÇÃO DE VALORES INF/NAN - Calculo da Norma\n");
+    }
 
     it++;
     somatParc += tParcial;
