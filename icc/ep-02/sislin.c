@@ -215,11 +215,11 @@ void checaErros(int *retornos){
   \param t Tipo do sistema linear (Diag. Dominante, Genérico ou Hilbert)
 */
 void testaMatrizes(tipoSistLinear_t t){
-  int TAM_MATRIZES[QTD_MAT] = {10, 30, 50, 128, 256, 512/*, 1000, 2000, 3000*/};
+  int TAM_MATRIZES[QTD_MAT] = {10, 30, 50, 128, 256/*, 512, 1000, 2000, 3000*/};
 
   SistLinear_t *SL1, *SL2;
   real_t *x1, *x2, *x3, *r1, *r2, *r3;
-  double tEGP = 0.0, tGS = tEGP, tREF = tEGP;
+  double tEGP = 0.0, tGS = 0.0, tREF = 0.0;
 
   switch (t){
     case diagDominante:
@@ -278,6 +278,12 @@ void testaMatrizes(tipoSistLinear_t t){
       x3[i] = x1[i];
     }
     int itREF = refinamento(SL2, x3, ERRO, &tREF);
+
+    for(int i = 0; i < tam; i++){
+      r1[i] = 0.0;
+      r2[i] = 0.0;
+      r3[i] = 0.0;
+    }
 
     calculaResiduo(SL2, x1, r1);
     calculaResiduo(SL2, x2, r2);

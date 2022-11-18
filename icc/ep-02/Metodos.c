@@ -68,13 +68,34 @@ int retrossubs(SistLinear_t *SL, real_t *x)
       x[i] -= SL->A[i][j] * x[j];
     }
 
-    //checa se algum valor eh inf ou nan
-    if(!x[i] && !SL->b[i])
-      return INDET;
-    else if(!x[i] && SL->b[i] != 0)
-      return IMPOSS;
-
     x[i] /= SL->A[i][i];
+  }
+
+  /* checa se sistema eh ideterminado */
+  real_t somaT = 0.0;
+  for(int i = 0; i < SL->n; i++){
+    for(int j = i+1; j < SL->n; j++){
+      somaT += ABS(SL->A[i][j]);
+    }
+
+    /* 0 == 0 */
+    if(somaT == 0 && SL->b[i] == 0){
+      return INDET;
+    }
+  }
+
+  /* checa se sistema eh impossivel */
+  somaT = 0.0;
+  for(int i = 0; i < SL->n; i++){
+    for(int j = 0; j < SL->n; j++){
+      somaT += ABS(SL->A[i][j]);
+    }
+
+    /* n == 0 */
+    if(somaT == 0 && SL->b[i] != 0){
+      prnSisLin(SL);
+      return IMPOSS;
+    }
   }
 
   return 0;
@@ -149,26 +170,26 @@ int gaussSeidel (SistLinear_t *SL, real_t *x, real_t erro, double *tTotal)
   do{
     //para cada linha do sistema
     for(int i = 0; i < SL->n; i++){
-      real_t soma  = SL->b[i];
+      real_t soma  = 0.0;
       real_t err = x[i];
       maxErr = -1.0;
 
       //soma todos os elementos menos A[i][i]
       for(int j = 0; j < SL->n; j++){
         if(i != j){
-          soma -= SL->A[i][j]*x[j];
+          soma += SL->A[i][j]*x[j];
         }
       }
 
       //X(i+1) = ( b[i]-(soma) ) / A[i][i]
-      soma /= SL->A[i][i];
       if( isinf(soma) || isnan(soma) ){
         ret = INFNAN;
       }
+      soma = (SL->b[i] - soma) / SL->A[i][i];
       x[i] = soma;
 
       //compara X(i+1) com X(i), pega apenas o maior erro (de todas as linhas)
-      real_t diff = fabs(x[i] - err);
+      real_t diff = ABS(x[i] - err);
       maxErr = (diff > maxErr) ? diff : maxErr;
     }
     it++;
@@ -256,8 +277,11 @@ int refinamento (SistLinear_t *SL, real_t *x, real_t erro, double *tTotal)
 
     A->n = SL->n;
 
-    /* checar por erros na eliminacao*/
-    eliminacaoGauss(A, w, &tParcial);
+    int egp = eliminacaoGauss(A, w, &tParcial);
+    if(egp != 0){
+      ret = egp;
+      break;
+    }
 
     //calcula X(i+1) somando X(i) com w (resultado do EGP)
     for(int i = 0; i < SL->n; i++){
