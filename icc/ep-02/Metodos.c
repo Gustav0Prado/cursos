@@ -219,6 +219,74 @@ real_t normaL2Residuo(SistLinear_t *SL, real_t *r)
   \return código de erro. Um nr positivo indica sucesso e o nr
           de iterações realizadas. Um nr. negativo indica um erro.
   */
+// int refinamento (SistLinear_t *SL, real_t *x, real_t erro, double *tTotal)
+// {
+//   /*
+//     Calcula um residuo inicial baseado em X0 (resultado do EGP), cria um novo
+//     sistema linear A com r como os termos independentes, resolve Aw = r por EGP
+//     soma w com x para obter X(i+1) e calcula o novo residuo para esse X(i+1),
+//     que será usado para calcular a norma
+//   */
+//   double tParcial;
+//   double somatParc = 0.0;
+//   /* checar mallocs */
+//   real_t *r = malloc(sizeof(real_t)*SL->n);
+//   real_t *w = malloc(sizeof(real_t)*SL->n);
+//   SistLinear_t *A = alocaSisLin(SL->n);
+//   double tempo = timestamp();
+//   int it = 0;
+//   real_t norma;
+//   int ret = 0;
+
+//   for(int i = 0; i < SL->n; i++){
+//     r[i] = 0.0;
+//   }
+
+//   calculaResiduo(SL, x, r);
+
+//   do{
+//     /* memcpy?? */
+//     for(int i = 0; i < SL->n; i++){
+//       for(int j = 0; j < SL->n; j++){
+//         A->A[i][j] = SL->A[i][j];
+//       }
+//     }
+    
+//     /* memcpy?? */
+//     for(int i = 0; i < SL->n; i++){
+//       A->b[i] = r[i];
+//     }
+
+//     A->n = SL->n;
+
+//     /* checar por erros na eliminacao*/
+//     eliminacaoGauss(A, w, &tParcial);
+
+//     /* cancelamento subtrativo????????? */
+//     for(int i = 0; i < SL->n; i++){
+//       x[i] += w[i];
+//     }
+
+//     calculaResiduo(SL, x, r);
+
+//     it++;
+//     somatParc += tParcial;
+//     norma = normaL2Residuo(SL, r);
+//   } while(norma > erro && it < MAXIT);
+
+//   *tTotal = timestamp() - tempo + somatParc; 
+
+//   if(ret != INFNAN){
+//     ret = it;
+//   }
+
+//   liberaSisLin(A);
+//   free(w);
+//   free(r);
+
+//   return ret;
+// }
+
 int refinamento (SistLinear_t *SL, real_t *x, real_t erro, double *tTotal)
 {
   /*
@@ -234,17 +302,15 @@ int refinamento (SistLinear_t *SL, real_t *x, real_t erro, double *tTotal)
   real_t *w = malloc(sizeof(real_t)*SL->n);
   SistLinear_t *A = alocaSisLin(SL->n);
   double tempo = timestamp();
+  real_t norma = 100;
   int it = 0;
-  real_t norma;
   int ret = 0;
 
   for(int i = 0; i < SL->n; i++){
     r[i] = 0.0;
   }
 
-  calculaResiduo(SL, x, r);
-
-  do{
+  while(norma > erro && it < MAXIT){
     /* memcpy?? */
     for(int i = 0; i < SL->n; i++){
       for(int j = 0; j < SL->n; j++){
@@ -268,11 +334,11 @@ int refinamento (SistLinear_t *SL, real_t *x, real_t erro, double *tTotal)
     }
 
     calculaResiduo(SL, x, r);
+    norma = normaL2Residuo(SL, r);
 
     it++;
     somatParc += tParcial;
-    norma = normaL2Residuo(SL, r);
-  } while(norma > erro && it < MAXIT);
+  }
 
   *tTotal = timestamp() - tempo + somatParc; 
 

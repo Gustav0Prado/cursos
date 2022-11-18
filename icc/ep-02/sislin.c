@@ -193,7 +193,7 @@ void checaErros(int *retornos){
   for(int i = 0; i < 3; ++i){
     switch(retornos[i]){
       case INFNAN:
-        fprintf(stderr, "\tERRO: GERAÇÃO DE VALORES INF/NAN\n");
+        fprintf(stderr, "\tERRO: GERAÇÃO DE VALORES INF/NAN - Metodo Numerico\n");
         break;
       case ALLOC:
         fprintf(stderr, "\tERRO: ERRO DE ALOCAÇÃO\n");
