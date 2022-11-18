@@ -214,13 +214,6 @@ void checaErros(int *retornos){
   \param t Tipo do sistema linear (Diag. Dominante, Genérico ou Hilbert)
 */
 void testaMatrizes(tipoSistLinear_t t){
-  /*
-    Aloca dois sistemas, um para EGP (altera o sistema) e uma copia para GS
-    e Refinamento (nao alteram o sistema), além de um vetor de solução e um de
-    residuo para cada método. Copia resultado do EGP (x1) para o inicio do 
-    refinamento (x3)
-    Testa em matrizes de tamanho definido (10 -> 3000)
-  */
   int TAM_MATRIZES[QTD_MAT] = {10, 30, 50, 128};
 
   SistLinear_t *SL1, *SL2;
@@ -259,12 +252,15 @@ void testaMatrizes(tipoSistLinear_t t){
     r2 = malloc(sizeof(real_t)*tam);
     r3 = malloc(sizeof(real_t)*tam);
 
+    /* Aloca dois sistemas, um pro EGP (altera o sistema) e outra copia
+      para o GS e REF (nao alteram o sistema)*/
     iniSisLin(SL1, t, COEF_MAX);
     copiaMatriz(SL2, SL1, tam);
 
     int rEGP = eliminacaoGauss(SL1, x1, &tEGP);
     int itGS = gaussSeidel(SL2, x2, ERRO, &tGS);
 
+    //inicia o refinamento com o resultado do EGP
     for(int i = 0; i < tam; i++){
       x3[i] = x1[i];
     }

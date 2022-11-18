@@ -18,13 +18,14 @@
 */
 void trocaLinha(SistLinear_t *SL, int i, int pivo)
 {
-  /* troca valores das linhas e depois do vetor de valores independentes */
+  //troca valores das linhas
   for(int j = 0; j < SL->n; j++){
     real_t aux = SL->A[i][j];
     SL->A[i][j] = SL->A[pivo][j];
     SL->A[pivo][j] = aux;
   }
 
+  //troca valores dos termos independentes
   real_t auxB = SL->b[i];
   SL->b[i] = SL->b[pivo];
   SL->b[pivo] = auxB;
@@ -58,19 +59,19 @@ int encontraMax(SistLinear_t *SL, int linha)
 */
 int retrossubs(SistLinear_t *SL, real_t *x)
 {
-  /*
-    Faz a retrosubstituição em um sistema triangular, checa se sistema
-    é indeterminado ou impossivel (0 = 0 ou 0 = n)
-  */
+  //para cada linha, de baixo pra cima 
   for(int i = SL->n-1; i >= 0; i--){
     x[i] = SL->b[i];
     for(int j = i+1; j < SL->n; j++){
       x[i] -= SL->A[i][j] * x[j];
     }
+
+    //checa se algum valor eh inf ou nan
     if(!x[i] && !SL->b[i])
       return INDET;
     else if(!x[i] && SL->b[i] != 0)
       return IMPOSS;
+
     x[i] /= SL->A[i][i];
   }
 
@@ -88,24 +89,24 @@ int retrossubs(SistLinear_t *SL, real_t *x)
 */
 int eliminacaoGauss (SistLinear_t *SL, real_t *x, double *tTotal)
 {
-  /*
-    Para cada linha do sistema, realiza pivotamento parcial, zera os
-    termos das colunas e realiza as mesmas operações com o resto da
-    linha e o termo independente. No final, faz retrossubstituicao
-    e coloca resultados no vetor x 
-  */
   double tempo = timestamp();
 
+  //para cada linha do sistema
   for(int i = 0; i < SL->n; i++){
+    //pivoteamento parcial
     int pivo = encontraMax(SL, i);
     if(pivo != i){
       trocaLinha(SL, i, pivo);
     }
 
+    //para cada linha depois
     for(int k = i +1; k < SL->n; k++){
       /* checar se eh inf ou nan */
+      //zera coluna
       real_t m = SL->A[k][i] / SL->A[i][i];
       SL->A[k][i] = 0.0;
+
+      //aplica operacoes nos outros elementos da linha e no termo independente
       for(int j = i+1; j < SL->n; j++){
         SL->A[k][j] -= SL->A[i][j] * m;
       }
@@ -132,19 +133,59 @@ int eliminacaoGauss (SistLinear_t *SL, real_t *x, double *tTotal)
   \return código de erro. Um nr positivo indica sucesso e o nr
           de iterações realizadas. Um nr. negativo indica um erro.
   */
+// int gaussSeidel (SistLinear_t *SL, real_t *x, real_t erro, double *tTotal)
+// {
+//   int it = 0;
+//   int ret;
+//   real_t maxErr;
+
+//   double tempo = timestamp();
+
+//   /* testar criterio de convergencia????? */
+
+//   for(int i = 0; i < SL->n; i++){
+//     x[i] = 0;
+//   }
+
+//   do{
+//     //para cada linha do sistema
+//     for(int i = 0; i < SL->n; i++){
+//       real_t soma  = SL->b[i];
+//       real_t err = x[i];
+//       maxErr = -1.0;
+
+//       //soma todos os elementos menos A[i][i]
+//       for(int j = 0; j < SL->n; j++){
+//         if(i != j){
+//           soma -= SL->A[i][j]*x[j];
+//         }
+//       }
+
+//       //X(i+1) = ( b[i]-(soma) ) / A[i][i]
+//       soma /= SL->A[i][i];
+//       if( isinf(soma) || isnan(soma) ){
+//         ret = INFNAN;
+//       }
+//       x[i] = soma;
+
+//       //compara X(i+1) com X(i), pega apenas o maior erro (de todas as linhas)
+//       real_t diff = fabs(x[i] - err);
+//       maxErr = (diff > maxErr) ? diff : maxErr;
+//     }
+//     it++;
+//   } while(maxErr > erro && it < MAXIT);
+
+//   *tTotal = timestamp() - tempo;
+
+//   ret = (ret == INFNAN) ? ret : it;
+
+//   return ret;
+// }
 int gaussSeidel (SistLinear_t *SL, real_t *x, real_t erro, double *tTotal)
 {
-  /* 
-    Para cada linha, calcula o novo x baseado no chute inicial (0) e
-    realiza a soma baseada nos valores das soluções, soma
-    "isola" A[i][i] e soma os outros elementos multiplicados pelo x[j],
-    essa soma se torna o novo x[i] e ao final calcula a diferenca do x[i]
-    atual para o anterior, pega a maior dentre todas as linhas e usa para
-    comparar com o erro
-  */
   int it = 0;
   int ret;
-  real_t maxErr;
+  real_t maxErr = 100;
 
   double tempo = timestamp();
 
@@ -154,29 +195,33 @@ int gaussSeidel (SistLinear_t *SL, real_t *x, real_t erro, double *tTotal)
     x[i] = 0;
   }
 
-  do{
+  while(maxErr > erro && it < MAXIT){
+    //para cada linha do sistema
     for(int i = 0; i < SL->n; i++){
       real_t soma  = SL->b[i];
       real_t err = x[i];
       maxErr = -1.0;
 
+      //soma todos os elementos menos A[i][i]
       for(int j = 0; j < SL->n; j++){
         if(i != j){
           soma -= SL->A[i][j]*x[j];
         }
       }
 
+      //X(i+1) = ( b[i]-(soma) ) / A[i][i]
       soma /= SL->A[i][i];
       if( isinf(soma) || isnan(soma) ){
         ret = INFNAN;
       }
       x[i] = soma;
 
+      //compara X(i+1) com X(i), pega apenas o maior erro (de todas as linhas)
       real_t diff = fabs(x[i] - err);
       maxErr = (diff > maxErr) ? diff : maxErr;
     }
     it++;
-  } while(maxErr > erro && it < MAXIT);
+  }
 
   *tTotal = timestamp() - tempo;
 
@@ -289,12 +334,6 @@ real_t normaL2Residuo(SistLinear_t *SL, real_t *r)
 
 int refinamento (SistLinear_t *SL, real_t *x, real_t erro, double *tTotal)
 {
-  /*
-    Calcula um residuo inicial baseado em X0 (resultado do EGP), cria um novo
-    sistema linear A com r como os termos independentes, resolve Aw = r por EGP
-    soma w com x para obter X(i+1) e calcula o novo residuo para esse X(i+1),
-    que será usado para calcular a norma
-  */
   double tParcial;
   double somatParc = 0.0;
   /* checar mallocs */
@@ -311,24 +350,24 @@ int refinamento (SistLinear_t *SL, real_t *x, real_t erro, double *tTotal)
   }
 
   while(norma > erro && it < MAXIT){
+    //cria sistema linear novo com r como termos independentes
     /* memcpy?? */
     for(int i = 0; i < SL->n; i++){
       for(int j = 0; j < SL->n; j++){
         A->A[i][j] = SL->A[i][j];
       }
     }
-    
     /* memcpy?? */
     for(int i = 0; i < SL->n; i++){
       A->b[i] = r[i];
     }
-
     A->n = SL->n;
 
     /* checar por erros na eliminacao*/
     eliminacaoGauss(A, w, &tParcial);
 
     /* cancelamento subtrativo????????? */
+    //calcula X(i+1) somando X(i) com w (resultado do EGP)
     for(int i = 0; i < SL->n; i++){
       x[i] += w[i];
     }
