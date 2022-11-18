@@ -1,11 +1,18 @@
 // Gustavo do Prado Silva - GRR20203942
 
 /*
-  EGP mais rapido que GS em sistemas diagDominante menores??? (10x10)
-  GS nao da bons resultados em matrizes genericas e tem residuo maior em diag
-  GS em hilbert tem residuo menor, porem tempo maior
-  REF gera residuo muito alto (overflow??) em hilbert, sempre tem tempo alto
-  para residuo nao tao diferente
+  A partir dos resultados obtidos (tempos, número de iterações, tamanho do SL)
+  responda:
+
+  1. É possível estimar as condições em que o método EGP é mais vantajoso 
+  que o método GS?
+    Dados os resultados, em sistemas com diagonal dominante, EGP acaba sendo
+    mais preciso (residuo menor), especialmente em sistemas de tamanho <= 30,
+    onde acaba sendo inclusive mais rapido. Temos também em sistemas genéricos,
+    visto que Gauss-Seidel acaba não conseguindo resolver por erros numéricos.
+    Já em matrizes de Hilbert, o tempo para calcular é menor que GS, porém com
+    resíduo bem maior.
+    OBS: Considerando o chute inicial = 0
 */
 
 #include <stdio.h>

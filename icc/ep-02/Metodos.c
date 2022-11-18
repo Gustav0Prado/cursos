@@ -101,7 +101,6 @@ int eliminacaoGauss (SistLinear_t *SL, real_t *x, double *tTotal)
 
     //para cada linha depois
     for(int k = i +1; k < SL->n; k++){
-      /* checar se eh inf ou nan */
       //zera coluna
       real_t m = SL->A[k][i] / SL->A[i][i];
       SL->A[k][i] = 0.0;
@@ -137,10 +136,9 @@ int gaussSeidel (SistLinear_t *SL, real_t *x, real_t erro, double *tTotal)
 {
   int it = 0;
   int ret = 0;
-  real_t maxErr;
+  real_t maxErr = 0.0;
 
   double tempo = timestamp();
-  /* testar criterio de convergencia????? */
 
   for(int i = 0; i < SL->n; i++){
     x[i] = 0;
@@ -182,21 +180,25 @@ int gaussSeidel (SistLinear_t *SL, real_t *x, real_t erro, double *tTotal)
 }
 
 /*!
-  \brief Essa função calcula a norma L2 do resíduo de um sistema linear 
+  \brief Essa função calcula a norma L2 do resíduo de um sistema linear implementando
+  a soma de Kahan
 
   \param SL Ponteiro para o sistema linear
   \param r Vetor com o Residuo
 */
 real_t normaL2Residuo(SistLinear_t *SL, real_t *r)
 {
-  /* achar jeito melhor de calcular pra evitar erro -> Kahan????? */
   real_t somaq = 0.0;
+  real_t c = 0.0;
   for(int i = 0; i < SL->n; i++){
-    somaq += pow(r[i], 2);
-    if( isnan(r[i]) || isinf(r[i]) || isnan(somaq) || isinf(somaq) ){
+    real_t y = pow(r[i], 2) - c;
+    real_t t = somaq + y;
+    if( isnan(t) || isinf(t) ){
       fprintf(stderr, "\tERRO: GERAÇÃO DE VALORES INF/NAN - Calculo da Norma\n");
       return -1;
     }
+    c = (t - somaq) - y;
+    somaq = t;
   }
 
   return sqrt(somaq);
@@ -214,86 +216,22 @@ real_t normaL2Residuo(SistLinear_t *SL, real_t *r)
   \return código de erro. Um nr positivo indica sucesso e o nr
           de iterações realizadas. Um nr. negativo indica um erro.
   */
-// int refinamento (SistLinear_t *SL, real_t *x, real_t erro, double *tTotal)
-// {
-//   /*
-//     Calcula um residuo inicial baseado em X0 (resultado do EGP), cria um novo
-//     sistema linear A com r como os termos independentes, resolve Aw = r por EGP
-//     soma w com x para obter X(i+1) e calcula o novo residuo para esse X(i+1),
-//     que será usado para calcular a norma
-//   */
-//   double tParcial;
-//   double somatParc = 0.0;
-//   /* checar mallocs */
-//   real_t *r = malloc(sizeof(real_t)*SL->n);
-//   real_t *w = malloc(sizeof(real_t)*SL->n);
-//   SistLinear_t *A = alocaSisLin(SL->n);
-//   double tempo = timestamp();
-//   int it = 0;
-//   real_t norma;
-//   int ret = 0;
-
-//   for(int i = 0; i < SL->n; i++){
-//     r[i] = 0.0;
-//   }
-
-//   calculaResiduo(SL, x, r);
-
-//   do{
-//     /* memcpy?? */
-//     for(int i = 0; i < SL->n; i++){
-//       for(int j = 0; j < SL->n; j++){
-//         A->A[i][j] = SL->A[i][j];
-//       }
-//     }
-    
-//     /* memcpy?? */
-//     for(int i = 0; i < SL->n; i++){
-//       A->b[i] = r[i];
-//     }
-
-//     A->n = SL->n;
-
-//     /* checar por erros na eliminacao*/
-//     eliminacaoGauss(A, w, &tParcial);
-
-//     /* cancelamento subtrativo????????? */
-//     for(int i = 0; i < SL->n; i++){
-//       x[i] += w[i];
-//     }
-
-//     calculaResiduo(SL, x, r);
-
-//     it++;
-//     somatParc += tParcial;
-//     norma = normaL2Residuo(SL, r);
-//   } while(norma > erro && it < MAXIT);
-
-//   *tTotal = timestamp() - tempo + somatParc; 
-
-//   if(ret != INFNAN){
-//     ret = it;
-//   }
-
-//   liberaSisLin(A);
-//   free(w);
-//   free(r);
-
-//   return ret;
-// }
-
 int refinamento (SistLinear_t *SL, real_t *x, real_t erro, double *tTotal)
 {
   double tParcial;
   double somatParc = 0.0;
-  /* checar mallocs */
-  real_t *r = malloc(sizeof(real_t)*SL->n);
-  real_t *w = malloc(sizeof(real_t)*SL->n);
-  SistLinear_t *A = alocaSisLin(SL->n);
   double tempo = timestamp();
   real_t norma = 100;
   int it = 0;
   int ret = 0;
+
+  real_t *r = malloc(sizeof(real_t)*SL->n);
+  real_t *w = malloc(sizeof(real_t)*SL->n);
+  SistLinear_t *A = alocaSisLin(SL->n);
+
+  if(!r || !w || !A){
+    return ALLOC;
+  }
 
   for(int i = 0; i < SL->n; i++){
     r[i] = 0.0;
@@ -301,22 +239,21 @@ int refinamento (SistLinear_t *SL, real_t *x, real_t erro, double *tTotal)
 
   while(norma > erro && it < MAXIT){
     //cria sistema linear novo com r como termos independentes
-    /* memcpy?? */
     for(int i = 0; i < SL->n; i++){
       for(int j = 0; j < SL->n; j++){
         A->A[i][j] = SL->A[i][j];
       }
     }
-    /* memcpy?? */
+    
     for(int i = 0; i < SL->n; i++){
       A->b[i] = r[i];
     }
+
     A->n = SL->n;
 
     /* checar por erros na eliminacao*/
     eliminacaoGauss(A, w, &tParcial);
 
-    /* cancelamento subtrativo????????? */
     //calcula X(i+1) somando X(i) com w (resultado do EGP)
     for(int i = 0; i < SL->n; i++){
       x[i] += w[i];

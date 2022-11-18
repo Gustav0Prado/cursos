@@ -143,7 +143,6 @@ void prnVetor (real_t *v, unsigned int n)
 
 }
 
-
 /* funcoes novas */
 
 /*!
@@ -189,7 +188,7 @@ void copiaMatriz(SistLinear_t *SLDest, SistLinear_t *SLOrig, int tam)
   \param retornos Vetor com os retornos das funcoes (EGP, GS e REF, nessa ordem)
 */
 void checaErros(int *retornos){
-  /* para cada retorno, checa por erros */
+  //para cada retorno, checa por erros
   for(int i = 0; i < 3; ++i){
     switch(retornos[i]){
       case INFNAN:
@@ -214,7 +213,7 @@ void checaErros(int *retornos){
   \param t Tipo do sistema linear (Diag. Dominante, Genérico ou Hilbert)
 */
 void testaMatrizes(tipoSistLinear_t t){
-  int TAM_MATRIZES[QTD_MAT] = {10, 30, 50, 128};
+  int TAM_MATRIZES[QTD_MAT] = {10, 30, 50, 128, 256, 512/*, 1000, 2000, 3000*/};
 
   SistLinear_t *SL1, *SL2;
   real_t *x1, *x2, *x3, *r1, *r2, *r3;
@@ -242,15 +241,19 @@ void testaMatrizes(tipoSistLinear_t t){
   for(int i = 0; i < QTD_MAT; i++){
     int tam = TAM_MATRIZES[i];
 
-    /* Testar ponteiros */
     SL1 = alocaSisLin(tam);
-    SL2 = alocaSisLin(tam);
+    SL2 = alocaSisLin(tam) ;   
     x1 = malloc(sizeof(real_t)*tam);
     x2 = malloc(sizeof(real_t)*tam);
     x3 = malloc(sizeof(real_t)*tam);
     r1 = malloc(sizeof(real_t)*tam);
     r2 = malloc(sizeof(real_t)*tam);
     r3 = malloc(sizeof(real_t)*tam);
+
+    if( !SL1 || !SL2 || !x1 || !x2 || !x3 || !r1 || !r2 || !r3){
+      fprintf(stderr, "ERRO DE ALOCAÇÃO\n");
+      break;
+    }
 
     /* Aloca dois sistemas, um pro EGP (altera o sistema) e outra copia
       para o GS e REF (nao alteram o sistema)*/
