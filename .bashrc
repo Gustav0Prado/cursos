@@ -116,6 +116,7 @@ fi
 
 
 bind -x '"\C-l": clear; ls'
+alias UF='cd ~/ufpr/cursos'
 function lazygit() {
     git add .
     git commit -a -m "$1"
