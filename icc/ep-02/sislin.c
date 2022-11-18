@@ -252,6 +252,14 @@ void testaMatrizes(tipoSistLinear_t t){
 
     if( !SL1 || !SL2 || !x1 || !x2 || !x3 || !r1 || !r2 || !r3){
       fprintf(stderr, "ERRO DE ALOCAÇÃO\n");
+      free(SL1);
+      free(SL2);
+      free(x1);
+      free(x2);
+      free(x3);
+      free(r1);
+      free(r2);
+      free(r3);
       break;
     }
 

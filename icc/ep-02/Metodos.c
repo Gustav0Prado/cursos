@@ -230,6 +230,9 @@ int refinamento (SistLinear_t *SL, real_t *x, real_t erro, double *tTotal)
   SistLinear_t *A = alocaSisLin(SL->n);
 
   if(!r || !w || !A){
+    free(r);
+    free(w);
+    free(A);
     return ALLOC;
   }
 
