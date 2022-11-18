@@ -215,7 +215,7 @@ void checaErros(int *retornos){
 */
 void testaMatrizes(tipoSistLinear_t t){
   //int TAM_MATRIZES[QTD_MAT] = {10, 30, 50, 128};
-  int TAM_MATRIZES[QTD_MAT] = {3};
+  int TAM_MATRIZES[QTD_MAT] = {10};
 
   SistLinear_t *SL1, *SL2;
   real_t *x1, *x2, *x3, *r1, *r2, *r3;

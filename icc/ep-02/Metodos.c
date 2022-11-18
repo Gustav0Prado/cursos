@@ -215,11 +215,11 @@ real_t normaL2Residuo(SistLinear_t *SL, real_t *r)
   /* achar jeito melhor de calcular pra evitar erro -> Kahan????? */
   real_t somaq = 0.0;
   for(int i = 0; i < SL->n; i++){
-    if(isnan(r[i]) || isinf(r[i])){
+    somaq += pow(r[i], 2);
+    if( isnan(r[i]) || isinf(r[i]) || isnan(somaq) || isinf(somaq) ){
       fprintf(stderr, "\tERRO: GERAÇÃO DE VALORES INF/NAN - Calculo da Norma\n");
       return -1;
     }
-    somaq += pow(r[i], 2);
   }
 
   return sqrt(somaq);

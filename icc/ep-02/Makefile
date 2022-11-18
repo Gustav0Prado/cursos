@@ -24,4 +24,4 @@ purge:   clean
 	@rm -f $(PROG) saida.txt
 
 run:   $(PROG)
-	@./labSisLin > saida.txt && less ./saida.txt
+	@clear && ./labSisLin > saida.txt && cat ./saida.txt

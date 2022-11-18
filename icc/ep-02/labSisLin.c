@@ -17,7 +17,7 @@ int main ()
   // inicializa gerador de números aleatóreos
   srand(202202);
   
-  testaMatrizes(diagDominante);
-  //testaMatrizes(generico);
+  //testaMatrizes(diagDominante);
+  testaMatrizes(generico);
   //testaMatrizes(hilbert);
 }
