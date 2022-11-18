@@ -214,8 +214,14 @@ void checaErros(int *retornos){
   \param t Tipo do sistema linear (Diag. Dominante, Genérico ou Hilbert)
 */
 void testaMatrizes(tipoSistLinear_t t){
-  //int TAM_MATRIZES[QTD_MAT] = {10, 30, 50, 128};
-  int TAM_MATRIZES[QTD_MAT] = {10};
+  /*
+    Aloca dois sistemas, um para EGP (altera o sistema) e uma copia para GS
+    e Refinamento (nao alteram o sistema), além de um vetor de solução e um de
+    residuo para cada método. Copia resultado do EGP (x1) para o inicio do 
+    refinamento (x3)
+    Testa em matrizes de tamanho definido (10 -> 3000)
+  */
+  int TAM_MATRIZES[QTD_MAT] = {10, 30, 50, 128};
 
   SistLinear_t *SL1, *SL2;
   real_t *x1, *x2, *x3, *r1, *r2, *r3;
@@ -249,7 +255,6 @@ void testaMatrizes(tipoSistLinear_t t){
     x1 = malloc(sizeof(real_t)*tam);
     x2 = malloc(sizeof(real_t)*tam);
     x3 = malloc(sizeof(real_t)*tam);
-
     r1 = malloc(sizeof(real_t)*tam);
     r2 = malloc(sizeof(real_t)*tam);
     r3 = malloc(sizeof(real_t)*tam);
@@ -257,22 +262,14 @@ void testaMatrizes(tipoSistLinear_t t){
     iniSisLin(SL1, t, COEF_MAX);
     copiaMatriz(SL2, SL1, tam);
 
-    /* eliminacao de gauss */
-    /* pegar retorno tbm */
     int rEGP = eliminacaoGauss(SL1, x1, &tEGP);
-
-    /* Gauss-Seidel */
     int itGS = gaussSeidel(SL2, x2, ERRO, &tGS);
 
-    /* copia x1 pra x3 */
     for(int i = 0; i < tam; i++){
       x3[i] = x1[i];
     }
-
-    /* refinamento */
     int itREF = refinamento(SL2, x3, ERRO, &tREF);
 
-    /* calcular residuo para todos */
     calculaResiduo(SL2, x1, r1);
     calculaResiduo(SL2, x2, r2);
     calculaResiduo(SL2, x3, r3);
@@ -280,16 +277,9 @@ void testaMatrizes(tipoSistLinear_t t){
     printf("%4d   |%10g |   %12g   | %10g |   %4d    |%15g  |", tam, tEGP, normaL2Residuo(SL2, r1), tGS, itGS, normaL2Residuo(SL2, r2));
     printf("%10g |    %4d    | %15g |\n", tREF, itREF, normaL2Residuo(SL2, r3));
   
-    /* checa por erros e printa em stderr */
     int retornos[3] = {rEGP, itGS, itREF};
     checaErros(retornos);
 
-    prnSisLin(SL2);
-    prnVetor(x1, tam);
-    prnVetor(x2, tam);
-    prnVetor(x3, tam);
-
-    /* Desaloca estruturas */
     liberaSisLin(SL1);
     liberaSisLin(SL2);
     free(r1);

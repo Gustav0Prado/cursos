@@ -11,7 +11,7 @@
 #define INDET  -3
 #define IMPOSS -4
 
-#define QTD_MAT 1
+#define QTD_MAT 4
 
 // Estrutura para definiçao de um sistema linear qualquer
 typedef struct {

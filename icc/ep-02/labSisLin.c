@@ -14,10 +14,10 @@
 
 int main ()
 {
-  // inicializa gerador de números aleatóreos
+  // inicializa gerador de números aleatórios
   srand(202202);
   
-  //testaMatrizes(diagDominante);
+  testaMatrizes(diagDominante);
   testaMatrizes(generico);
-  //testaMatrizes(hilbert);
+  testaMatrizes(hilbert);
 }

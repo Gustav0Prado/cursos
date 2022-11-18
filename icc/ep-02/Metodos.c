@@ -18,14 +18,13 @@
 */
 void trocaLinha(SistLinear_t *SL, int i, int pivo)
 {
-  /* troca valores das linhas */
+  /* troca valores das linhas e depois do vetor de valores independentes */
   for(int j = 0; j < SL->n; j++){
     real_t aux = SL->A[i][j];
     SL->A[i][j] = SL->A[pivo][j];
     SL->A[pivo][j] = aux;
   }
 
-  /* troca valores do vetor de valores independentes */
   real_t auxB = SL->b[i];
   SL->b[i] = SL->b[pivo];
   SL->b[pivo] = auxB;
@@ -41,7 +40,6 @@ int encontraMax(SistLinear_t *SL, int linha)
 {
   int maior = linha;
   for(int i = linha+1; i < SL->n; i++){
-    /* arrumar comparação */
     if((SL->A[i][0] - SL->A[maior][0]) > ERRO){
       maior = i;
     }
@@ -60,7 +58,10 @@ int encontraMax(SistLinear_t *SL, int linha)
 */
 int retrossubs(SistLinear_t *SL, real_t *x)
 {
-  /*Checa se sistema eh indeterminado*/
+  /*
+    Faz a retrosubstituição em um sistema triangular, checa se sistema
+    é indeterminado ou impossivel (0 = 0 ou 0 = n)
+  */
   for(int i = SL->n-1; i >= 0; i--){
     x[i] = SL->b[i];
     for(int j = i+1; j < SL->n; j++){
@@ -87,53 +88,36 @@ int retrossubs(SistLinear_t *SL, real_t *x)
 */
 int eliminacaoGauss (SistLinear_t *SL, real_t *x, double *tTotal)
 {
-  /* comeca a contar o tempo */
+  /*
+    Para cada linha do sistema, realiza pivotamento parcial, zera os
+    termos das colunas e realiza as mesmas operações com o resto da
+    linha e o termo independente. No final, faz retrossubstituicao
+    e coloca resultados no vetor x 
+  */
   double tempo = timestamp();
 
-  /* para cada linha do sistema */
   for(int i = 0; i < SL->n; i++){
-    /* pivotamento parcial */
     int pivo = encontraMax(SL, i);
     if(pivo != i){
       trocaLinha(SL, i, pivo);
     }
 
-    /* A partir da proxima linha */
     for(int k = i +1; k < SL->n; k++){
-      /* zera termos da coluna */
       /* checar se eh inf ou nan */
       real_t m = SL->A[k][i] / SL->A[i][i];
       SL->A[k][i] = 0.0;
-      /* faz operacao com os outros elementos da linha */
       for(int j = i+1; j < SL->n; j++){
         SL->A[k][j] -= SL->A[i][j] * m;
       }
-      /* faz operação com o termo independente */
       SL->b[k] -= SL->b[i] * m;
     }
   }
 
-  /* faz retrossubstituicao e coloca resultados no vetor x */
-  /* checa se retrosubs nao retornou erro */
   int retro = retrossubs(SL, x);
 
-  /* mede tempo ao final */
   *tTotal = timestamp() - tempo;
 
-  /* checar se realmente zerou as colunas? */
   return retro;
-}
-
-real_t normaMax(real_t *ant, real_t *novo, int tam)
-{
-  real_t maior = novo[0] - ant[0];
-  for(int i = 1; i < tam; i++){
-    if((novo[i] - ant[i]) > maior){
-      maior = novo[i] - ant[i];
-    }
-  }
-
-  return maior;
 }
 
 
@@ -150,8 +134,14 @@ real_t normaMax(real_t *ant, real_t *novo, int tam)
   */
 int gaussSeidel (SistLinear_t *SL, real_t *x, real_t erro, double *tTotal)
 {
-  /* resultado errado quando matriz eh generica ou hilbert */
-  /* testar se converge */
+  /* 
+    Para cada linha, calcula o novo x baseado no chute inicial (0) e
+    realiza a soma baseada nos valores das soluções, soma
+    "isola" A[i][i] e soma os outros elementos multiplicados pelo x[j],
+    essa soma se torna o novo x[i] e ao final calcula a diferenca do x[i]
+    atual para o anterior, pega a maior dentre todas as linhas e usa para
+    comparar com o erro
+  */
   int it = 0;
   int ret;
   real_t maxErr;
@@ -160,42 +150,34 @@ int gaussSeidel (SistLinear_t *SL, real_t *x, real_t erro, double *tTotal)
 
   /* testar criterio de convergencia????? */
 
-  /* chute inicial = 0 */
   for(int i = 0; i < SL->n; i++){
     x[i] = 0;
   }
 
   do{
-    /* para cada linha, calcula o novo x baseado no chute */
     for(int i = 0; i < SL->n; i++){
       real_t soma  = SL->b[i];
       real_t err = x[i];
       maxErr = -1.0;
 
-      /* realiza a soma baseada nos valores das soluções */
       for(int j = 0; j < SL->n; j++){
-        /* soma todos os elementos menos A[i][i] */
         if(i != j){
           soma -= SL->A[i][j]*x[j];
         }
       }
 
-      /* calcula o novo x[i] */
       soma /= SL->A[i][i];
       if( isinf(soma) || isnan(soma) ){
         ret = INFNAN;
       }
-      /* checar se soma nao eh inf ou nan */
       x[i] = soma;
 
       real_t diff = fabs(x[i] - err);
-      /* se diferenca atual > maxErr, atualiza maxErr */
       maxErr = (diff > maxErr) ? diff : maxErr;
     }
     it++;
   } while(maxErr > erro && it < MAXIT);
 
-  //calcula tempo gasto
   *tTotal = timestamp() - tempo;
 
   ret = (ret == INFNAN) ? ret : it;
@@ -239,6 +221,12 @@ real_t normaL2Residuo(SistLinear_t *SL, real_t *r)
   */
 int refinamento (SistLinear_t *SL, real_t *x, real_t erro, double *tTotal)
 {
+  /*
+    Calcula um residuo inicial baseado em X0 (resultado do EGP), cria um novo
+    sistema linear A com r como os termos independentes, resolve Aw = r por EGP
+    soma w com x para obter X(i+1) e calcula o novo residuo para esse X(i+1),
+    que será usado para calcular a norma
+  */
   double tParcial;
   double somatParc = 0.0;
   /* checar mallocs */
@@ -254,12 +242,9 @@ int refinamento (SistLinear_t *SL, real_t *x, real_t erro, double *tTotal)
     r[i] = 0.0;
   }
 
-  /* residuo inicial X0 */
   calculaResiduo(SL, x, r);
 
-  /* para quando norma < erro ou it >= MAXIT */
   do{
-    /* cria novo sistema linear com r como variaveis independentes */
     /* memcpy?? */
     for(int i = 0; i < SL->n; i++){
       for(int j = 0; j < SL->n; j++){
@@ -267,7 +252,6 @@ int refinamento (SistLinear_t *SL, real_t *x, real_t erro, double *tTotal)
       }
     }
     
-    /* copia residuo como b do Sistema Linear */
     /* memcpy?? */
     for(int i = 0; i < SL->n; i++){
       A->b[i] = r[i];
@@ -275,17 +259,14 @@ int refinamento (SistLinear_t *SL, real_t *x, real_t erro, double *tTotal)
 
     A->n = SL->n;
 
-    /* chama eliminacaoGauss para resolver o sistma */
     /* checar por erros na eliminacao*/
     eliminacaoGauss(A, w, &tParcial);
 
     /* cancelamento subtrativo????????? */
-    /* obtem proxima solucao -> x(i+1) = x(i) + w */
     for(int i = 0; i < SL->n; i++){
       x[i] += w[i];
     }
 
-    /* r = b-Ax */
     calculaResiduo(SL, x, r);
 
     it++;
@@ -293,11 +274,8 @@ int refinamento (SistLinear_t *SL, real_t *x, real_t erro, double *tTotal)
     norma = normaL2Residuo(SL, r);
   } while(norma > erro && it < MAXIT);
 
-  /* se norma for MUITO grande, nao converge */
-
   *tTotal = timestamp() - tempo + somatParc; 
 
-  /* funcao pra checar ret */
   if(ret != INFNAN){
     ret = it;
   }
