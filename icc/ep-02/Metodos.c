@@ -133,69 +133,20 @@ int eliminacaoGauss (SistLinear_t *SL, real_t *x, double *tTotal)
   \return código de erro. Um nr positivo indica sucesso e o nr
           de iterações realizadas. Um nr. negativo indica um erro.
   */
-// int gaussSeidel (SistLinear_t *SL, real_t *x, real_t erro, double *tTotal)
-// {
-//   int it = 0;
-//   int ret;
-//   real_t maxErr;
-
-//   double tempo = timestamp();
-
-//   /* testar criterio de convergencia????? */
-
-//   for(int i = 0; i < SL->n; i++){
-//     x[i] = 0;
-//   }
-
-//   do{
-//     //para cada linha do sistema
-//     for(int i = 0; i < SL->n; i++){
-//       real_t soma  = SL->b[i];
-//       real_t err = x[i];
-//       maxErr = -1.0;
-
-//       //soma todos os elementos menos A[i][i]
-//       for(int j = 0; j < SL->n; j++){
-//         if(i != j){
-//           soma -= SL->A[i][j]*x[j];
-//         }
-//       }
-
-//       //X(i+1) = ( b[i]-(soma) ) / A[i][i]
-//       soma /= SL->A[i][i];
-//       if( isinf(soma) || isnan(soma) ){
-//         ret = INFNAN;
-//       }
-//       x[i] = soma;
-
-//       //compara X(i+1) com X(i), pega apenas o maior erro (de todas as linhas)
-//       real_t diff = fabs(x[i] - err);
-//       maxErr = (diff > maxErr) ? diff : maxErr;
-//     }
-//     it++;
-//   } while(maxErr > erro && it < MAXIT);
-
-//   *tTotal = timestamp() - tempo;
-
-//   ret = (ret == INFNAN) ? ret : it;
-
-//   return ret;
-// }
 int gaussSeidel (SistLinear_t *SL, real_t *x, real_t erro, double *tTotal)
 {
   int it = 0;
-  int ret;
-  real_t maxErr = 100;
+  int ret = 0;
+  real_t maxErr;
 
   double tempo = timestamp();
-
   /* testar criterio de convergencia????? */
 
   for(int i = 0; i < SL->n; i++){
     x[i] = 0;
   }
 
-  while(maxErr > erro && it < MAXIT){
+  do{
     //para cada linha do sistema
     for(int i = 0; i < SL->n; i++){
       real_t soma  = SL->b[i];
@@ -221,7 +172,7 @@ int gaussSeidel (SistLinear_t *SL, real_t *x, real_t erro, double *tTotal)
       maxErr = (diff > maxErr) ? diff : maxErr;
     }
     it++;
-  }
+  } while(maxErr > erro && it < MAXIT);
 
   *tTotal = timestamp() - tempo;
 
@@ -229,7 +180,6 @@ int gaussSeidel (SistLinear_t *SL, real_t *x, real_t erro, double *tTotal)
 
   return ret;
 }
-
 
 /*!
   \brief Essa função calcula a norma L2 do resíduo de um sistema linear 
