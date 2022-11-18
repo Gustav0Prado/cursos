@@ -236,7 +236,7 @@ void testaMatrizes(tipoSistLinear_t t){
       return;
   }
 
-  printf("   n   |   t_egp   | normaResiduo_egp |    t_gs    |   it_gs   |");
+  printf("   n   |    t_egp    | normaResiduo_egp |    t_gs    |   it_gs   |");
   printf(" normaResiduo_gs |   t_ref   |   it_ref   | normaResiduo_ref|\n");
   printf("-------------------------------------------------------------");
   printf("--------------------------------------------------------------\n");
@@ -289,7 +289,7 @@ void testaMatrizes(tipoSistLinear_t t){
     calculaResiduo(SL2, x2, r2);
     calculaResiduo(SL2, x3, r3);
 
-    printf("%4d   |%10g |   %12g   | %10g |   %4d    |%15g  |", tam, tEGP, normaL2Residuo(SL2, r1), tGS, itGS, normaL2Residuo(SL2, r2));
+    printf("%4d   |%12g |   %12g   | %10g |   %4d    |%15g  |", tam, tEGP, normaL2Residuo(SL2, r1), tGS, itGS, normaL2Residuo(SL2, r2));
     printf("%10g |    %4d    | %15g |\n", tREF, itREF, normaL2Residuo(SL2, r3));
   
     int retornos[3] = {rEGP, itGS, itREF};
