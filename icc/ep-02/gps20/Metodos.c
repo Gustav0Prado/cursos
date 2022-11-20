@@ -291,7 +291,7 @@ int refinamento (SistLinear_t *SL, real_t *x, real_t erro, double *tTotal)
 
     calculaResiduo(SL, x, r);
     norma = normaL2Residuo(SL, r);
-    if(norma < 0){
+    if(isnan(norma) || isinf(norma)){
       fprintf(stderr, "\tERRO: GERAÇÃO DE VALORES INF/NAN - Calculo da Norma\n");
       ret = INFNAN;
       break;
