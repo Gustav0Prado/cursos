@@ -241,7 +241,6 @@ real_t normaL2Residuo(SistLinear_t *SL, real_t *r)
 int refinamento (SistLinear_t *SL, real_t *x, real_t erro, double *tTotal)
 {
   double tParcial;
-  double somatParc = 0.0;
   double tempo = timestamp();
   real_t norma = 100;
   int it = 0;
@@ -262,7 +261,10 @@ int refinamento (SistLinear_t *SL, real_t *x, real_t erro, double *tTotal)
     r[i] = 0.0;
   }
 
-  while(norma > erro && it < MAXIT){
+  //calcula residou para x0
+  calculaResiduo(SL, x, r);
+
+  do{
     //cria sistema linear novo com r como termos independentes
     for(int i = 0; i < SL->n; i++){
       for(int j = 0; j < SL->n; j++){
@@ -291,13 +293,14 @@ int refinamento (SistLinear_t *SL, real_t *x, real_t erro, double *tTotal)
     norma = normaL2Residuo(SL, r);
     if(norma < 0){
       fprintf(stderr, "\tERRO: GERAÇÃO DE VALORES INF/NAN - Calculo da Norma\n");
+      ret = INFNAN;
+      break;
     }
 
     it++;
-    somatParc += tParcial;
-  }
+  } while(norma > erro && it < MAXIT);
 
-  *tTotal = timestamp() - tempo + somatParc; 
+  *tTotal = timestamp() - tempo; 
 
   if(ret != INFNAN){
     ret = it;
