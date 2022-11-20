@@ -1,4 +1,4 @@
-    CC     = gcc -g
+    CC     = gcc
     CFLAGS = -Wall
     LFLAGS = -lm
 
@@ -22,6 +22,3 @@ clean:
 purge:   clean
 	@rm -f *.o core a.out
 	@rm -f $(PROG) saida.txt
-
-run:   $(PROG)
-	@clear && ./labSisLin > saida.txt && cat ./saida.txt

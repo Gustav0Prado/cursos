@@ -13,6 +13,9 @@
     Já em matrizes de Hilbert, o tempo para calcular é menor que GS, porém com
     resíduo bem maior.
     OBS: Considerando o chute inicial = 0
+
+  OBS: Tempos de refinamento para matrizes de tamanho 3000 ficou MUITO grande mas não consegui arrumar/diminuir isso, nem os valores
+  inf/nan no Gauss-Seidel em matrizes Genericas
 */
 
 #include <stdio.h>
