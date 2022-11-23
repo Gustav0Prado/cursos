@@ -5,7 +5,7 @@
 
 double func(double a)
 {
-   return pow(a, 3) + pow(a, 2) - a + 5;
+   return pow(a, 2) - 1;
 }
 
 double bissecao( double xl, double xu, double f(double a), double epsilon )
@@ -50,5 +50,6 @@ int main(){
 
    void *f = &func;
 
-   printf("Zero em: %g\n", bissecao(xl, xu, f, erro));
+   printf("Por bissecao: \n\tZero em: %g\n", bissecao(xl, xu, f, erro));
+   //printf("Por iteração: \n\tZero em: %g\n", );
 }
