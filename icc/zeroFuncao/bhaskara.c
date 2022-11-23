@@ -20,18 +20,14 @@ void bhaskaraOpt(double a, double b, double c, double *x1, double *x2)
 }
 
 int main(){
-   z, c, x1, x2, x3, x4;
+   double a, b, c, x1, x2, x3, x4;
 
-   // printf("Insira o A: ");
-   // scanf("%lf", &a);
-   // printf("Insira o B: ");
-   // scanf("%lf", &b);
-   // printf("Insira o C: ");
-   // scanf("%lf", &c);
-
-   a = 0.0005;
-   b = 100;
-   c = 0.005;
+   printf("Insira o A: ");
+   scanf("%lf", &a);
+   printf("Insira o B: ");
+   scanf("%lf", &b);
+   printf("Insira o C: ");
+   scanf("%lf", &c);
 
    bhaskara(a, b, c, &x1, &x2);
    bhaskaraOpt(a, b, c, &x3, &x4);
