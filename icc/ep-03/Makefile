@@ -1,6 +1,6 @@
 CFLAGS = -Wall -g -lm
 
-objects = main.o edo.o utils.o
+objects = main.o edo.o utils.o matriz.o
 
 all: ep03
 
@@ -15,6 +15,9 @@ edo.o: edo.c edo.h
 
 utils.o: utils.c utils.h
 	gcc -c utils.c $(CFLAGS)
+
+matriz.o: matriz.c matriz.h
+	gcc -c matriz.c $(CFLAGS)
 
 clean:
 	rm -rf $(objects) ./*~ ./.vscode

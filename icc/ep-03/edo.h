@@ -1,3 +1,8 @@
+#ifndef __EDO_H__
+#define __EDO_H__
+
+#define MAXIT 50
+
 typedef struct{
    double *d, *a, *c, *b;
    int n;
@@ -9,6 +14,12 @@ typedef struct{
    int n;
 } Edo;
 
-void seidelDiag();
+double normaL2(SL_Tridiag *SL, double *x);
 
-void seidelFunc();
+void calculaDiag(SL_Tridiag *SL, Edo *edo);
+
+void gaussseidelDiag(SL_Tridiag *SL, Edo *edo, double *x, double *tTotal);
+
+void gaussseidelFunc(Edo *edo, double *x, double *tTotal);
+
+#endif

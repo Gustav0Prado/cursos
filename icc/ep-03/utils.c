@@ -20,4 +20,3 @@ double timestamp (void)
   clock_gettime(CLOCK_MONOTONIC_RAW, &tp);
   return ( (double) tp.tv_sec*1.0e3 + (double) tp.tv_nsec*1.0e-6 );
 }
-
