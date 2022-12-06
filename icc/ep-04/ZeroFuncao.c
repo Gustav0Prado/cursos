@@ -7,10 +7,21 @@
 double newtonRaphson (Polinomio p, double x0, double eps,
 		   int *it, double *raiz)
 {
-	double erro;
+	double px, dpx, erro, xprox;
+	double xi = x0;
 	do{
-
+		calcPolinomio_rapido(p, xi, &px, &dpx);
+		//calcula x(i+1)
+		xprox = xi - (px/dpx);
+		erro = (fabs(xprox - xi)/fabs(xprox));
+		//proxima iteracao
+		xi = xprox;
+		++(*it);
 	} while(erro > eps && *it < MAXIT);
+
+	*raiz = xi;
+
+	return erro;
 }
 
 
