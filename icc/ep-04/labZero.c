@@ -15,7 +15,7 @@ int main ()
   p.p = malloc(sizeof(double)*p.grau+1);
 
   printf("Insira os coeficientes do polinomio: ");
-  for(int i = p.grau; i >=0 ; --i){
+  for(int i = p.grau-1; i >=0 ; --i){
     scanf("%lg", &p.p[i]);
   }
 
@@ -28,6 +28,8 @@ int main ()
   printf("erro: %g\n", newtonRaphson(p, x0, EPS, &it, &raiz));
   printf("raiz: %g\n", raiz);
   printf("iteracoes: %d\n", it);
+
+  free(p.p);
 
   return 0;
 }
