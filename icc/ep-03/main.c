@@ -4,8 +4,7 @@
 #include "edo.h"
 #include "matriz.h"
 
-#define TAM 3
-
+#define TAM 1
 
 //funcao aloca edo, imprimir matriz melhor, seidel alternativo dando inf
 
@@ -23,7 +22,7 @@ double r(double x){
 }
 
 int main() {
-   int n_malha[TAM] = {5, 10, 100};
+   int n_malha[TAM] = {100};
    
    Edo *edo = malloc(sizeof(Edo));
    edo->a = 0;
@@ -49,16 +48,16 @@ int main() {
       printf("n: %d\n", edo->n);
 
       gaussseidelDiag(SL, edo, x, &tTotal);
-      imprimeSL(SL);
+      //imprimeSL(SL);
       printf("Tempo Gauss-Seidel gerando matriz: %g\n", tTotal);
-      printf("Vetor Solução: ");
-      imprimeVetor(x, SL->n);
+      //printf("Vetor Solução: ");
+      //imprimeVetor(x, SL->n);
       printf("Norma L2 do resíduo: %g\n", normaL2(SL, x));
 
       gaussseidelFunc(edo, x, &tTotal);
       printf("\nTempo Gauss-Seidel sem gerar matriz: %g\n", tTotal);
-      printf("Vetor Solução: ");
-      imprimeVetor(x, SL->n);
+      //printf("Vetor Solução: ");
+      //imprimeVetor(x, SL->n);
       printf("Norma L2 do resíduo: %g\n", normaL2(SL, x));
 
       desalocaSisLin(SL);
