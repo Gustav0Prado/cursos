@@ -4,7 +4,7 @@
 #include "edo.h"
 #include "matriz.h"
 
-#define TAM 1
+#define TAM 3
 
 //funcao aloca edo, imprimir matriz melhor, seidel alternativo dando inf
 
@@ -22,7 +22,7 @@ double r(double x){
 }
 
 int main() {
-   int n_malha[TAM] = {100};
+   int n_malha[TAM] = {5, 10, 100};
    
    Edo *edo = malloc(sizeof(Edo));
    edo->a = 0;
@@ -59,6 +59,8 @@ int main() {
       //printf("Vetor Solução: ");
       //imprimeVetor(x, SL->n);
       printf("Norma L2 do resíduo: %g\n", normaL2(SL, x));
+
+      printf("----------------------------------------------\n");
 
       desalocaSisLin(SL);
       free(x);

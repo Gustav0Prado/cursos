@@ -31,7 +31,7 @@ void calculaDiag(SL_Tridiag *SL, Edo *edo){
    double xi;
 
    //calcula valores baseado na eq generica
-   for (int i = 0; i < edo->n; ++i){
+   for (int i = 0; i < SL->n; ++i){
       xi = h*(i+1) + edo->a;
       SL->a[i] = 1 - edo->p(xi) * (h/2) ;
       SL->d[i] = -2 + (h*h) * edo->q(xi);
@@ -55,19 +55,10 @@ void gaussseidelDiag(SL_Tridiag *SL, Edo *edo, double *x, double *tTotal){
 
    //Realiza 50 iterações
    for(int it = 0; it < MAXIT; ++it){
-      // //primeira linha nao tem a
-      // x[0] = (SL->b[0] - SL->c[0]*x[1]) / SL->d[0];
-
-      // //linhas internas da matriz
-      // for(int i = 1; i < SL->n-1; ++i){
-      //    x[i] = (SL->b[i] - SL->a[i-1]*x[i-1] - SL->c[i]*x[i+1]) / SL->d[i];
-      // }
-
-      // //ultima linha nao tem c
-      // x[SL->n-1] = (SL->b[SL->n-1] - SL->a[SL->n-2]*x[SL->n-2]) / SL->d[SL->n-1];
       for(int i = 0; i < SL->n; ++i){
          double bi = SL->b[i];
 
+         //separa condicoes de contorno
          if(i == 0)
             bi -= SL->c[i]*x[i+1];
          else if(i == SL->n-1)
@@ -83,7 +74,7 @@ void gaussseidelDiag(SL_Tridiag *SL, Edo *edo, double *x, double *tTotal){
 }
 
 /*
-   Metodo de Gauss-Seidel calculando os valores
+   Metodo de Gauss-Seidel calculando os valores sem usar vetores
 */
 void gaussseidelFunc(Edo *edo, double *X, double *tTotal){
    *tTotal = timestamp();
@@ -95,11 +86,13 @@ void gaussseidelFunc(Edo *edo, double *X, double *tTotal){
 
    for(int it = 0; it < MAXIT; ++it){
       for(int i = 0; i < edo->n; ++i){
-         xi = edo->ya + h*i;
+         //termos dependem de xi
+         xi = edo->a + h*(i+1);
          bi = 2*h*h*edo->r(i);
          di = 1 - (h/2)*edo->p(xi);
          ds = 1 + (h/2)*edo->p(xi);
 
+         //separa os casos de contorno
          if(i == 0)
             bi -= ds*X[i+1];
          else if(i == edo->n-1)
@@ -107,6 +100,7 @@ void gaussseidelFunc(Edo *edo, double *X, double *tTotal){
          else
             bi -= di*X[i-1] - ds*X[i+1];
          
+         //calcula o valor
          X[i] = bi / d;
       }
    }
