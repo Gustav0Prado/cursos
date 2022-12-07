@@ -37,13 +37,15 @@ double secante (Polinomio p, double x0, double x1, double eps,
 
 void calcPolinomio_rapido(Polinomio p, double x, double *px, double *dpx)
 {
-	*px = 0;
-	*dpx = 0;
+	double b = 0.0;
+	double c = 0.0;
 	for(int i = p.grau; i > 0; --i){
-		*px = (*px)*x + p.p[i];
-		*dpx = (*dpx)*x + *px;
+		b = b*x + p.p[i];
+		c = c*x + b;
 	}
-	*px = *px*x + p.p[0];
+	b = b*x + p.p[0];
+	*px = b;
+	*dpx = c;
 }
 
 
