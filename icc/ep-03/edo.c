@@ -1,4 +1,5 @@
 #include <math.h>
+#include <stdio.h>
 #include "edo.h"
 #include "utils.h"
 
@@ -33,15 +34,15 @@ void calculaDiag(SL_Tridiag *SL, Edo *edo){
    //calcula valores baseado na eq generica
    for (int i = 0; i < SL->n; ++i){
       xi = h*(i+1) + edo->a;
-      SL->a[i] = 1 - edo->p(xi) * (h/2) ;
+      SL->a[i] = 1 - edo->p(xi) * (h/2.0) ;
       SL->d[i] = -2 + (h*h) * edo->q(xi);
-      SL->c[i] = 1 + edo->p(xi) * (h/2);
+      SL->c[i] = 1 + edo->p(xi) * (h/2.0);
       SL->b[i] = h*h * edo->r(xi);
    }
 
    //ya e yb são conhecidos, "passam" para o outro lado diminuindo
-   SL->b[0] -= edo->ya * (1 - (edo->p(xi) * h)/2);
-   SL->b[SL->n-1] -= edo->yb * (1 + edo->p(xi) * (h/2));
+   SL->b[0] -= edo->ya * (1 - (edo->p(edo->a+h) * h)/2.0);
+   SL->b[SL->n-1] -= edo->yb * (1 + (edo->p(edo->b-h) * h)/2.0);
 }
 
 /*
@@ -54,20 +55,27 @@ void gaussseidelDiag(SL_Tridiag *SL, Edo *edo, double *x, double *tTotal){
    calculaDiag(SL, edo);
 
    //Realiza 50 iterações
+   //por algum motivo escrever assim diminui a norma L2 ???????
    for(int it = 0; it < MAXIT; ++it){
-      for(int i = 0; i < SL->n; ++i){
-         double bi = SL->b[i];
+      double bi = SL->b[0];
+      int i = 0;
 
-         //separa condicoes de contorno
-         if(i == 0)
-            bi -= SL->c[i]*x[i+1];
-         else if(i == SL->n-1)
-            bi -= SL->a[i-1]*x[i-1];
-         else
-            bi -= SL->a[i-1]*x[i-1] - SL->c[i+1]*x[i+1];
-         
+      //y[0] = (SL->b[0] - SL->c[0]*y[1]) / SL->d[0];
+      bi = SL->b[0];
+      bi -= SL->c[i]*x[i+1];
+      x[i] = bi / SL->d[i];
+
+      for(i = 1; i < SL->n-1; ++i){
+         //y[i] = (SL->b[i] - SL->a[i-1]*y[i-1] - SL->c[i]*y[i+1]) / SL->d[i];
+         bi = SL->b[i];
+         bi -= SL->a[i-1]*x[i-1] - SL->c[i]*x[i+1];
          x[i] = bi / SL->d[i];
       }
+
+      //y[SL->n-1] = (SL->b[SL->n-1] - SL->a[SL->n-2]*y[SL->n-2]) / SL->d[SL->n-1];
+      bi = SL->b[i];
+      bi -= SL->a[i-1]*x[i-1];
+      x[i] = bi / SL->d[i];
    }
 
    *tTotal = timestamp() - *tTotal;
@@ -103,6 +111,24 @@ void gaussseidelFunc(Edo *edo, double *X, double *tTotal){
          //calcula o valor
          X[i] = bi / d;
       }
+
+      // int i = 0;
+      // ds = 1 + (h/2)*edo->p(0);
+      // X[0] = (2*h*h*edo->r(0) - ds*X[1]) / d;
+
+      // for(i = 1; i < edo->n-1; ++i){
+      //    //termos dependem de xi
+      //    xi = edo->a + h*(i+1);
+      //    bi = 2*h*h*edo->r(i);
+      //    di = 1 - (h/2)*edo->p(xi);
+      //    ds = 1 + (h/2)*edo->p(xi);
+
+      //    bi -= di*X[i-1] - ds*X[i+1];
+      //    X[i] = bi / d;
+      // }
+
+      // di = 1 - (h/2)*edo->p(edo->n-1);
+      // X[0] = (2*h*h*edo->r(edo->n-1) - di*X[edo->n-2]) / d;
    }
 
    *tTotal = timestamp() - *tTotal;
