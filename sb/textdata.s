@@ -3,24 +3,29 @@
     str1: .string ".data %d bytes\n"
     str2: .string ".text %d bytes\n"
     B: .quad 0
+
 .section .text
 .globl main
+
 main:
     _c:
     pushq %rbp
     movq %rsp, %rbp
-    movq $A, %r11
-    movq $B, %rbx
-    subq %r11, %rbx
+
+    # imprime tamanho da secao data
+    movq $B, %rax
+    movq $A, %rbx
+    subq %rbx, %rax
+    movq %rax, %rsi
     movq $str1, %rdi
-    movq %r11, %rsi
     call printf
 
-    movq $_c, %r11
-    movq $_d, %rbx
-    subq %r11, %rbx
+    # imprime tamanho da secao text
+    movq $_d, %rax
+    movq $_c, %rbx
+    subq %rbx, %rax
+    movq %rax, %rsi
     movq $str2, %rdi
-    movq %r11, %rsi
     call printf
 
     movq $0, %rdi
