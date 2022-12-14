@@ -8,7 +8,7 @@ last=${args[$#-1]}
 i=(${args[0]})
 
 if [ "$last" = "--clean" -o "$last" = "-c" ]; then
-   rm -v !(*.s|*.pdf|*.sh|.gitignore)
+   rm -fv !(*.s|*.pdf|*.sh|.gitignore)
 elif [ "$last" = "--printf" -o "$last" = "-p" ]; then
    as $i.s -o $i.o -g
    ld $i.o -o $i -dynamic-linker /lib/x86_64-linux-gnu/ld-linux-x86-64.so.2 \
