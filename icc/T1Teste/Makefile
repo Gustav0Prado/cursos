@@ -1,4 +1,4 @@
-CFLAGS = -Wall -g
+CFLAGS = -Wall -g -lm
 objects = main.o utils.o oper.o sistema.o metodos.o
 
 all: cgSolver

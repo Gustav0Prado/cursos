@@ -121,6 +121,7 @@ int main(int argc, char **argv){
    }
 
    double tempMed = 0.0;
+   double tempR = 0.0;
 
    //sem erro definido, apenas faz iteracoes
    if(e == -1){
@@ -131,7 +132,16 @@ int main(int argc, char **argv){
       tempMed = GradConjErr(SL, x, M, e);
    }
 
-   printf("Tempo médio das iterações: %15g\n", tempMed);
+   //calcula residuo final
+   somaVetMatxVet(SL->A, SL->b, x, -1, r, n);
+
+   //escrever em arquivo com fprintf
+   printf("# residuo: %.15g\n", normaL2(r, n, &tempR));
+   printf("# Tempo PC: \n");
+   printf("# Tempo iter: %.15g\n", tempMed);
+   printf("# Tempo residuo: %.15g\n", tempR);
+   printf("#\n");
+   printf("%d\n", n);
 
    //imprime solucao final
    for(int j = 0; j < n; ++j){
@@ -141,6 +151,11 @@ int main(int argc, char **argv){
 
    free(x);
    free(r);
+
+   for(int i = 0; i < n; ++i){
+      free(M[i]);
+   }
+   free(M);
 
    liberaSisLin (SL);
 
