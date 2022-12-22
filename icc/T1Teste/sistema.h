@@ -1,3 +1,6 @@
+//Gustavo do Prado Silva - 20203942 
+//Rafael Gonçalves dos Santos - 20211798
+
 #ifndef __SISTEMA_H__
 #define __SISTEMA_H__
 

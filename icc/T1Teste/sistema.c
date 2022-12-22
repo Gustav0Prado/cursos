@@ -1,3 +1,6 @@
+//Gustavo do Prado Silva - 20203942 
+//Rafael Gonçalves dos Santos - 20211798
+
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -29,6 +32,7 @@ SistLinear_t* alocaSisLin (unsigned int n)
 
     if (!(SL->A) || !(SL->b)) {
       liberaSisLin(SL);
+      fprintf(stderr, "Erro de alocação!\n");
       return NULL;
     }
 
@@ -36,6 +40,7 @@ SistLinear_t* alocaSisLin (unsigned int n)
     SL->A[0] = (double *) malloc(n * n * sizeof(double));
     if (!(SL->A[0])) {
       liberaSisLin(SL);
+      fprintf(stderr, "Erro de alocação!\n");
       return NULL;
     }
     
@@ -45,25 +50,6 @@ SistLinear_t* alocaSisLin (unsigned int n)
   }
   
   return (SL);
-}
-
-SistLinear_t *lerSisLin ()
-{
-  unsigned int n;
-  SistLinear_t *SL;
-  
-  scanf("%d",&n);
-
-  SL = alocaSisLin (n);
-  
-  for(int i=0; i < n; ++i)
-    for(int j=0; j < n; ++j)
-      scanf ("%lg", &SL->A[i][j]);
-
-  for(int i=0; i < n; ++i)
-    scanf ("%lg", &SL->b[i]);
-  
-  return SL;
 }
 
 void prnSisLin (SistLinear_t *SL)

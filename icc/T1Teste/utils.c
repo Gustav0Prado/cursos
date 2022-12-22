@@ -1,3 +1,6 @@
+//Gustavo do Prado Silva - 20203942 
+//Rafael Gonçalves dos Santos - 20211798
+
 #include <stdlib.h>
 #include <time.h>
 #include "utils.h"

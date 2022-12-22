@@ -1,3 +1,6 @@
+//Gustavo do Prado Silva - 20203942 
+//Rafael Gonçalves dos Santos - 20211798
+
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
@@ -10,22 +13,27 @@
 
 int main(int argc, char **argv){
    int opt;
-   int n, k, p, it;
+   int n = 12, k = 3, p = 0, it = 100;
    double e = -1;
-   char *saida;
+   char *saida = "saida";
+   FILE *arq;
+   
+   double tempMed = 0.0;
+   double tempR   = 0.0;
+   double tempPC  = 0.0;
 
    SistLinear_t *SL;
 
    // Inicializa semente 
    srand(20222);
 
-   /* Algum argumento obrigatorio faltando, escreve na saida de erro */
-   if( ((argc-1)/2) < 5 ){
+   // Algum argumento obrigatorio faltando, escreve na saida de erro 
+   /* if( ((argc-1)/2) < 5 ){
       fprintf(stderr, "Argumentos Obrigatórios Faltando!!\n");
       return -1;
    }
    else{
-      /* usa getopt para pegar valores da entrada */
+      // usa getopt para pegar valores da entrada 
       while((opt = getopt(argc, argv, "n:k:p:i:e:o:")) != -1){
          //colocar em funcao
          switch(opt){
@@ -73,12 +81,18 @@ int main(int argc, char **argv){
                break;
          }
       }
-   }
+   } */
 
    SL = alocaSisLin (n);
+
+   if(!SL){
+      fprintf(stderr, "Erro de alocação!\n");
+      exit(ERRALLOC);
+   }
+
    // gera os coeficientes da matriz
    for (int i = 0; i < n; i++) {
-      for (int j = 0; j <= i; j++) {
+      for (int j = 0; j < n; j++) {
          //zera elementos que nao estao nas diagonais
          int banda = (k-1)/2;
          if( j > i+banda || j < i-banda ){
@@ -87,20 +101,29 @@ int main(int argc, char **argv){
          else{
             SL -> A[i][j] = generateRandomA (i, j, k);
             //simetria na matriz
-            SL -> A[j][i] = SL -> A[i][j];
+            /* SL -> A[j][i] = SL -> A[i][j]; */
          }
       }
       SL -> b[i] = generateRandomB (k);
    }
-
-   // /* SL = lerSisLin (); */
+   SL->i = it;
+   
    prnSisLin (SL);
 
-   SL->i = it;
+   simetrizaSistema (SL);
 
+   prnSisLin (SL); 
+
+   //vetores do residuo e x inicial e matrix pre-condicionadora
    double *r   = malloc(sizeof(double)*n);
    double *x   = malloc(sizeof(double)*n);
    double **M  = malloc(sizeof(double*)*n);
+
+   //checa erros de alocação
+   if(!r || !x || !M){
+      fprintf(stderr, "Erro de alocação!\n");
+      exit(ERRALLOC);
+   }
 
    //inicializa x = 0
    memset(x, 0, SL->n*sizeof(*x));
@@ -108,55 +131,79 @@ int main(int argc, char **argv){
    //colocar metodos numericos em funcoes, uma com erro e uma sem
    // se p = 0, M = I
    // se p > 0, M = D
+   tempPC = timestamp();
    if(p == 0){
       //cria matriz identidade; I^(-1) = I, diagonais = 1
       for(int i = 0; i < n; ++i){
          M[i] = malloc(sizeof(double)*n);
+         if(!M[i]){
+            fprintf(stderr, "Erro de alocação!\n");
+            exit(ERRALLOC);
+         }
          memset(M[i], 0, n*sizeof(double));
          M[i][i] = 1.0;
       }
    }
    else{
-      //cria matriz M = D
+      //cria matriz diagonal; D^(-1) 
+      for(int i = 0; i < n; ++i){
+         M[i] = malloc(sizeof(double)*n);
+         if(!M[i]){
+            fprintf(stderr, "Erro de alocação!\n");
+            exit(ERRALLOC);
+         }
+         memset(M[i], 0, n*sizeof(double));
+         M[i][i] = SL->A[i][i] * (1 / (SL->A[i][i] * SL->A[i][i]));
+      }
+   }
+   tempPC = timestamp() - tempPC;
+
+   //abre arquivo para escrita
+   arq = fopen(saida, "w");
+   if(!arq){
+      fprintf(stderr, "Erro ao criar arquivo de saída!\n");
+      return ERROUTPUT;
    }
 
-   double tempMed = 0.0;
-   double tempR = 0.0;
+   fprintf(arq, "# gps20 Gustavo do Prado\n");
+   fprintf(arq, "# rgs21 Rafael Gonçalves\n");
+   fprintf(arq, "#\n");
 
    //sem erro definido, apenas faz iteracoes
    if(e == -1){
-      tempMed = GradConjIt(SL, x, M);
+      tempMed = GradConjIt(SL, x, M, arq);
    }
    //com erro definido
    else{
-      tempMed = GradConjErr(SL, x, M, e);
+      tempMed = GradConjErr(SL, x, M, e, arq);
    }
 
    //calcula residuo final
    somaVetMatxVet(SL->A, SL->b, x, -1, r, n);
 
-   //escrever em arquivo com fprintf
-   printf("# residuo: %.15g\n", normaL2(r, n, &tempR));
-   printf("# Tempo PC: \n");
-   printf("# Tempo iter: %.15g\n", tempMed);
-   printf("# Tempo residuo: %.15g\n", tempR);
-   printf("#\n");
-   printf("%d\n", n);
+   fprintf(arq, "# residuo: %.15g\n", normaL2(r, n, &tempR));
+   fprintf(arq, "# Tempo PC: %.15g\n", tempPC);
+   fprintf(arq, "# Tempo iter: %.15g\n", tempMed);
+   fprintf(arq, "# Tempo residuo: %.15g\n", tempR);
+   fprintf(arq, "#\n");
+   fprintf(arq, "%d\n", n);
 
    //imprime solucao final
    for(int j = 0; j < n; ++j){
-      printf("%g ", x[j]);
+      fprintf(arq, "%.15g ", x[j]);
    }
-   printf("\n");
+   fprintf(arq, "\n");
 
+   //fecha arquivo de saida
+   fclose(arq);
+
+   //libera estruturas
    free(x);
    free(r);
-
-   for(int i = 0; i < n; ++i){
-      free(M[i]);
+   for (int i = 0; i < n; i++){
+      free (M[i]);
    }
-   free(M);
-
+   free (M);
    liberaSisLin (SL);
 
    return 0;

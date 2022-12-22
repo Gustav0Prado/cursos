@@ -1,3 +1,6 @@
+# Gustavo do Prado Silva - 20203942 
+# Rafael Gonçalves dos Santos - 20211798
+
 CFLAGS = -Wall -g -lm
 objects = main.o utils.o oper.o sistema.o metodos.o
 
@@ -23,4 +26,4 @@ metodos.o: metodos.c
 
 #remove objetos e restos do editor
 clean:
-	rm -rf $(objects) ./*~ ./.vscode ./cgSolver
+	rm -rf $(objects) ./*~ ./.vscode ./cgSolver ./*.txt

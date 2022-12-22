@@ -1,7 +1,10 @@
+//Gustavo do Prado Silva - 20203942 
+//Rafael Gonçalves dos Santos - 20211978
+
 #include <string.h>
 #include <stdlib.h>
-#include <math.h>
 #include <stdio.h>
+#include <math.h>
 
 #include "oper.h"
 #include "sistema.h"
@@ -21,23 +24,55 @@ double normaL2(double *r, int n, double *tempR){
    return sqrt(soma);
 }
 
-//calcula norma maxima entre dois vetores
-// max ( |xi - xi-1| / |xi| )
-double normamax(double *x, double *x1, int n){
-   double max = -1.0;
-   double norma;
-
-   for(int i = 0; i < n; ++i){
-      norma = fabs(x[i]-x1[i]) / fabs(x[i]);
-      max = (norma > max) ? norma : max;
+void simetrizaSistema (SistLinear_t *SL) {
+   double **M_trans = malloc(sizeof(double*)*SL->n);
+   double **M_res   = malloc(sizeof(double*)*SL->n);
+   double *V_res    = malloc(sizeof(double)*SL->n);
+   
+   if(!M_trans || !M_res || !V_res){
+      fprintf(stderr, "Erro de alocação!\n");
+      exit(ERRALLOC);
    }
 
-   return max;
+   // cria a mztrz transposta
+   for (int i = 0; i < SL->n; i++) {
+      M_trans[i] = malloc(sizeof(double)*SL ->n);
+      M_res[i] = malloc(sizeof(double)*SL ->n);
+      for (int j = 0; j < SL->n; j++) { 
+         M_trans[i][j] = SL -> A[j][i];
+      }
+   }
+
+   // At * A
+   multMatMat (M_trans, SL->A, M_res, SL->n);
+
+   // A = M_res
+   for(int i = 0; i < SL->n; ++i){
+      memcpy(SL->A[i], M_res[i], SL->n * sizeof(double));
+   }
+
+   // At * b
+   multMatVet (M_trans, SL->b, V_res, SL->n);
+
+   // b = V_aux
+   memcpy(SL->b, V_res, SL->n * sizeof(double));
+
+   for(int i = 0; i < SL->n; ++i){
+      free(M_trans[i]);
+   }
+
+   for(int i = 0; i < SL->n; ++i){
+      free(M_res[i]);
+   }
+
+   free (M_trans);
+   free (M_res);
+   free (V_res);
 }
 
 //Realiza método do gradiente conjugado e retorna o tempo médio levado pelas iterações
 //Criterio de parada eh apenas o num de iteracoes
-double GradConjIt(SistLinear_t *SL, double *x, double **M){
+double GradConjIt(SistLinear_t *SL, double *x, double **M, FILE *arq){
    double *r  = malloc(sizeof(double)*SL->n);
    double *r1 = malloc(sizeof(double)*SL->n);
    double *z  = malloc(sizeof(double)*SL->n);
@@ -46,8 +81,12 @@ double GradConjIt(SistLinear_t *SL, double *x, double **M){
    double *p1 = malloc(sizeof(double)*SL->n);
    double *x1 = malloc(sizeof(double)*SL->n);
    
+   if(!r || !r1 || !z || !z1 || !p || !p1 || !x1){
+      fprintf(stderr, "Erro de alocação!\n");
+      exit(ERRALLOC);
+   }
+
    double tempo = timestamp();
-   int iter;
 
    //calcula R0
    somaVetMatxVet(SL->A, SL->b, x, -1, r, SL->n);
@@ -58,7 +97,7 @@ double GradConjIt(SistLinear_t *SL, double *x, double **M){
    //p0 = z0
    memcpy(p, z, SL->n * sizeof(double));
 
-   for(iter = 0; iter < SL->i; ++iter){
+   for(int iter = 0; iter < SL->i; ++iter){
       //alpha(k) := r(k)T*z(k) / p(k)T*A*p(k)
       double alpha = (multVetVet(r, z, SL->n)) / (multVetMatVet(p, SL->A, p, SL->n));
 
@@ -68,7 +107,7 @@ double GradConjIt(SistLinear_t *SL, double *x, double **M){
       //r(k+1) := r(k) - a(k)*A*p(k)
       somaVetMatxVet(SL->A, r, p, -alpha, r1, SL->n);
 
-      //z(k+1) := M^(-1)*r(k+1)
+      //z(k+1) := M^(-1)*r1(k+1)
       multMatVet(M, r1, z1, SL->n);
 
       //beta(k) := r(k+1)T*z(k+1) / r(k)T*z(k)
@@ -77,8 +116,8 @@ double GradConjIt(SistLinear_t *SL, double *x, double **M){
       //p(k+1) := z(k+1) + beta*p(k)
       somaVetVet(z1, beta, p, p1, SL->n);
 
-      //imprime norma maxima do vetor x
-      printf("# iter %4d: %.15g\n", iter+1, normamax(x1, x, SL->n));
+      //Escreve na saida a normamax da iteração
+      fprintf(arq, "# iter %d: %.15g\n", iter+1, normamaxAbs(x1, x, SL->n));
 
       //r = r1
       memcpy(r, r1, SL->n * sizeof(double));
@@ -104,7 +143,7 @@ double GradConjIt(SistLinear_t *SL, double *x, double **M){
 
 //Realiza método do gradiente conjugado e retorna o tempo médio levado pelas iterações
 //Criterio de parada eh o erro definido e o num de iteracoes
-double GradConjErr(SistLinear_t *SL, double *x, double **M, double err){
+double GradConjErr(SistLinear_t *SL, double *x, double **M, double err, FILE *arq){
    double *r  = malloc(sizeof(double)*SL->n);
    double *r1 = malloc(sizeof(double)*SL->n);
    double *z  = malloc(sizeof(double)*SL->n);
@@ -113,8 +152,12 @@ double GradConjErr(SistLinear_t *SL, double *x, double **M, double err){
    double *p1 = malloc(sizeof(double)*SL->n);
    double *x1 = malloc(sizeof(double)*SL->n);
    
+   if(!r || !r1 || !z || !z1 || !p || !p1 || !x1){
+      fprintf(stderr, "Erro de alocação!\n");
+      exit(ERRALLOC);
+   }
+
    double tempo = timestamp();
-   int iter;
 
    //calcula R0
    somaVetMatxVet(SL->A, SL->b, x, -1, r, SL->n);
@@ -125,7 +168,7 @@ double GradConjErr(SistLinear_t *SL, double *x, double **M, double err){
    //p0 = z0
    memcpy(p, z, SL->n * sizeof(double));
 
-   for(iter = 0; iter < SL->i; ++iter){
+   for(int iter = 0; iter < SL->i; ++iter){
       //alpha(k) := r(k)T*z(k) / p(k)T*A*p(k)
       double alpha = (multVetVet(r, z, SL->n)) / (multVetMatVet(p, SL->A, p, SL->n));
 
@@ -135,8 +178,8 @@ double GradConjErr(SistLinear_t *SL, double *x, double **M, double err){
       //r(k+1) := r(k) - a(k)*A*p(k)
       somaVetMatxVet(SL->A, r, p, -alpha, r1, SL->n);
 
-      //max ( |xi - xi-1| / |xi| )
-      if(normamax(r1, r, SL->n) < err){
+      // x ( max ( |xi - xi-1| / |xi| ) < ε )
+      if (normamax (x1, x, SL -> n) < err){
          break;
       }
 
@@ -148,9 +191,9 @@ double GradConjErr(SistLinear_t *SL, double *x, double **M, double err){
 
       //p(k+1) := z(k+1) + beta*p(k)
       somaVetVet(z1, beta, p, p1, SL->n);
-
-      //imprime norma maxima do vetor x
-      printf("# iter %4d: %.15g\n", iter+1, normamax(x1, x, SL->n));
+      
+      //Escreve na saida a normamax da iteração
+      fprintf(arq, "# iter %d: %.15g\n", iter+1, normamaxAbs(x1, x, SL->n));
 
       //r = r1
       memcpy(r, r1, SL->n * sizeof(double));
