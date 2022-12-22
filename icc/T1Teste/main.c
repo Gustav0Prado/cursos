@@ -30,6 +30,7 @@ int main(int argc, char **argv){
    // Algum argumento obrigatorio faltando, escreve na saida de erro 
    /* if( ((argc-1)/2) < 5 ){
       fprintf(stderr, "Argumentos Obrigatórios Faltando!!\n");
+      fprintf(stderr, "Exemplo: ./cgSolver -n 13 -k 3 -p 0 -i 100 -e 0.0005 -o saida.txt \n");
       return -1;
    }
    else{

@@ -129,6 +129,13 @@ double GradConjIt(SistLinear_t *SL, double *x, double **M, FILE *arq){
       memcpy(z, z1, SL->n * sizeof(double));
    }
 
+   for(int i = 0; i < SL->n; ++i){
+      if(isnanf(x[i]) || isinff(x[i])){
+         fprintf(stderr, "Erro numérico, geração de valor inf/nan - Resultado não converge\n");
+         break;
+      }
+   }
+
    free(x1);
    free(r);
    free(r1);
@@ -203,6 +210,13 @@ double GradConjErr(SistLinear_t *SL, double *x, double **M, double err, FILE *ar
       memcpy(p, p1, SL->n * sizeof(double));
       //z = z1
       memcpy(z, z1, SL->n * sizeof(double));
+   }
+
+   for(int i = 0; i < SL->n; ++i){
+      if(isnanf(x[i]) || isinff(x[i])){
+         fprintf(stderr, "Erro numérico, geração de valor inf/nan - Resultado não converge\n");
+         break;
+      }
    }
 
    free(x1);
