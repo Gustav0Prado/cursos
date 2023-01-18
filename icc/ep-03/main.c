@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <string.h>
 #include "edo.h"
 #include "matriz.h"
 
@@ -33,7 +34,7 @@ int main() {
    edo->q = &q;
    edo->r = &r;
 
-   for(int i = 0; i < TAM; ++i)
+   for(int i = 0; i < 1; ++i)
    {
       edo->n = n_malha[i];
 
@@ -41,9 +42,7 @@ int main() {
       double *x = malloc(sizeof(double)*SL->n);
       double tTotal;
 
-      for(int i = 0; i < SL->n; ++i){
-         x[i] = 0.0;
-      }
+      memset(x, 0, sizeof(double)*SL->n);
 
       printf("n: %d\n", edo->n);
 
@@ -51,13 +50,15 @@ int main() {
       //imprimeSL(SL);
       printf("Tempo Gauss-Seidel gerando matriz: %g\n", tTotal);
       //printf("Vetor Solução: ");
-      //imprimeVetor(x, SL->n);
+      imprimeVetor(x, SL->n);
       printf("Norma L2 do resíduo: %g\n", normaL2(SL, x));
+
+      memset(x, 0, sizeof(double)*SL->n);
 
       gaussseidelFunc(edo, x, &tTotal);
       printf("\nTempo Gauss-Seidel sem gerar matriz: %g\n", tTotal);
       //printf("Vetor Solução: ");
-      //imprimeVetor(x, SL->n);
+      imprimeVetor(x, SL->n);
       printf("Norma L2 do resíduo: %g\n", normaL2(SL, x));
 
       printf("----------------------------------------------\n");
