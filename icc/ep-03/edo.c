@@ -76,62 +76,33 @@ void gaussseidelDiag(SL_Tridiag *SL, Edo *edo, double *x, double *tTotal){
 /*
    Metodo de Gauss-Seidel calculando os valores sem usar vetores
 */
-void gaussseidelFunc(Edo *edo, double *x, double *tTotal){
+void gaussseidelFunc(Edo *edo, double *X, double *tTotal){
    *tTotal = timestamp();
    
-   // //Realiza 50 iterações
-   // double h = (edo->b - edo->a) / (edo->n + 1);
-   // double d = -4-4*h*h;
-   // double xi, bi, di, ds;
-
-   // for(int it = 0; it < MAXIT; ++it){
-   //    for(int i = 0; i < edo->n; ++i){
-   //       //termos dependem de xi
-   //       xi = edo->a + h*(i+1);
-   //       bi = 2*h*h*edo->r(i);
-   //       di = 1 - (h/2)*edo->p(xi);
-   //       ds = 1 + (h/2)*edo->p(xi);
-
-   //       //separa os casos de contorno
-   //       if(i == 0)
-   //          bi -= ds*X[i+1];
-   //       else if(i == edo->n-1)
-   //          bi -= di*X[i-1];
-   //       else
-   //          bi -= di*X[i-1] - ds*X[i+1];
-         
-   //       //calcula o valor
-   //       X[i] = bi / d;
-   //    }
-   // }
-
    //Realiza 50 iterações
    double h = (edo->b - edo->a) / (edo->n + 1);
-   //isso aqui ta certo??
-   double a, c, d, xi;
+   double xi, bi, di, ds, d;
 
    for(int it = 0; it < MAXIT; ++it){
-      //primeira linha nao tem a
-      xi = h + edo->a;
-      c = 1 + (h/2)*edo->p(xi);
-      d = (-2+(h*h*edo->q(xi)));
-      x[0] = (2*h*h*edo->r(0) - c*x[1]) / d;
+      for(int i = 0; i < edo->n; ++i){
+         //termos dependem de xi
+         xi = h*(i+1) + edo->a;
+         bi = h*h * edo->r(xi);
+         di = 1 - edo->p(xi) * (h/2.0);
+         ds = 1 + edo->p(xi) * (h/2.0);
+         d = -2 + (h*h) * edo->q(xi);
 
-      //linhas internas da matriz
-      for(int i = 1; i < edo->n-1; ++i){
-         // x(i) = b(i) - a*x(i-1) - c*x(i+1) / d(i)
-         xi = edo->a + h*(i+1);
-         a = 1 - (h/2)*edo->p(xi);
-         c = 1 + (h/2)*edo->p(xi);
-         d = (-2+(h*h*edo->q(xi)));
-         x[i] = (2*h*h*edo->r(i) - a*x[i-1] - c*x[i+1]) / d;
+         //separa os casos de contorno
+         if(i == 0)
+            bi -= edo->ya * (1 - (edo->p(edo->a+h) * h)/2.0) + ds*X[i+1];
+         else if(i == edo->n-1)     
+            bi -= edo->yb * (1 + (edo->p(edo->b-h) * h)/2.0) + di*X[i-1];
+         else                       
+            bi -= ds*X[i+1] + di*X[i-1];
+         
+         //calcula o valor
+         X[i] = bi / d;
       }
-
-      //ultima linha nao tem c
-      xi = edo->a + h*(edo->n);
-      a = 1 - (h/2)*edo->p(xi);
-      d = (-2+(h*h)*edo->q(xi));
-      x[edo->n-1] = (2*h*h*edo->r(edo->n-1) - a*x[edo->n-2]) / d;
    }
 
    *tTotal = timestamp() - *tTotal;
