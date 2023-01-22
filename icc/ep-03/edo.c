@@ -58,17 +58,25 @@ void gaussseidelDiag(SL_Tridiag *SL, Edo *edo, double *x, double *tTotal){
    for(int it = 0; it < MAXIT; ++it){
       //primeira linha nao tem a
       x[0] = (SL->b[0] - SL->c[0]*x[1]) / SL->d[0];
+      if(isinf(x[it]) || isnan(x[it])){
+         fprintf(stderr, "ERRO: Geração de valor inf/nan\n");
+      }
 
       //linhas internas da matriz
       for(int i = 1; i < SL->n-1; ++i){
          // x(i) = b(i) - a*x(i-1) - c*x(i+1) / d(i)
          x[i] = (SL->b[i] - SL->a[i-1]*x[i-1] - SL->c[i]*x[i+1]) / SL->d[i];
+         if(isinf(x[it]) || isnan(x[it])){
+            fprintf(stderr, "ERRO: Geração de valor inf/nan\n");
+         }
       }
 
       //ultima linha nao tem c
       x[SL->n-1] = (SL->b[SL->n-1] - SL->a[SL->n-2]*x[SL->n-2]) / SL->d[SL->n-1];
+      if(isinf(x[it]) || isnan(x[it])){
+         fprintf(stderr, "ERRO: Geração de valor inf/nan\n");
+      }
    }
-
 
    *tTotal = timestamp() - *tTotal;
 }
@@ -87,10 +95,10 @@ void gaussseidelFunc(Edo *edo, double *X, double *tTotal){
       for(int i = 0; i < edo->n; ++i){
          //termos dependem de xi
          xi = h*(i+1) + edo->a;
-         bi = h*h * edo->r(xi);
-         di = 1 - edo->p(xi) * (h/2.0);
-         ds = 1 + edo->p(xi) * (h/2.0);
+         di = 1 - edo->p(xi) * (h/2.0) ;
          d = -2 + (h*h) * edo->q(xi);
+         ds = 1 + edo->p(xi) * (h/2.0);
+         bi = h*h * edo->r(xi);
 
          //separa os casos de contorno
          if(i == 0)
@@ -102,6 +110,9 @@ void gaussseidelFunc(Edo *edo, double *X, double *tTotal){
          
          //calcula o valor
          X[i] = bi / d;
+         if(isinf(X[i]) || isnan(X[i])){
+            fprintf(stderr, "ERRO: Geração de valor inf/nan\n");
+         }
       }
    }
 

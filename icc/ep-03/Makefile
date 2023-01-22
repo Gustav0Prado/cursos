@@ -5,7 +5,7 @@ objects = main.o edo.o utils.o matriz.o
 all: ep03
 
 ep03: $(objects)
-	gcc $(objects) -o ep03 $(CFLAGS)
+	gcc $(objects) -o labEdo $(CFLAGS)
 
 main.o: main.c
 	gcc -c main.c $(CFLAGS)
@@ -23,6 +23,6 @@ clean:
 	rm -rf $(objects) ./*~ ./.vscode
 
 purge: clean
-	rm -f ./ep03
+	rm -f ./labEdo
 
 remake: purge all

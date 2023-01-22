@@ -34,7 +34,7 @@ int main() {
    edo->q = &q;
    edo->r = &r;
 
-   for(int i = 0; i < 1; ++i)
+   for(int i = 0; i < TAM; ++i)
    {
       edo->n = n_malha[i];
 
@@ -47,9 +47,9 @@ int main() {
       printf("n: %d\n", edo->n);
 
       gaussseidelDiag(SL, edo, x, &tTotal);
-      //imprimeSL(SL);
+      imprimeSL(SL);
       printf("Tempo Gauss-Seidel gerando matriz: %g\n", tTotal);
-      //printf("Vetor Solução: ");
+      printf("Vetor Solução: \n");
       imprimeVetor(x, SL->n);
       printf("Norma L2 do resíduo: %g\n", normaL2(SL, x));
 
@@ -57,7 +57,7 @@ int main() {
 
       gaussseidelFunc(edo, x, &tTotal);
       printf("\nTempo Gauss-Seidel sem gerar matriz: %g\n", tTotal);
-      //printf("Vetor Solução: ");
+      printf("Vetor Solução: \n");
       imprimeVetor(x, SL->n);
       printf("Norma L2 do resíduo: %g\n", normaL2(SL, x));
 

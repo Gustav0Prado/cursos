@@ -7,8 +7,9 @@
 int main ()
 {
   Polinomio p;
-  double x0, x1, raiz;
+  double x0, x1, raiz, tempo;
   int it = 0;
+  void (*calcPolinomio) (Polinomio p, double x, double *px, double *dpx);
 
   printf("Grau do Polinomio: ");
   scanf("%d", &p.grau);
@@ -25,9 +26,46 @@ int main ()
   printf("x1: ");
   scanf("%lg", &x1);
 
-  printf("erro: %g\n", newtonRaphson(p, x0, EPS, &it, &raiz));
-  printf("raiz: %g\n", raiz);
-  printf("iteracoes: %d\n", it);
+  //usando calcpolinomio_rapido
+
+  calcPolinomio = calcPolinomio_rapido;
+
+  printf("Calculo do polinômio rápido: \n");
+
+  printf("Método de Newton: \n");
+  printf("\terro: %g\n", newtonRaphson(p, x0, EPS, &it, &raiz, &tempo, calcPolinomio));
+  printf("\traiz: %g\n", raiz);
+  printf("\titeracoes: %d\n", it);
+  printf("\ttempo: %g\n", tempo);
+
+  printf("\n");
+
+  printf("Método da Secante: \n");
+  printf("\terro: %g\n", secante(p, x0, x1, EPS, &it, &raiz, &tempo, calcPolinomio));
+  printf("\traiz: %g\n", raiz);
+  printf("\titeracoes: %d\n", it);
+  printf("\ttempo: %g\n", tempo);
+
+
+  //usando calcpolinomio_lento
+  printf("\n");
+  printf("Calculo do polinômio lento: \n");
+
+  calcPolinomio = calcPolinomio_lento;
+
+  printf("Método de Newton: \n");
+  printf("\terro: %g\n", newtonRaphson(p, x0, EPS, &it, &raiz, &tempo, calcPolinomio));
+  printf("\traiz: %g\n", raiz);
+  printf("\titeracoes: %d\n", it);
+  printf("\ttempo: %g\n", tempo);
+
+  printf("\n");
+
+  printf("Método da Secante: \n");
+  printf("\terro: %g\n", secante(p, x0, x1, EPS, &it, &raiz, &tempo, calcPolinomio));
+  printf("\traiz: %g\n", raiz);
+  printf("\titeracoes: %d\n", it);
+  printf("\ttempo: %g\n", tempo);
 
   free(p.p);
 
