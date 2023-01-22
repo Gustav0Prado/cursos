@@ -13,7 +13,7 @@ int main ()
 
   printf("Grau do Polinomio: ");
   scanf("%d", &p.grau);
-  p.p = malloc(sizeof(double)*p.grau+1);
+  p.p = malloc(sizeof(double)*(p.grau+1));
 
   printf("Insira os coeficientes do polinomio: ");
   for(int i = p.grau; i >=0 ; --i){
