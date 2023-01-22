@@ -32,6 +32,7 @@ double newtonRaphson (Polinomio p, double x0, double eps,
 		if(L == 0){
 			fprintf(stderr, "ERRO: Divisão por 0 - Derivada do polinomio no ponto x0 eh 0\n");
 			xi = xprox;
+			erro = 0.0;
 			break;
 		}
 
@@ -80,6 +81,7 @@ double secante (Polinomio p, double x0, double x1, double eps,
 		xprox = xi - ( (( pxi * (xi-xant) )) / (pxi - pxant) );
 		if(L == 0){
 			fprintf(stderr, "ERRO: Divisão por 0 - Valores de f(x) e f(x-1) são iguais/zero\n");
+			erro = 0.0;
 			break;
 		}
 		//erro absoluto aproximado
