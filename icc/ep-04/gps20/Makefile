@@ -1,4 +1,4 @@
-    CC     = gcc -g
+    CC     = gcc
 
     CFLAGS = -I/usr/include
     LFLAGS = -lm -L/usr/lib -lmatheval

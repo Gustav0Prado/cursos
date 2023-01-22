@@ -1,28 +1,21 @@
-CFLAGS = -Wall -g -lm
+    CC     = gcc
 
-objects = main.o edo.o utils.o matriz.o
+    CFLAGS =  -Wall -lm
 
-all: ep03
+      PROG = labEdo
+      OBJS = utils.o \
+             matriz.o \
+			 edo.o
 
-ep03: $(objects)
-	gcc $(objects) -o labEdo $(CFLAGS)
+%.o: %.c %.h utils.h
+	$(CC) -c $(CFLAGS) $<
 
-main.o: main.c
-	gcc -c main.c $(CFLAGS)
-
-edo.o: edo.c edo.h
-	gcc -c edo.c $(CFLAGS)
-
-utils.o: utils.c utils.h
-	gcc -c utils.c $(CFLAGS)
-
-matriz.o: matriz.c matriz.h
-	gcc -c matriz.c $(CFLAGS)
+$(PROG):  $(OBJS) main.c
+	$(CC) -o $@ $^ $(CFLAGS)
 
 clean:
-	rm -rf $(objects) ./*~ ./.vscode
+	rm -f *~ *.bak
 
 purge: clean
-	rm -f ./labEdo
-
-remake: purge all
+	rm -f *.o core a.out
+	rm -f $(PROG)

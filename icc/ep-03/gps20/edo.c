@@ -58,7 +58,7 @@ void gaussseidelDiag(SL_Tridiag *SL, Edo *edo, double *x, double *tTotal){
    for(int it = 0; it < MAXIT; ++it){
       //primeira linha nao tem a
       x[0] = (SL->b[0] - SL->c[0]*x[1]) / SL->d[0];
-      if(isinf(x[it]) || isnan(x[it])){
+      if(isinf(x[0]) || isnan(x[0])){
          fprintf(stderr, "ERRO: Geração de valor inf/nan\n");
       }
 
@@ -66,14 +66,14 @@ void gaussseidelDiag(SL_Tridiag *SL, Edo *edo, double *x, double *tTotal){
       for(int i = 1; i < SL->n-1; ++i){
          // x(i) = b(i) - a*x(i-1) - c*x(i+1) / d(i)
          x[i] = (SL->b[i] - SL->a[i-1]*x[i-1] - SL->c[i]*x[i+1]) / SL->d[i];
-         if(isinf(x[it]) || isnan(x[it])){
+         if(isinf(x[i]) || isnan(x[i])){
             fprintf(stderr, "ERRO: Geração de valor inf/nan\n");
          }
       }
 
       //ultima linha nao tem c
       x[SL->n-1] = (SL->b[SL->n-1] - SL->a[SL->n-2]*x[SL->n-2]) / SL->d[SL->n-1];
-      if(isinf(x[it]) || isnan(x[it])){
+      if(isinf(x[SL->n-1]) || isnan(x[SL->n-1])){
          fprintf(stderr, "ERRO: Geração de valor inf/nan\n");
       }
    }
