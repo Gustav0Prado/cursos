@@ -10,7 +10,7 @@ do
     for O in L3 L2CACHE FLOPS_DP
     do   
         FILE=${O}_${N}
-        ./perfctr 3 FLOPS_DP ./matmult -n $N > ./saida/$FILE.txt
+        ./perfctr 3 $O ./matmult -n $N > ./saida/$FILE.txt
     done
 done
 
