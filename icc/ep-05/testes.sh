@@ -15,3 +15,5 @@ do
 done
 
 echo "powersave" > /sys/devices/system/cpu/cpufreq/policy3/scaling_governor
+
+#teste de cut da saida: cat ./saida/L3_1.txt | grep "DP MFLOP/s" | rev | cut -c 3- | sed 's/\s.*$//'
