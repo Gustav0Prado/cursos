@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <likwid.h>
 
 #include "matriz.h"
 
@@ -107,13 +108,19 @@ void liberaVetor (void *vet)
 
 void multMatVet (MatRow mat, Vetor v, int m, int n, Vetor res)
 {
-    
+  LIKWID_MARKER_INIT;
+  LIKWID_MARKER_REGISTER("1-n");
+  LIKWID_MARKER_START("1-n");
+
   /* Efetua a multiplicação */
   if (res) {
     for (int i=0; i < m; ++i)
       for (int j=0; j < n; ++j)
         res[i] += mat[n*i + j] * v[j];
   }
+
+  LIKWID_MARKER_STOP("1-n");
+  LIKWID_MARKER_CLOSE;
 }
 
 
@@ -130,13 +137,64 @@ void multMatVet (MatRow mat, Vetor v, int m, int n, Vetor res)
 void multMatMat (MatRow A, MatRow B, int n, MatRow C)
 {
 
+  LIKWID_MARKER_INIT;
+  LIKWID_MARKER_REGISTER("2-n");
+  LIKWID_MARKER_START("2-n");
+
   /* Efetua a multiplicação */
-  for (int i=0; i < n; ++i)
-    for (int j=0; j < n; ++j)
-      for (int k=0; k < n; ++k)
-	C[i*n+j] += A[i*n+k] * B[k*n+j];
+  for (int i=0; i < n; ++i){
+    for (int j=0; j < n; ++j){
+      for (int k=0; k < n; ++k){
+	      C[i*n+j] += A[i*n+k] * B[k*n+j];
+      }
+    }
+  }
+
+  LIKWID_MARKER_STOP("2-n");
+  LIKWID_MARKER_CLOSE;
 }
 
+
+/**
+ *  Funcao multMatRowVet:  Efetua multiplicacao entre matriz 'mxn' por vetor
+ *                       de 'n' elementos
+ *  @param mat matriz 'mxn'
+ *  @param m número de linhas da matriz
+ *  @param n número de colunas da matriz
+ *  @param res vetor que guarda o resultado. Deve estar previamente alocado e com
+ *             seus elementos inicializados em 0.0 (zero)
+ *  @return vetor de 'm' elementos
+ *
+ */
+void multMatRowVet(MatRow mat, Vetor v, int m, int n, Vetor res){
+  LIKWID_MARKER_INIT;
+  LIKWID_MARKER_REGISTER("1-o");
+  LIKWID_MARKER_START("1-o");
+
+
+  LIKWID_MARKER_STOP("1-o");
+  LIKWID_MARKER_CLOSE;
+}
+
+
+/**
+ *  Funcao multMatMatRow: Efetua multiplicacao de duas matrizes 'n x n' 
+ *  @param A matriz 'n x n'
+ *  @param B matriz 'n x n'
+ *  @param n ordem da matriz quadrada
+ *  @param C   matriz que guarda o resultado. Deve ser previamente gerada com 'geraMatPtr()'
+ *             e com seus elementos inicializados em 0.0 (zero)
+ *
+ */
+void multMatMatRow(MatRow A, MatRow B, int n, MatRow C){
+  LIKWID_MARKER_INIT;
+  LIKWID_MARKER_REGISTER("2-o");
+  LIKWID_MARKER_START("2-o");
+
+
+  LIKWID_MARKER_STOP("2-o");
+  LIKWID_MARKER_CLOSE;
+}
 
 /**
  *  Funcao prnMat:  Imprime o conteudo de uma matriz em stdout

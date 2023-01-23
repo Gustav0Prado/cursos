@@ -3,8 +3,8 @@
            CC = gcc -g
          OBJS = matriz.o
 
-       CFLAGS = -O3 -mavx2 -march=native
-       LFLAGS = -lm
+       CFLAGS = -O3 -mavx2 -march=native -DLIKWID_PERFMON -I${LIKWID_INCLUDE}
+       LFLAGS = -lm -L${LIKWID_LIB} -llikwid
 
 .PHONY: all debug clean limpa purge faxina
 
