@@ -1,4 +1,4 @@
 *.o
 *.png
 *.txt
-./matmult
+matmult
