@@ -23,7 +23,7 @@ $(PROG): $(OBJS)
 
 clean limpa:
 	@echo "Limpando ...."
-	@rm -f *~ *.bak *.tmp *.txt
+	@rm -f *~ *.bak *.tmp *.txt ./saida/*.txt
 
 purge faxina:   clean
 	@echo "Faxina ...."

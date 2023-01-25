@@ -108,7 +108,6 @@ void liberaVetor (void *vet)
 
 void multMatVet (MatRow mat, Vetor v, int m, int n, Vetor res)
 {
-  LIKWID_MARKER_INIT;
   LIKWID_MARKER_REGISTER("1-n");
   LIKWID_MARKER_START("1-n");
 
@@ -120,7 +119,6 @@ void multMatVet (MatRow mat, Vetor v, int m, int n, Vetor res)
   }
 
   LIKWID_MARKER_STOP("1-n");
-  LIKWID_MARKER_CLOSE;
 }
 
 
@@ -136,8 +134,6 @@ void multMatVet (MatRow mat, Vetor v, int m, int n, Vetor res)
 
 void multMatMat (MatRow A, MatRow B, int n, MatRow C)
 {
-
-  LIKWID_MARKER_INIT;
   LIKWID_MARKER_REGISTER("2-n");
   LIKWID_MARKER_START("2-n");
 
@@ -151,7 +147,6 @@ void multMatMat (MatRow A, MatRow B, int n, MatRow C)
   }
 
   LIKWID_MARKER_STOP("2-n");
-  LIKWID_MARKER_CLOSE;
 }
 
 
@@ -167,13 +162,31 @@ void multMatMat (MatRow A, MatRow B, int n, MatRow C)
  *
  */
 void multMatRowVet(MatRow mat, Vetor v, int m, int n, Vetor res){
-  LIKWID_MARKER_INIT;
   LIKWID_MARKER_REGISTER("1-o");
   LIKWID_MARKER_START("1-o");
 
+  /* Efetua a multiplicação */
+  if (res) {
+    //Unroll & jam -> fazer blocking
+    //passo = 4
+    for (int i=0; i < m-m%4; i+=4){
+      for (int j=0; j < n; ++j){
+        res[i]   += mat[n*i + j]     * v[j];
+        res[i+1] += mat[n*(i+1) + j] * v[j];
+        res[i+2] += mat[n*(i+2) + j] * v[j];
+        res[i+3] += mat[n*(i+3) + j] * v[j];
+      }
+    }
+
+    //residuo do laco
+    for (int i=m-m%4; i < m; i++){
+      for (int j=0; j < n; ++j){
+        res[i]   += mat[n*i + j] * v[j];
+      }
+    }
+  }
 
   LIKWID_MARKER_STOP("1-o");
-  LIKWID_MARKER_CLOSE;
 }
 
 
@@ -187,13 +200,11 @@ void multMatRowVet(MatRow mat, Vetor v, int m, int n, Vetor res){
  *
  */
 void multMatMatRow(MatRow A, MatRow B, int n, MatRow C){
-  LIKWID_MARKER_INIT;
   LIKWID_MARKER_REGISTER("2-o");
   LIKWID_MARKER_START("2-o");
 
 
   LIKWID_MARKER_STOP("2-o");
-  LIKWID_MARKER_CLOSE;
 }
 
 /**

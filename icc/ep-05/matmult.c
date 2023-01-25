@@ -3,6 +3,7 @@
 #include <string.h>
 #include <getopt.h>    /* getopt */
 #include <time.h>
+#include <likwid.h>
 
 #include "matriz.h"
 
@@ -31,8 +32,10 @@ int main (int argc, char *argv[])
   int c, n=DEF_SIZE;
   
   MatRow mRow_1, mRow_2, resMat;
-  Vetor vet, res;
+  Vetor vet, res, res2;
   
+  LIKWID_MARKER_INIT;
+
   /* =============== TRATAMENTO DE LINHA DE COMANDO =============== */
 
   char *opts = "n:";
@@ -53,6 +56,7 @@ int main (int argc, char *argv[])
   srandom(20212);
       
   res = (real_t *) calloc (n, sizeof(real_t));
+  res2 = (real_t *) calloc (n, sizeof(real_t));
   resMat = geraMatRow(n, n, 1);
     
   mRow_1 = geraMatRow (n, n, 0);
@@ -70,6 +74,8 @@ int main (int argc, char *argv[])
   multMatVet (mRow_1, vet, n, n, res);
     
   multMatMat (mRow_1, mRow_2, n, resMat);
+
+  multMatRowVet (mRow_1, vet, n, n, res2);
     
 #ifdef DEBUG
     prnVetor (res, n);
@@ -81,6 +87,9 @@ int main (int argc, char *argv[])
   liberaVetor ((void*) resMat);
   liberaVetor ((void*) vet);
   liberaVetor ((void*) res);
+  liberaVetor ((void*) res2);
+
+  LIKWID_MARKER_CLOSE;
 
   return 0;
 }
