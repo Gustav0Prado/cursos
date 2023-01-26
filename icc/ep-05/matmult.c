@@ -31,7 +31,7 @@ int main (int argc, char *argv[])
 {
   int c, n=DEF_SIZE;
   
-  MatRow mRow_1, mRow_2, resMat;
+  MatRow mRow_1, mRow_2, resMat, resMat2;
   Vetor vet, res, res2;
   
   LIKWID_MARKER_INIT;
@@ -58,6 +58,7 @@ int main (int argc, char *argv[])
   res = (real_t *) calloc (n, sizeof(real_t));
   res2 = (real_t *) calloc (n, sizeof(real_t));
   resMat = geraMatRow(n, n, 1);
+  resMat2 = geraMatRow(n, n, 1);
     
   mRow_1 = geraMatRow (n, n, 0);
   mRow_2 = geraMatRow (n, n, 0);
@@ -73,13 +74,17 @@ int main (int argc, char *argv[])
 
   multMatVet (mRow_1, vet, n, n, res);
     
+  multMatRowVet (mRow_1, vet, n, n, res2);
+
   multMatMat (mRow_1, mRow_2, n, resMat);
 
-  multMatRowVet (mRow_1, vet, n, n, res2);
+  multMatMatRow (mRow_1, mRow_2, n, resMat2);
     
 #ifdef DEBUG
     prnVetor (res, n);
+    prnVetor (res2, n);
     prnMat (resMat, n, n);
+    prnMat (resMat2, n, n);
 #endif /* DEBUG */
 
   liberaVetor ((void*) mRow_1);

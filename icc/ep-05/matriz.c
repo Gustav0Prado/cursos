@@ -121,35 +121,6 @@ void multMatVet (MatRow mat, Vetor v, int m, int n, Vetor res)
   LIKWID_MARKER_STOP("1-n");
 }
 
-
-/**
- *  Funcao multMatMat: Efetua multiplicacao de duas matrizes 'n x n' 
- *  @param A matriz 'n x n'
- *  @param B matriz 'n x n'
- *  @param n ordem da matriz quadrada
- *  @param C   matriz que guarda o resultado. Deve ser previamente gerada com 'geraMatPtr()'
- *             e com seus elementos inicializados em 0.0 (zero)
- *
- */
-
-void multMatMat (MatRow A, MatRow B, int n, MatRow C)
-{
-  LIKWID_MARKER_REGISTER("2-n");
-  LIKWID_MARKER_START("2-n");
-
-  /* Efetua a multiplicação */
-  for (int i=0; i < n; ++i){
-    for (int j=0; j < n; ++j){
-      for (int k=0; k < n; ++k){
-	      C[i*n+j] += A[i*n+k] * B[k*n+j];
-      }
-    }
-  }
-
-  LIKWID_MARKER_STOP("2-n");
-}
-
-
 /**
  *  Funcao multMatRowVet:  Efetua multiplicacao entre matriz 'mxn' por vetor
  *                       de 'n' elementos
@@ -189,6 +160,33 @@ void multMatRowVet(MatRow mat, Vetor v, int m, int n, Vetor res){
   LIKWID_MARKER_STOP("1-o");
 }
 
+/**
+ *  Funcao multMatMat: Efetua multiplicacao de duas matrizes 'n x n' 
+ *  @param A matriz 'n x n'
+ *  @param B matriz 'n x n'
+ *  @param n ordem da matriz quadrada
+ *  @param C   matriz que guarda o resultado. Deve ser previamente gerada com 'geraMatPtr()'
+ *             e com seus elementos inicializados em 0.0 (zero)
+ *
+ */
+
+void multMatMat (MatRow A, MatRow B, int n, MatRow C)
+{
+  LIKWID_MARKER_REGISTER("2-n");
+  LIKWID_MARKER_START("2-n");
+
+  /* Efetua a multiplicação */
+  for (int i=0; i < n; ++i){
+    for (int j=0; j < n; ++j){
+      for (int k=0; k < n; ++k){
+	      C[i*n+j] += A[i*n+k] * B[k*n+j];
+      }
+    }
+  }
+
+  LIKWID_MARKER_STOP("2-n");
+}
+
 
 /**
  *  Funcao multMatMatRow: Efetua multiplicacao de duas matrizes 'n x n' 
@@ -202,6 +200,28 @@ void multMatRowVet(MatRow mat, Vetor v, int m, int n, Vetor res){
 void multMatMatRow(MatRow A, MatRow B, int n, MatRow C){
   LIKWID_MARKER_REGISTER("2-o");
   LIKWID_MARKER_START("2-o");
+
+  /* Efetua a multiplicação */
+  for (int i=0; i < n; ++i){
+    //Loop Unroll e Jam
+    for (int j=0; j < n-n%4; j+=4){
+      C[i*n+j] = C[i*n+j+1] = C[i*n+j+2] = C[i*n+j+3] = 0.0;
+      for (int k=0; k < n; ++k){
+	      C[i*n+j] += A[i*n+k] * B[k*n+j];
+        C[i*n+j+1] += A[i*n+k] * B[k*n+j+1];
+        C[i*n+j+2] += A[i*n+k] * B[k*n+j+2];
+        C[i*n+j+3] += A[i*n+k] * B[k*n+j+3];
+      }
+    }
+
+    //Residuo do laco
+    for (int j=n-n%4; j < n; ++j){
+      C[i*n+j] = 0.0;
+      for (int k=0; k < n; ++k){
+        C[i*n+j] += A[i*n+k] * B[k*n+j];
+      }
+    }
+  }
 
 
   LIKWID_MARKER_STOP("2-o");
