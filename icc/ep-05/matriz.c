@@ -132,7 +132,7 @@ void multMatVet (MatRow mat, Vetor v, int m, int n, Vetor res)
  *  @return vetor de 'm' elementos
  *
  */
-void multMatRowVet(MatRow mat, Vetor v, int m, int n, Vetor res){
+void multMatRowVet(restrict MatRow mat, restrict Vetor v, int m, int n, restrict Vetor res){
   LIKWID_MARKER_REGISTER("1-o");
   LIKWID_MARKER_START("1-o");
 
@@ -201,27 +201,85 @@ void multMatMatRow(MatRow A, MatRow B, int n, MatRow C){
   LIKWID_MARKER_REGISTER("2-o");
   LIKWID_MARKER_START("2-o");
 
-  /* Efetua a multiplicação */
-  for (int i=0; i < n; ++i){
-    //Loop Unroll e Jam
-    for (int j=0; j < n-n%4; j+=4){
-      C[i*n+j] = C[i*n+j+1] = C[i*n+j+2] = C[i*n+j+3] = 0.0;
-      for (int k=0; k < n; ++k){
-	      C[i*n+j] += A[i*n+k] * B[k*n+j];
-        C[i*n+j+1] += A[i*n+k] * B[k*n+j+1];
-        C[i*n+j+2] += A[i*n+k] * B[k*n+j+2];
-        C[i*n+j+3] += A[i*n+k] * B[k*n+j+3];
-      }
-    }
+  int istart, iend, jstart, jend, kstart, kend;
 
-    //Residuo do laco
-    for (int j=n-n%4; j < n; ++j){
-      C[i*n+j] = 0.0;
-      for (int k=0; k < n; ++k){
-        C[i*n+j] += A[i*n+k] * B[k*n+j];
+  for(int ii = 0; ii<n/4; ++ii){
+    istart=ii*4; iend=istart+4;
+    for(int jj=0; jj<n/4; ++jj){
+      jstart=jj*4; jend=jstart+4;
+      for(int kk=0; kk<n/4; ++kk){
+        kstart=kk*4; kend=kstart+4;
+        for (int i=istart; i<iend; ++i){
+          for (int j=jstart; j<jend; j+=4){
+            for (int k=kstart; k<kend; ++k){
+              //Loop Unroll e Jam
+              for (int i=istart; i<iend; ++i){
+                for (int j=jstart; j<jend; j+=4){
+                  C[i*n+j] = C[i*n+j+1] = C[i*n+j+2] = C[i*n+j+3] = 0.0;
+                  for (int k=kstart; k<kend; ++k){
+                    C[i*n+j]   += A[i*n+k] * B[k*n+j];
+                    C[i*n+j+1] += A[i*n+k] * B[k*n+j+1];
+                    C[i*n+j+2] += A[i*n+k] * B[k*n+j+2];
+                    C[i*n+j+3] += A[i*n+k] * B[k*n+j+3];
+                  }
+                }
+              }
+
+                //Residuo do laco
+                for (int j=jend; j < n; ++j){
+                  C[i*n+j] = 0.0;
+                  for (int k=0; k < n; ++k){
+                    C[i*n+j] += A[i*n+k] * B[k*n+j];
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+  }
+
+  //residuo da blocagem
+  //adiciona valores de fora
+  for(int ii = 0; ii<n-n%4; ++ii){
+    for(int jj=0; jj<n-n%4; ++jj){
+      //linhas/colunas fora dos blocos
+      for(int k = n-n%4; k<n; ++k){
+        C[ii*n+jj] += A[ii*n+k] * B[k*n+jj];
       }
     }
   }
+  //linhas fora dos blocos
+  for(int ii = n-n%4; ii<n; ++ii){
+    for(int jj=0; jj<n; ++jj){
+      C[ii*n+jj] = 0.0;
+      for(int kk=0; kk<n; ++kk){
+        C[ii*n+jj] += A[ii*n+kk] * B[kk*n+jj];
+      }
+    }
+  }
+
+  //Loop Unroll e Jam
+  // for (int i=0; i < n; ++i){
+  //   for (int j=0; j < n-n%4; j+=4){
+  //     C[i*n+j] = C[i*n+j+1] = C[i*n+j+2] = C[i*n+j+3] = 0.0;
+  //     for (int k=0; k < n; ++k){
+	//       C[i*n+j]   += A[i*n+k] * B[k*n+j];
+  //       C[i*n+j+1] += A[i*n+k] * B[k*n+j+1];
+  //       C[i*n+j+2] += A[i*n+k] * B[k*n+j+2];
+  //       C[i*n+j+3] += A[i*n+k] * B[k*n+j+3];
+  //     }
+  //   }
+  // }
+
+  //   //Residuo do laco
+  //   for (int j=n-n%4; j < n; ++j){
+  //     C[i*n+j] = 0.0;
+  //     for (int k=0; k < n; ++k){
+  //       C[i*n+j] += A[i*n+k] * B[k*n+j];
+  //     }
+  //   }
+  // }
 
 
   LIKWID_MARKER_STOP("2-o");

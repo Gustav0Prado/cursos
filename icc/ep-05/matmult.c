@@ -7,6 +7,29 @@
 
 #include "matriz.h"
 
+int vetIgual(Vetor a, Vetor b, int n){
+  for(int i = 0; i < n; ++i){
+    if(a[i] != b[i]){
+      return 0;
+    }
+  }
+
+  return 1;
+}
+
+int matIgual(MatRow a, MatRow b, int n, int m){
+  for(int i = 0; i < n; ++i){
+    for(int j = 0; j < m; ++j){
+      if(a[i*n+j] != b[i*n+j]){
+        printf("%g -- %g\n", a[i*n+j], b[i*n+j]);
+        return 0;
+      }
+    }
+  }
+
+  return 1;
+}
+
 /**
  * Exibe mensagem de erro indicando forma de uso do programa e termina
  * o programa.
@@ -79,7 +102,11 @@ int main (int argc, char *argv[])
   multMatMat (mRow_1, mRow_2, n, resMat);
 
   multMatMatRow (mRow_1, mRow_2, n, resMat2);
-    
+  
+  if(!vetIgual(res, res2, n) || !matIgual(resMat, resMat2, n, n)){
+    fprintf(stderr, "ERRO! Resultados diferentes!\n");
+  }
+
 #ifdef DEBUG
     prnVetor (res, n);
     prnVetor (res2, n);
