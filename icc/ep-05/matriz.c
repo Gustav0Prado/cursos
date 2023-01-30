@@ -209,34 +209,28 @@ void multMatMatRow(MatRow A, MatRow B, int n, MatRow C){
       jstart=jj*4; jend=jstart+4;
       for(int kk=0; kk<n/4; ++kk){
         kstart=kk*4; kend=kstart+4;
+        //Loop Unroll e Jam
         for (int i=istart; i<iend; ++i){
           for (int j=jstart; j<jend; j+=4){
+            C[i*n+j] = C[i*n+j+1] = C[i*n+j+2] = C[i*n+j+3] = 0.0;
             for (int k=kstart; k<kend; ++k){
-              //Loop Unroll e Jam
-              for (int i=istart; i<iend; ++i){
-                for (int j=jstart; j<jend; j+=4){
-                  C[i*n+j] = C[i*n+j+1] = C[i*n+j+2] = C[i*n+j+3] = 0.0;
-                  for (int k=kstart; k<kend; ++k){
-                    C[i*n+j]   += A[i*n+k] * B[k*n+j];
-                    C[i*n+j+1] += A[i*n+k] * B[k*n+j+1];
-                    C[i*n+j+2] += A[i*n+k] * B[k*n+j+2];
-                    C[i*n+j+3] += A[i*n+k] * B[k*n+j+3];
-                  }
-                }
-              }
+              C[i*n+j]   += A[i*n+k] * B[k*n+j];
+              C[i*n+j+1] += A[i*n+k] * B[k*n+j+1];
+              C[i*n+j+2] += A[i*n+k] * B[k*n+j+2];
+              C[i*n+j+3] += A[i*n+k] * B[k*n+j+3];
+            }
+          }
 
-                //Residuo do laco
-                for (int j=jend; j < n; ++j){
-                  C[i*n+j] = 0.0;
-                  for (int k=0; k < n; ++k){
-                    C[i*n+j] += A[i*n+k] * B[k*n+j];
-                  }
-                }
-              }
+          //Residuo do laco
+          for (int j=jend; j < n; ++j){
+            C[i*n+j] = 0.0;
+            for (int k=0; k < n; ++k){
+              C[i*n+j] += A[i*n+k] * B[k*n+j];
             }
           }
         }
       }
+    }
   }
 
   //residuo da blocagem
