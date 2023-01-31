@@ -9,7 +9,8 @@
 
 int vetIgual(Vetor a, Vetor b, int n){
   for(int i = 0; i < n; ++i){
-    if(a[i] != b[i]){
+    if(ABS(a[i]-b[i] > 1e-10)){
+      printf("%e\n", a[i]-b[i]);
       return 0;
     }
   }
@@ -103,8 +104,11 @@ int main (int argc, char *argv[])
 
   multMatMatRow (mRow_1, mRow_2, n, resMat2);
   
-  if(!vetIgual(res, res2, n) || !matIgual(resMat, resMat2, n, n)){
-    fprintf(stderr, "ERRO! Resultados diferentes!\n");
+  if(!vetIgual(res, res2, n)){
+    fprintf(stderr, "ERRO! Resultados dos vetores diferentes!\n");
+  }
+  else if( !matIgual(resMat, resMat2, n, n)){
+    fprintf(stderr, "ERRO! Resultados dos vetores diferentes!\n");
   }
 
 #ifdef DEBUG

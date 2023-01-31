@@ -138,21 +138,22 @@ void multMatRowVet(restrict MatRow mat, restrict Vetor v, int m, int n, restrict
 
   /* Efetua a multiplicação */
   if (res) {
-    //Unroll & jam -> fazer blocking
-    //passo = 4
-    for (int i=0; i < m-m%4; i+=4){
+    for (int i=0; i < m-m%UF; i+=UF){
       for (int j=0; j < n; ++j){
-        res[i]   += mat[n*i + j]     * v[j];
-        res[i+1] += mat[n*(i+1) + j] * v[j];
-        res[i+2] += mat[n*(i+2) + j] * v[j];
-        res[i+3] += mat[n*(i+3) + j] * v[j];
+        for(int itUF = 0; itUF < UF; ++itUF){
+          res[i+itUF] += mat[n*(i+itUF) + j] * v[j];
+        }
+        // res[i+UF-4] += mat[n*(i+UF-4) + j] * v[j];
+        // res[i+UF-3] += mat[n*(i+UF-3) + j] * v[j];
+        // res[i+UF-2] += mat[n*(i+UF-2) + j] * v[j];
+        // res[i+UF-1] += mat[n*(i+UF-1) + j] * v[j];
       }
     }
 
     //residuo do laco
-    for (int i=m-m%4; i < m; i++){
+    for (int i=m-m%UF; i < m; i++){
       for (int j=0; j < n; ++j){
-        res[i]   += mat[n*i + j] * v[j];
+        res[i] += mat[n*i + j] * v[j];
       }
     }
   }
@@ -203,21 +204,28 @@ void multMatMatRow(MatRow A, MatRow B, int n, MatRow C){
 
   int istart, iend, jstart, jend, kstart, kend;
 
-  for(int ii = 0; ii<n/4; ++ii){
-    istart=ii*4; iend=istart+4;
-    for(int jj=0; jj<n/4; ++jj){
-      jstart=jj*4; jend=jstart+4;
-      for(int kk=0; kk<n/4; ++kk){
-        kstart=kk*4; kend=kstart+4;
+  //Blocking
+  for(int ii = 0; ii<n/BK; ++ii){
+    istart=ii*BK; iend=istart+BK;
+    for(int jj=0; jj<n/BK; ++jj){
+      jstart=jj*BK; jend=jstart+BK;
+      for(int kk=0; kk<n/BK; ++kk){
+        kstart=kk*BK; kend=kstart+BK;
         //Loop Unroll e Jam
         for (int i=istart; i<iend; ++i){
-          for (int j=jstart; j<jend; j+=4){
-            C[i*n+j] = C[i*n+j+1] = C[i*n+j+2] = C[i*n+j+3] = 0.0;
+          for (int j=jstart; j<jend; j+=UF){
+            //zera valores
+            for(int itUF = 0; itUF < UF; ++itUF){
+              C[i*n+j+itUF] = 0.0;
+            }
             for (int k=kstart; k<kend; ++k){
-              C[i*n+j]   += A[i*n+k] * B[k*n+j];
-              C[i*n+j+1] += A[i*n+k] * B[k*n+j+1];
-              C[i*n+j+2] += A[i*n+k] * B[k*n+j+2];
-              C[i*n+j+3] += A[i*n+k] * B[k*n+j+3];
+              for(int itUF = 0; itUF < UF; ++itUF){
+                C[i*n+j+itUF] += A[i*n+k] * B[k*n+j+itUF];
+              }
+              // C[i*n+j+UF-4] += A[i*n+k] * B[k*n+j+UF-4];
+              // C[i*n+j+UF-3] += A[i*n+k] * B[k*n+j+UF-3];
+              // C[i*n+j+UF-2] += A[i*n+k] * B[k*n+j+UF-2];
+              // C[i*n+j+UF-1] += A[i*n+k] * B[k*n+j+UF-1];
             }
           }
 
@@ -235,16 +243,16 @@ void multMatMatRow(MatRow A, MatRow B, int n, MatRow C){
 
   //residuo da blocagem
   //adiciona valores de fora
-  for(int ii = 0; ii<n-n%4; ++ii){
-    for(int jj=0; jj<n-n%4; ++jj){
+  for(int ii = 0; ii<n-n%BK; ++ii){
+    for(int jj=0; jj<n-n%BK; ++jj){
       //linhas/colunas fora dos blocos
-      for(int k = n-n%4; k<n; ++k){
+      for(int k = n-n%BK; k<n; ++k){
         C[ii*n+jj] += A[ii*n+k] * B[k*n+jj];
       }
     }
   }
   //linhas fora dos blocos
-  for(int ii = n-n%4; ii<n; ++ii){
+  for(int ii = n-n%BK; ii<n; ++ii){
     for(int jj=0; jj<n; ++jj){
       C[ii*n+jj] = 0.0;
       for(int kk=0; kk<n; ++kk){
