@@ -121,6 +121,7 @@ int main (int argc, char *argv[])
   liberaVetor ((void*) mRow_1);
   liberaVetor ((void*) mRow_2);
   liberaVetor ((void*) resMat);
+  liberaVetor ((void*) resMat2);
   liberaVetor ((void*) vet);
   liberaVetor ((void*) res);
   liberaVetor ((void*) res2);
