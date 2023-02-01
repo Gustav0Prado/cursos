@@ -218,16 +218,19 @@ void multMatMatRow(MatRow A, MatRow B, int n, MatRow C){
         kend=kstart+BK;
         //Multi
         for (int i=istart; i<iend; ++i){
-          for (int j=jstart; j<jend; ++j){
+          for (int j=jstart; j<jend; j+=UF){
             for (int k=kstart; k<kend; ++k){
-              C[i*n+j] += A[i*n+k] * B[k*n+j];
-            }  
+              C[i*n+j]   += A[i*n+k] * B[k*n+j];
+              C[i*n+j+1] += A[i*n+k] * B[k*n+j+1];
+              C[i*n+j+2] += A[i*n+k] * B[k*n+j+2];
+              C[i*n+j+3] += A[i*n+k] * B[k*n+j+3];
+            }
           }
         }
       }
     }
   }
-  //residuo da blocagem
+  //residuo do blocking
   //adiciona valores de fora
   for(int ii = 0; ii<n-n%BK; ++ii){
     for(int jj=0; jj<n-n%BK; ++jj){
@@ -255,28 +258,6 @@ void multMatMatRow(MatRow A, MatRow B, int n, MatRow C){
       }
     }
   }
-
-  //Loop Unroll e Jam
-  // for (int i=0; i < n; ++i){
-  //   for (int j=0; j < n-n%4; j+=4){
-  //     C[i*n+j] = C[i*n+j+1] = C[i*n+j+2] = C[i*n+j+3] = 0.0;
-  //     for (int k=0; k < n; ++k){
-	//       C[i*n+j]   += A[i*n+k] * B[k*n+j];
-  //       C[i*n+j+1] += A[i*n+k] * B[k*n+j+1];
-  //       C[i*n+j+2] += A[i*n+k] * B[k*n+j+2];
-  //       C[i*n+j+3] += A[i*n+k] * B[k*n+j+3];
-  //     }
-  //   }
-  // }
-
-  //   //Residuo do laco
-  //   for (int j=n-n%4; j < n; ++j){
-  //     C[i*n+j] = 0.0;
-  //     for (int k=0; k < n; ++k){
-  //       C[i*n+j] += A[i*n+k] * B[k*n+j];
-  //     }
-  //   }
-  // }
 
   LIKWID_MARKER_STOP("2-o");
 }

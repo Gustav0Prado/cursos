@@ -7,7 +7,7 @@
 #define BASE 32
 
 #define BK 4
-#define UF 2
+#define UF 4
 
 #define ABS(num)  ((num) < 0.0 ? -(num) : (num))
 
