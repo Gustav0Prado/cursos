@@ -206,41 +206,27 @@ void multMatMatRow(MatRow A, MatRow B, int n, MatRow C){
 
   //Blocking
   for(int ii = 0; ii<n/BK; ++ii){
-    istart=ii*BK; iend=istart+BK;
-    for(int jj=0; jj<n/BK; ++jj){
-      jstart=jj*BK; jend=jstart+BK;
-      for(int kk=0; kk<n/BK; ++kk){
-        kstart=kk*BK; kend=kstart+BK;
-        //Loop Unroll e Jam
-        for (int i=istart; i<iend; ++i){
-          for (int j=jstart; j<jend; j+=UF){
-            //zera valores
-            for(int itUF = 0; itUF < UF; ++itUF){
-              C[i*n+j+itUF] = 0.0;
-            }
-            for (int k=kstart; k<kend; ++k){
-              for(int itUF = 0; itUF < UF; ++itUF){
-                C[i*n+j+itUF] += A[i*n+k] * B[k*n+j+itUF];
-              }
-              // C[i*n+j+UF-4] += A[i*n+k] * B[k*n+j+UF-4];
-              // C[i*n+j+UF-3] += A[i*n+k] * B[k*n+j+UF-3];
-              // C[i*n+j+UF-2] += A[i*n+k] * B[k*n+j+UF-2];
-              // C[i*n+j+UF-1] += A[i*n+k] * B[k*n+j+UF-1];
-            }
-          }
+    istart=ii*BK;
+    iend=istart+BK;
 
-          //Residuo do laco
-          for (int j=jend; j < n; ++j){
-            C[i*n+j] = 0.0;
-            for (int k=0; k < n; ++k){
+    for(int jj=0; jj<n/BK; ++jj){
+      jstart=jj*BK;
+      jend=jstart+BK;
+
+      for(int kk=0; kk<n/BK; ++kk){
+        kstart=kk*BK;
+        kend=kstart+BK;
+        //Multi
+        for (int i=istart; i<iend; ++i){
+          for (int j=jstart; j<jend; ++j){
+            for (int k=kstart; k<kend; ++k){
               C[i*n+j] += A[i*n+k] * B[k*n+j];
-            }
+            }  
           }
         }
       }
     }
   }
-
   //residuo da blocagem
   //adiciona valores de fora
   for(int ii = 0; ii<n-n%BK; ++ii){
@@ -254,6 +240,15 @@ void multMatMatRow(MatRow A, MatRow B, int n, MatRow C){
   //linhas fora dos blocos
   for(int ii = n-n%BK; ii<n; ++ii){
     for(int jj=0; jj<n; ++jj){
+      C[ii*n+jj] = 0.0;
+      for(int kk=0; kk<n; ++kk){
+        C[ii*n+jj] += A[ii*n+kk] * B[kk*n+jj];
+      }
+    }
+  }
+  //colunas fora dos blocos
+  for(int ii = 0; ii<n; ++ii){
+    for(int jj=n-n%BK; jj<n; ++jj){
       C[ii*n+jj] = 0.0;
       for(int kk=0; kk<n; ++kk){
         C[ii*n+jj] += A[ii*n+kk] * B[kk*n+jj];
@@ -282,7 +277,6 @@ void multMatMatRow(MatRow A, MatRow B, int n, MatRow C){
   //     }
   //   }
   // }
-
 
   LIKWID_MARKER_STOP("2-o");
 }

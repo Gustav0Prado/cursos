@@ -108,7 +108,7 @@ int main (int argc, char *argv[])
     fprintf(stderr, "ERRO! Resultados dos vetores diferentes!\n");
   }
   else if( !matIgual(resMat, resMat2, n, n)){
-    fprintf(stderr, "ERRO! Resultados dos vetores diferentes!\n");
+    fprintf(stderr, "ERRO! Resultados das matrizes diferentes!\n");
   }
 
 #ifdef DEBUG
