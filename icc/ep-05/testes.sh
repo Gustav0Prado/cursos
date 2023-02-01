@@ -9,9 +9,11 @@ CORES=$(likwid-topology | grep Cores | cut -c 19-)
 let CORES--
 
 for N in 4 8 12
-do    
+do
+    echo "Executando para N = $N"
     for O in L3 L2CACHE FLOPS_DP
     do   
+        printf "\tExecutando teste de $O\n"
         FILE=${O}_${N}
         ./perfctr $CORES $O ./matmult -n $N > ./saida/$FILE.txt
     done
