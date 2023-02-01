@@ -3,7 +3,7 @@
            CC = gcc -g
          OBJS = matriz.o
 
-       CFLAGS = -O3  -march=native -DLIKWID_PERFMON -I${LIKWID_INCLUDE} -Wall
+       CFLAGS = -O3 -mavx2 -march=native -DLIKWID_PERFMON -I${LIKWID_INCLUDE} -Wall
        LFLAGS = -lm -L${LIKWID_LIB} -llikwid
 
 .PHONY: all debug clean limpa purge faxina
@@ -23,7 +23,7 @@ $(PROG): $(OBJS)
 
 clean limpa:
 	@echo "Limpando ...."
-	@rm -f *~ *.bak *.tmp *.txt ./saida/*.txt
+	@rm -f *~ *.bak *.tmp *.txt ./saida/*.txt ./saida/*.dat
 
 purge faxina:   clean
 	@echo "Faxina ...."
