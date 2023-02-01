@@ -22,7 +22,7 @@ done
 for N in 64 100 128 1024
 do
     echo "Executando para N = $N"
-    for O in L2CACHE #L3 L2CACHE FLOPS_DP
+    for O in L3 #L2CACHE FLOPS_DP
     do   
         printf "\tExecutando teste de $O\n"
         FILE=${O}_${N}
@@ -32,6 +32,7 @@ do
 
         L3)
             RES="$(cat ./saida/$FILE.txt | grep "L3 bandwidth" | rev | cut -c 3- | sed 's/\s.*$//' | rev)"
+            TEMPO="$(cat ./saida/$FILE.txt | grep "Runtime (RDTSC)" | rev | cut -c 3- | sed 's/\s.*$//' | rev)"
             ;;
 
         L2CACHE)
@@ -50,6 +51,12 @@ do
         echo "$N ${resultados[1]}" >> ./saida/plot_MatRowVet-$O-o.dat
         echo "$N ${resultados[2]}" >> ./saida/plot_MatMatRow-$O-u.dat
         echo "$N ${resultados[3]}" >> ./saida/plot_MatMatRow-$O-o.dat
+
+        tempos=($TEMPO)
+        echo "$N ${tempos[0]}" >> ./saida/plot_MatRowVet-Tempo-u.dat
+        echo "$N ${tempos[1]}" >> ./saida/plot_MatRowVet-Tempo-o.dat
+        echo "$N ${tempos[2]}" >> ./saida/plot_MatMatRow-Tempo-u.dat
+        echo "$N ${tempos[3]}" >> ./saida/plot_MatMatRow-Tempo-o.dat
     done
 done
 
@@ -60,6 +67,7 @@ pushd ./saida > /dev/null
 # ./plotFLOPS_MatVet.gp
 # ./plotL2_MatVet.gp
 ./plotL3_MatVet.gp
+./plotTempo_MatVet.gp
 popd > /dev/null
 
 #teste de cut da saida: cat ./saida/L3_1.txt | grep "L3 bandwidth" | rev | cut -c 3- | sed 's/\s.*$//' | rev
