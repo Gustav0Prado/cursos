@@ -224,6 +224,10 @@ void multMatMatRow(MatRow A, MatRow B, int n, MatRow C){
               C[i*n+j+1] += A[i*n+k] * B[k*n+j+1];
               C[i*n+j+2] += A[i*n+k] * B[k*n+j+2];
               C[i*n+j+3] += A[i*n+k] * B[k*n+j+3];
+              C[i*n+j+4] += A[i*n+k] * B[k*n+j+4];
+              C[i*n+j+5] += A[i*n+k] * B[k*n+j+5];
+              C[i*n+j+6] += A[i*n+k] * B[k*n+j+6];
+              C[i*n+j+7] += A[i*n+k] * B[k*n+j+7];
             }
           }
         }
