@@ -140,13 +140,14 @@ void multMatRowVet(restrict MatRow mat, restrict Vetor v, int m, int n, restrict
   if (res) {
     for (int i=0; i < m-m%UF; i+=UF){
       for (int j=0; j < n; ++j){
-        for(int itUF = 0; itUF < UF; ++itUF){
-          res[i+itUF] += mat[n*(i+itUF) + j] * v[j];
-        }
-        // res[i+UF-4] += mat[n*(i+UF-4) + j] * v[j];
-        // res[i+UF-3] += mat[n*(i+UF-3) + j] * v[j];
-        // res[i+UF-2] += mat[n*(i+UF-2) + j] * v[j];
-        // res[i+UF-1] += mat[n*(i+UF-1) + j] * v[j];
+        res[i]   += mat[n*i + j]     * v[j];
+        res[i+1] += mat[n*(i+1) + j] * v[j];
+        res[i+2] += mat[n*(i+2) + j] * v[j];
+        res[i+3] += mat[n*(i+3) + j] * v[j];
+        res[i+4] += mat[n*(i+4) + j] * v[j];
+        res[i+5] += mat[n*(i+5) + j] * v[j];
+        res[i+6] += mat[n*(i+6) + j] * v[j];
+        res[i+7] += mat[n*(i+7) + j] * v[j];
       }
     }
 
