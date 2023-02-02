@@ -220,7 +220,7 @@ void multMatMat (MatRow A, MatRow B, int n, MatRow C)
  *             e com seus elementos inicializados em 0.0 (zero)
  *
  */
-void multMatMatRow(MatRow A, MatRow B, int n, MatRow C){
+void multMatMatRow(restrict MatRow A, restrict MatRow B, int n, restrict MatRow C){
   LIKWID_MARKER_REGISTER("2-o");
   LIKWID_MARKER_START("2-o");
 
@@ -242,14 +242,14 @@ void multMatMatRow(MatRow A, MatRow B, int n, MatRow C){
         for (int i=istart; i<iend; ++i){
           for (int j=jstart; j<jend; j+=UF){
             for (int k=kstart; k<kend; ++k){
-              C[i*n+j]   += A[i*n+k] * B[k*n+j];
-              C[i*n+j+1] += A[i*n+k] * B[k*n+j+1];
-              C[i*n+j+2] += A[i*n+k] * B[k*n+j+2];
-              C[i*n+j+3] += A[i*n+k] * B[k*n+j+3];
-              C[i*n+j+4] += A[i*n+k] * B[k*n+j+4];
-              C[i*n+j+5] += A[i*n+k] * B[k*n+j+5];
-              C[i*n+j+6] += A[i*n+k] * B[k*n+j+6];
-              C[i*n+j+7] += A[i*n+k] * B[k*n+j+7];
+              C[i*n+j]     += A[i*n+k] * B[k*n+j];
+              C[i*n+(j+1)] += A[i*n+k] * B[k*n+(j+1)];
+              C[i*n+(j+2)] += A[i*n+k] * B[k*n+(j+2)];
+              C[i*n+(j+3)] += A[i*n+k] * B[k*n+(j+3)];
+              C[i*n+(j+4)] += A[i*n+k] * B[k*n+(j+4)];
+              C[i*n+(j+5)] += A[i*n+k] * B[k*n+(j+5)];
+              C[i*n+(j+6)] += A[i*n+k] * B[k*n+(j+6)];
+              C[i*n+(j+7)] += A[i*n+k] * B[k*n+(j+7)];
             }
           }
         }
