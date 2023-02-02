@@ -10,16 +10,17 @@ set boxwidth 1
 set xtics
 set xrange ["0":]
 set xlabel  "N (tamanho da matriz)"
+dir = system("dirname ".ARG0)."/"
 
 set ylabel  "Segundos"
 set title   "Tempo - MatRowVet"
 set terminal qt 0 title "Tempo - MatRowVet"
-plot 'plot_MatRowVet-Tempo.dat' using 1:2 title "<sem otimização>" with linespoints, \
+plot dir.'plot_MatRowVet-Tempo.dat' using 1:2 title "<sem otimização>" with linespoints, \
      '' using 1:3 title "<com otimização>" with linespoints
 
 pause -1
 
 set title   "Tempo - MatMatRow"
 set terminal qt 0 title "Tempo - MatMatRow"
-plot 'plot_MatMatRow-Tempo.dat' using 1:2 title "<sem otimização>" with linespoints, \
+plot dir.'plot_MatMatRow-Tempo.dat' using 1:2 title "<sem otimização>" with linespoints, \
      '' using 1:3 title "<com otimização>" with linespoints
