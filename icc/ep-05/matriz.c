@@ -136,25 +136,46 @@ void multMatRowVet(restrict MatRow mat, restrict Vetor v, int m, int n, restrict
   LIKWID_MARKER_REGISTER("1-o");
   LIKWID_MARKER_START("1-o");
 
+  int istart, iend, jstart, jend;
+
   /* Efetua a multiplicação */
   if (res) {
-    for (int i=0; i < m-m%UF; i+=UF){
-      for (int j=0; j < n; ++j){
-        res[i]   += mat[n*i + j]     * v[j];
-        res[i+1] += mat[n*(i+1) + j] * v[j];
-        res[i+2] += mat[n*(i+2) + j] * v[j];
-        res[i+3] += mat[n*(i+3) + j] * v[j];
-        res[i+4] += mat[n*(i+4) + j] * v[j];
-        res[i+5] += mat[n*(i+5) + j] * v[j];
-        res[i+6] += mat[n*(i+6) + j] * v[j];
-        res[i+7] += mat[n*(i+7) + j] * v[j];
+    for(int ii = 0; ii<n/BK; ++ii){
+      istart=ii*BK;
+      iend=istart+BK;
+
+      for(int jj=0; jj<n/BK; ++jj){
+        jstart=jj*BK;
+        jend=jstart+BK;
+
+        for (int i=istart; i<iend; i+=UF){
+          for (int j=jstart; j<jend; ++j){
+            res[i]   += mat[n*i + j]     * v[j];
+            res[i+1] += mat[n*(i+1) + j] * v[j];
+            res[i+2] += mat[n*(i+2) + j] * v[j];
+            res[i+3] += mat[n*(i+3) + j] * v[j];
+            res[i+4] += mat[n*(i+4) + j] * v[j];
+            res[i+5] += mat[n*(i+5) + j] * v[j];
+            res[i+6] += mat[n*(i+6) + j] * v[j];
+            res[i+7] += mat[n*(i+7) + j] * v[j];
+          }
+        }
       }
     }
 
-    //residuo do laco
-    for (int i=m-m%UF; i < m; i++){
-      for (int j=0; j < n; ++j){
-        res[i] += mat[n*i + j] * v[j];
+    //Residuo do blocking
+    //Soma valores de fora dos blocos com os já calculados
+    for(int ii = 0; ii<n-n%BK; ++ii){
+      for(int jj=n-n%BK; jj<n; ++jj){
+        res[ii] += mat[n*ii + jj] * v[jj];
+      }
+    }
+
+    //Multiplica linhas fora dos blocos
+    for(int ii = n-n%BK; ii<n; ++ii){
+      res[ii] = 0.0;
+      for(int jj=0; jj<n; ++jj){
+        res[ii] += mat[n*ii + jj] * v[jj];
       }
     }
   }
@@ -235,8 +256,9 @@ void multMatMatRow(MatRow A, MatRow B, int n, MatRow C){
       }
     }
   }
-  //residuo do blocking
-  //adiciona valores de fora
+
+  //Residuo do blocking
+  //Soma valores de fora dos blocos com os já calculados
   for(int ii = 0; ii<n-n%BK; ++ii){
     for(int jj=0; jj<n-n%BK; ++jj){
       //linhas/colunas fora dos blocos
@@ -245,7 +267,8 @@ void multMatMatRow(MatRow A, MatRow B, int n, MatRow C){
       }
     }
   }
-  //linhas fora dos blocos
+
+  //Multiplica linhas fora dos blocos
   for(int ii = n-n%BK; ii<n; ++ii){
     for(int jj=0; jj<n; ++jj){
       C[ii*n+jj] = 0.0;
@@ -254,7 +277,8 @@ void multMatMatRow(MatRow A, MatRow B, int n, MatRow C){
       }
     }
   }
-  //colunas fora dos blocos
+
+  //Multiplica colunas fora dos blocos
   for(int ii = 0; ii<n; ++ii){
     for(int jj=n-n%BK; jj<n; ++jj){
       C[ii*n+jj] = 0.0;
