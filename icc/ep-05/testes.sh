@@ -23,7 +23,7 @@ done
 for O in L3 L2CACHE FLOPS_DP
 do   
     echo "Executando teste de $O"
-    for N in 64 100 128 1024 #2000 2048 3000 4000 5000
+    for N in 64 100 128 1024 2000 2048 3000 4000 5000
     do
         printf "\tExecutando teste para N = $N\n"    
         FILE=${O}_${N}
@@ -73,5 +73,7 @@ do
         esac
     done
 done
+
+touch "done"
 
 echo "powersave" > /sys/devices/system/cpu/cpufreq/policy3/scaling_governor
