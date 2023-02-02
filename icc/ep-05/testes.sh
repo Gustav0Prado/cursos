@@ -32,8 +32,8 @@ do
         case $O in
 
         L3)
-            RES=$(cat ./saida/$FILE.txt | grep "L3 bandwidth" | rev | cut -c 3- | sed 's/\s.*$//' | rev | sed 'N;s/\n/ /')
-            TEMPO="$(cat ./saida/$FILE.txt | grep "Runtime (RDTSC)" | rev | cut -c 3- | sed 's/\s.*$//' | rev | sed 'N;s/\n/ /')"
+            RES=$(cat ./saida/$FILE.txt | grep "L3 bandwidth" | sed 's/[^0-9.]*//g' | sed 'N;s/\n/ /')
+            TEMPO="$(cat ./saida/$FILE.txt | grep "Runtime (RDTSC)" | sed 's/[^0-9.]*//g' | sed 'N;s/\n/ /')"
 
             #separa saida dos arquivos
             #IFS=$'\n' read -r -d '' -a resL3 <<< "$RES"
@@ -48,7 +48,7 @@ do
             ;;
 
         L2CACHE)
-            RES="$(cat ./saida/$FILE.txt | grep "miss ratio" | rev | cut -c 3- | sed 's/\s.*$//' | rev | sed 'N;s/\n/ /')"
+            RES="$(cat ./saida/$FILE.txt | grep "miss ratio" | sed 's/[^0-9.]*//g' | sed 'N;s/\n/ /')"
             
             #separa saida dos arquivos
             mapfile -t resL2 <<< "$RES"
@@ -58,8 +58,8 @@ do
 
         FLOPS_DP)
             #separa saida avx e sse
-            AVX="$(cat ./saida/$FILE.txt | grep "MFLOP/s" | rev | cut -c 3- | sed 's/\s.*$//' | rev | sed -n 'n;p' | sed 'N;s/\n/ /')"
-            SSE="$(cat ./saida/$FILE.txt | grep "MFLOP/s" | rev | cut -c 3- | sed 's/\s.*$//' | rev | sed -n 'p;n' | sed 'N;s/\n/ /')"
+            AVX="$(cat ./saida/$FILE.txt | grep "MFLOP/s" | sed 's/[^0-9.]*//g' | sed -n 'n;p' | sed 'N;s/\n/ /')"
+            SSE="$(cat ./saida/$FILE.txt | grep "MFLOP/s" | sed 's/[^0-9.]*//g' | sed -n 'p;n' | sed 'N;s/\n/ /')"
 
             mapfile -t resAVX <<< "$AVX"
             echo "$N ${resAVX[0]}" >> ./saida/plot_MatRowVet-$O-AVX.dat

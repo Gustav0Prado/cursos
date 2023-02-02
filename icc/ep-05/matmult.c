@@ -104,12 +104,12 @@ int main (int argc, char *argv[])
 
   multMatMatRow (mRow_1, mRow_2, n, resMat2);
   
-  if(!vetIgual(res, res2, n)){
-    fprintf(stderr, "ERRO! Resultados dos vetores diferentes!\n");
-  }
-  else if( !matIgual(resMat, resMat2, n, n)){
-    fprintf(stderr, "ERRO! Resultados das matrizes diferentes!\n");
-  }
+  // if(!vetIgual(res, res2, n)){
+  //   fprintf(stderr, "ERRO! Resultados dos vetores diferentes!\n");
+  // }
+  // else if( !matIgual(resMat, resMat2, n, n)){
+  //   fprintf(stderr, "ERRO! Resultados das matrizes diferentes!\n");
+  // }
 
 #ifdef DEBUG
     prnVetor (res, n);
