@@ -33,7 +33,7 @@ do
 
         L3)
             RES=$(cat ./saida/$FILE.txt | grep "L3 bandwidth" | sed 's/[^0-9.]*//g' | sed 'N;s/\n/ /')
-            TEMPO="$(cat ./saida/$FILE.txt | grep "Runtime (RDTSC)" | sed 's/[^0-9.]*//g' | sed 'N;s/\n/ /')"
+            TEMPO="$(cat ./saida/$FILE.txt | grep "Runtime (RDTSC)" | sed 's/[^0-9.]*//g' | cut -c2- )"
 
             #separa saida dos arquivos
             #IFS=$'\n' read -r -d '' -a resL3 <<< "$RES"
