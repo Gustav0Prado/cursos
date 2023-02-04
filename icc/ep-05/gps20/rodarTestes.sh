@@ -23,7 +23,7 @@ done
 for O in L3 L2CACHE FLOPS_DP
 do   
     echo "Executando teste de $O"
-    for N in 64 100 128 256 512 1024 #2000 2048 3000 4000 5000
+    for N in 64 100 128 256 512 1024 2000 2048 3000 4000 5000
     do
         printf "\tExecutando teste para N = $N\n"    
         FILE=${O}_${N}
