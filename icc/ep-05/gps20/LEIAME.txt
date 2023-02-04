@@ -1,0 +1,4 @@
+trabalho rodado no PC h26 do DINF, arquitetura do PC obtida pelo LIKWID em arquiteturaPC.txt
+executar "rodarTestes.sh" irá rodar o make, executar os programas pelo LIKWID e filtrar as saidas para os arquivos de dados
+para plotar execute ./saida/plot<Marcador>.gp após executar o script
+a pasta "resultadosDinf" contem os resultados obtidos ao rodar o script na maquina citada (h26) do Dinf por ssh
