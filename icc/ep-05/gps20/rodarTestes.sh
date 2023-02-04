@@ -74,6 +74,4 @@ do
     done
 done
 
-touch "done"
-
 echo "powersave" > /sys/devices/system/cpu/cpufreq/policy3/scaling_governor
