@@ -4,8 +4,8 @@
 #include <sys/time.h>
 
 #define tam 5
-#define BK 4
-#define UF 4
+#define BK 8
+#define UF 8
 
 double timestamp (void)
 {
@@ -50,7 +50,7 @@ int main(){
    for(int i = 0; i < tam; ++i){
       printf("%g ", res[i]);
    }
-   printf("\n");
+   printf("\n%g\n", t1);
 
    int istart, iend, jstart, jend;
 
@@ -66,28 +66,32 @@ int main(){
                res2[i+1] += mat[i+1][j] * teste[j];
                res2[i+2] += mat[i+2][j] * teste[j];
                res2[i+3] += mat[i+3][j] * teste[j];
+               res2[i+4] += mat[i+4][j] * teste[j];
+               res2[i+5] += mat[i+5][j] * teste[j];
+               res2[i+6] += mat[i+6][j] * teste[j];
+               res2[i+7] += mat[i+7][j] * teste[j];
             }
          }
       }  
    }
    //Soma valores de fora dos blocos com os já calculados
    for(int ii = 0; ii<tam-tam%BK; ++ii){
-   for(int jj=tam-tam%BK; jj<tam; ++jj){
-      res2[ii] += mat[ii][jj] * teste[jj];
-   }
+      for(int jj=tam-tam%BK; jj<tam; ++jj){
+         res2[ii] += mat[ii][jj] * teste[jj];
+      }
    }
 
    //Multiplica linhas fora dos blocos
    for(int ii = tam-tam%BK; ii<tam; ++ii){
-   res[ii] = 0.0;
-   for(int jj=0; jj<tam; ++jj){
-      res2[ii] += mat[ii][jj] * teste[jj];
-   }
+      res[ii] = 0.0;
+      for(int jj=0; jj<tam; ++jj){
+         res2[ii] += mat[ii][jj] * teste[jj];
+      }
    }
 
    t2 = timestamp() - t2;
    for(int i = 0; i < tam; ++i){
       printf("%g ", res2[i]);
    }
-   printf("\n");
+   printf("\n%g\n", t2);
 }
