@@ -3,7 +3,7 @@
            CC = gcc -g
          OBJS = matriz.o
 
-       CFLAGS = -O3 -mavx2 -march=native -DLIKWID_PERFMON -I${LIKWID_INCLUDE} -Wall -falign-functions=32 -falign-loops=32 -fopt-info-vec -fopt-info-vec-missed
+       CFLAGS = -O3 -mavx2 -march=native -DLIKWID_PERFMON -I${LIKWID_INCLUDE} -Wall -falign-functions=32 -falign-loops=32 -fopt-info-vec
        LFLAGS = -lm -L${LIKWID_LIB} -llikwid
 
 .PHONY: all debug clean limpa purge faxina
