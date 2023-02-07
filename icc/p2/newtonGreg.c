@@ -2,7 +2,7 @@
 #include <math.h>
 
 int main(){
-   int n;
+   int n, h;
    double xint;
 
    printf("Insira a qtd de pontos: ");
@@ -12,9 +12,13 @@ int main(){
    double y[n];
    double tab[n][n];
 
-   printf("Insira os valores de x: ");
-   for(int i = 0; i < n; ++i){
-      scanf("%lg", &x[i]);
+   printf("Insira a distancia entre os pontos: ");
+   scanf("%d", &h);
+
+   printf("Insira o ponto inicial: ");
+   scanf("%lg", &x[0]);
+   for(int i = 1; i < n; ++i){
+      x[i] = x[0]+(i*h);
    }
 
    printf("Insira os valores de y: ");
@@ -24,7 +28,6 @@ int main(){
 
    printf("Insira o valor de x a ser interpolado: ");
    scanf("%lg", &xint);
-
    //matriz de diferencas divididas
    //linha 1 = f(xi)
    for(int i = 0; i < n; ++i){
@@ -33,7 +36,7 @@ int main(){
    //constroi as outras linhas
    for(int i = 1; i < n; ++i){
       for(int j = 0; j < n-i; ++j){
-         tab[i][j] = (tab[i-1][j+1] - tab[i-1][j]) / (x[j+i]-x[j]);
+         tab[i][j] = (tab[i-1][j+1] - tab[i-1][j]);
       }
    }
 
@@ -49,14 +52,16 @@ int main(){
 
    double soma = tab[0][0];
    double mult = 1.0;
+   double div = 1.0;
    double d;
    //calcula valor do polinomio
    for(int i = 1; i < n; ++i){
       d = tab[i][0];
 
       mult *= (xint - x[i-1]);
+      div *= (h*i);
 
-      soma += d*mult;
+      soma += (d/div)*mult;
    }
 
    printf("P(x) = %g\n", soma);

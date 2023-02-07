@@ -39,8 +39,20 @@ int main(){
             soma += xi;
          }
          A[i][j] = soma;
-         A[j][i] = soma;
+
+         //ajusta outros elementos identicos
+         int ik = i+1;
+         int jk = j-1;
+         while( ik < n && jk >= 0){
+            A[ik][jk] = soma;
+            ik++;
+            jk--;
+         }
+         // A[i][j] = soma;
+         // A[j][i] = soma;
       }
+
+
       //Calcula valores dos termos independentes
       double somay = 0.0;
       for(int k = 0; k < n; ++k){
