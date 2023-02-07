@@ -51,19 +51,24 @@ int main(){
    double x_temp[4]; 
    Px = 0.0;
 
-   //Metodo de Lagrange com vetorização
+   //Lagrange com unroll
    for(int i = 0; i < n; ++i){
       Li = 1.0;
       xi = x[i];
 
       double L_temp[4] = {1.0, 1.0, 1.0, 1.0};
       //0 -> i-1
-      for(j = 0; j < i-i%4; j+=4){
-        for(int k = 0; k < 4; ++k){
-         L_temp[k] *= (xint - x[j+k])/(xi - x[j+k]);
-        }
+      for(j = 0; j < i-i%2; j+=2){
+         // xj = x[j];
+         // Li *= (xint - xj)/(xi - xj);
+
+         x_temp[0] = x[j];
+         x_temp[1] = x[j+1];
+
+         L_temp[0] *= (xint - x_temp[0])/(xi - x_temp[0]);
+         L_temp[1] *= (xint - x_temp[1])/(xi - x_temp[1]);
       }
-      Li *= L_temp[0] * L_temp[1] * L_temp[2] * L_temp[3];
+      Li *= L_temp[0] * L_temp[1];
       //residuo
       for(j; j < i; ++j){
          xj = x[j];
@@ -72,14 +77,17 @@ int main(){
 
       L_temp[0] = 1.0;
       L_temp[1] = 1.0;
-      L_temp[2] = 1.0;
-      L_temp[3] = 1.0;
-      for(j = i+1; j < n-4+1; j+=4){
-         for(int k = 0; k < 4; ++k){
-            L_temp[k] *= (xint - x[j+k])/(xi - x[j+k]);
-         }
+      for(j = i+1; j < n-2+1; j+=2){
+         // xj = x[j];
+         // Li *= (xint - xj)/(xi - xj);
+
+         x_temp[0] = x[j];
+         x_temp[1] = x[j+1];
+
+         L_temp[0] *= (xint - x_temp[0])/(xi - x_temp[0]);
+         L_temp[1] *= (xint - x_temp[1])/(xi - x_temp[1]);
       }
-      Li *= L_temp[0] * L_temp[1] * L_temp[2] * L_temp[3];
+      Li *= L_temp[0] * L_temp[1];
       //residuo
       for(j; j < n; ++j){
          xj = x[j];
@@ -88,52 +96,6 @@ int main(){
 
       Px += Li*y[i]; 
    }
-
-   // //Lagrange com unroll
-   // for(int i = 0; i < n; ++i){
-   //    Li = 1.0;
-   //    xi = x[i];
-
-   //    double L_temp[4] = {1.0, 1.0, 1.0, 1.0};
-   //    //0 -> i-1
-   //    for(j = 0; j < i-i%2; j+=2){
-   //       // xj = x[j];
-   //       // Li *= (xint - xj)/(xi - xj);
-
-   //       x_temp[0] = x[j];
-   //       x_temp[1] = x[j+1];
-
-   //       L_temp[0] *= (xint - x_temp[0])/(xi - x_temp[0]);
-   //       L_temp[1] *= (xint - x_temp[1])/(xi - x_temp[1]);
-   //    }
-   //    Li *= L_temp[0] * L_temp[1];
-   //    //residuo
-   //    for(j; j < i; ++j){
-   //       xj = x[j];
-   //       Li *= (xint - xj)/(xi - xj);
-   //    }
-
-   //    L_temp[0] = 1.0;
-   //    L_temp[1] = 1.0;
-   //    for(j = i+1; j < n-2+1; j+=2){
-   //       // xj = x[j];
-   //       // Li *= (xint - xj)/(xi - xj);
-
-   //       x_temp[0] = x[j];
-   //       x_temp[1] = x[j+1];
-
-   //       L_temp[0] *= (xint - x_temp[0])/(xi - x_temp[0]);
-   //       L_temp[1] *= (xint - x_temp[1])/(xi - x_temp[1]);
-   //    }
-   //    Li *= L_temp[0] * L_temp[1];
-   //    //residuo
-   //    for(j; j < n; ++j){
-   //       xj = x[j];
-   //       Li *= (xint - xj)/(xi - xj);
-   //    }
-
-   //    Px += Li*y[i]; 
-   // }
 
    printf("P(x) = %.4g\n", Px);
 }
