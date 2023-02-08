@@ -1,5 +1,5 @@
 %: %.c 
-	gcc -o $@ $< -Wall
+	gcc -o $@ $< -g -Wall
 
 
 

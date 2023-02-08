@@ -26,33 +26,55 @@ int main(){
       scanf("%lg", &y[i]);
    }
 
-   //calcula valores de dentro da matriz
-   for(int i = 0; i < p; ++i){
-      for(int j = i; j < p; ++j){
-         //somatorio
-         double soma = 0.0;
-         for(int k = 0; k < n; ++k){
-            double xi = 1.0;
-            for(int m = 0; m < j+i; ++m){
-               xi *= x[k];
-            }
-            soma += xi;
+   //calcula primeira linha
+   int i = 0;
+   for(int j = 0; j < p; ++j){
+      //somatorio
+      double soma = 0.0;
+      for(int k = 0; k < n; ++k){
+         double xi = 1.0;
+         for(int m = 0; m < j+i; ++m){
+            xi *= x[k];
          }
-         A[i][j] = soma;
-
-         //ajusta outros elementos identicos
-         int ik = i+1;
-         int jk = j-1;
-         while( ik < n && jk >= 0){
-            A[ik][jk] = soma;
-            ik++;
-            jk--;
-         }
-         // A[i][j] = soma;
-         // A[j][i] = soma;
+         soma += xi;
       }
+      A[i][j] = soma;
 
+      //ajusta outros elementos identicos
+      int ik = i+1;
+      int jk = j-1;
+      while( ik < n && jk >= 0){
+         A[ik][jk] = soma;
+         ik++;
+         jk--;
+      }
+   }
 
+   //calcula ultima coluna
+   int j = p-1;
+   for(i = 1; i < p; ++i){
+      //somatorio
+      double soma = 0.0;
+      for(int k = 0; k < n; ++k){
+         double xi = 1.0;
+         for(int m = 0; m < j+i; ++m){
+            xi *= x[k];
+         }
+         soma += xi;
+      }
+      A[i][j] = soma;
+
+      //ajusta outros elementos identicos
+      int ik = i+1;
+      int jk = j-1;
+      while( ik < p && jk >= 0){
+         A[ik][jk] = soma;
+         ik++;
+         jk--;
+      }
+   }
+
+   for(int i = 0; i < p; ++i){
       //Calcula valores dos termos independentes
       double somay = 0.0;
       for(int k = 0; k < n; ++k){
@@ -64,6 +86,7 @@ int main(){
       }
       B[i] = somay;
    }
+
 
    //Imprime sistema linear resultante
    for(int i = 0; i < p; ++i){
