@@ -79,6 +79,7 @@ alocaMem:
     movq %rcx, 8(%rbx)              # marca tamanho do bloco
     addq $16, %rbx               
     movq %rbx, %rax                 # retorna endereco do bloco livre
+    addq $16, %rcx
     addq %rcx, topoHeap             # atualiza topo da heap
 
     popq %rbp                       # retorno do procedimento
