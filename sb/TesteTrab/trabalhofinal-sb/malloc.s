@@ -74,6 +74,7 @@ alocaMem:
     # addq $1, topoHeap               # aponta para o novo bloco
     movq topoHeap, %rbx             # %rbx <- endereco do topo antigo da pilha
     movq $1, (%rbx)                 # marca bloco como ocupado
+    subq $16, numBytes
     movq numBytes, %rcx
     movq %rcx, 8(%rbx)              # marca tamanho do bloco
     addq $16, %rbx               
