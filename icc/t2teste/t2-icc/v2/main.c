@@ -246,13 +246,16 @@ int main(int argc, char **argv){
 
    end = n-k;
    desloc = k;
+   start = -k+1;
    for(int i = 0; i < n; ++i){
       //comeca em 0 até i >= k, e para em n-k até i <= n-k 
       int max = n - ((end-i)*(i <= end));
-      for(int j = 0; j < max; ++j){
+      desloc = max-start*(i>=k);
+
+      for(int j = 0; j < desloc; ++j){
          printf("%10g ", A[i][j]);
       }
-      desloc = max-start*(i>=k);
+      ++start;
       printf("desloc: %d\n", desloc);
    }
 
