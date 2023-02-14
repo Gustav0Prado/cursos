@@ -39,7 +39,7 @@ int main(int argc, char **argv){
          switch(opt){
             case 'n':
                n = atoi(optarg);
-               if(n <= 3){
+               if(n <= 10){
                   fprintf(stderr, "ERRO: Tamanho do sistema linear precisa ser maior que 10\n");
                   return ERRINPUT;
                }
@@ -112,8 +112,6 @@ int main(int argc, char **argv){
    }
    SL->i = it;
 
-   prnSisLin(SL);
-
    //copia sistema original
    memcpy(SLorig->b, SL->b, sizeof(double)*n);
    for(int i = 0; i < n; ++i){
@@ -185,36 +183,6 @@ int main(int argc, char **argv){
    //com erro definido
    else{
       tempMed = GradConjErr(SL, x, M, e, arq);
-   }
-
-   prnSisLin(SL);
-
-   //até acabarem os 0s na direita
-   int i = 0;
-   for(int max = n-k; max > 0; --max){
-      for(int j = 0; j < n-max; ++j){
-         printf("%10g ", SL->A[i][j]);
-      }
-      printf("\n");
-      ++i;
-   }
-
-   //linhas que as colunas vao ate o final
-   for(i; i < k; ++i){
-      for(int j = 0; j < n; ++j){
-         printf("%10g ", SL->A[i][j]);
-      }
-      printf("\n");
-   }
-
-   int ini = i-k+1;
-   //linhas com 0s na esquerda
-   for(i = n-k; i < n; ++i){
-      for(int j = 0+ini; j < n; ++j){
-         printf("%10g ", SL->A[i][j]);
-      }
-      printf("\n");
-      ++ini;
    }
 
    //calcula residuo final
