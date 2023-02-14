@@ -189,17 +189,6 @@ int main(int argc, char **argv){
 
    prnSisLin(SL);
 
-   int start = -k+1;
-   int end = n-k;
-   for(int i = 0; i < n; ++i){
-      //comeca em 0 até i >= k, e para em n-k até i <= n-k 
-      for(int j = start*(i>=k); j < n - ((end-i)*(i <= end)); ++j){
-         printf("%10g ", SL->A[i][j]);
-      }
-      ++start;
-      printf("\n");
-   }
-
    //calcula residuo final
    somaVetMatxVet(SLorig->A, SLorig->b, x, -1, r, n);
 
@@ -219,6 +208,58 @@ int main(int argc, char **argv){
    //fecha arquivo de saida
    fclose(arq);
 
+
+
+   //Teste com matrizes
+   //Imprime apenas nao nulos
+
+   int start = -k+1;
+   int end = n-k;
+   int desloc = 0;
+   for(int i = 0; i < n; ++i){
+      //comeca em 0 até i >= k, e para em n-k até i <= n-k 
+      int max = n - ((end-i)*(i <= end));
+      for(int j = start*(i>=k); j < max; ++j){
+         printf("%10g ", SL->A[i][j]);
+      }
+      printf(" -- %d -- %d\n", desloc, i);
+      desloc += max-start*(i>=k);
+      ++start;
+   }
+
+   // Matriz como vetor de N ponteiros para um único vetor com N*N elementos
+   double **A = malloc(n * sizeof(double *));
+   int tam = k * n + (n-k)*(k-1);
+   printf("tam: %d\n", tam);
+   A[0] = (double *) malloc( tam * sizeof(double));
+
+   desloc = k;
+   for (int i=1; i < n; ++i) {
+      int max = n - ((end-i)*(i <= end));
+
+      A[i] = A[i-1]+desloc;
+      
+      desloc = max-start*(i>=k);
+   }
+
+   memset(A[0], 0, tam*sizeof(double));
+
+   end = n-k;
+   desloc = k;
+   for(int i = 0; i < n; ++i){
+      //comeca em 0 até i >= k, e para em n-k até i <= n-k 
+      int max = n - ((end-i)*(i <= end));
+      for(int j = 0; j < max; ++j){
+         printf("%10g ", A[i][j]);
+      }
+      desloc = max-start*(i>=k);
+      printf("desloc: %d\n", desloc);
+   }
+
+   free (A[0]);
+   free(A);
+
+
    //libera estruturas
    free(x);
    free(r);
@@ -227,6 +268,7 @@ int main(int argc, char **argv){
    }
    free (M);
    liberaSisLin (SL);
+   liberaSisLin (SLorig);
 
    return 0;
 }
