@@ -211,38 +211,25 @@ int main(int argc, char **argv){
 
 
    //Teste com matrizes
-   //Imprime apenas nao nulos
-
-   int start = -k+1;
-   int end = n-k;
-   int desloc = 0;
-   for(int i = 0; i < n; ++i){
-      //comeca em 0 até i >= k, e para em n-k até i <= n-k 
-      int max = n - ((end-i)*(i <= end));
-      for(int j = start*(i>=k); j < max; ++j){
-         printf("%10g ", SL->A[i][j]);
-      }
-      printf(" -- %d -- %d\n", desloc, i);
-      desloc += max-start*(i>=k);
-      ++start;
-   }
-
    // Matriz como vetor de N ponteiros para um único vetor com N*N elementos
    double **A = malloc(n * sizeof(double *));
    int tam = k * n + (n-k)*(k-1);
-   printf("tam: %d\n", tam);
+
    A[0] = (double *) malloc( tam * sizeof(double));
 
-   desloc = k;
+   int start = -k+1;
+   int end = n-k;
+   int desloc = k;
    for (int i=1; i < n; ++i) {
       int max = n - ((end-i)*(i <= end));
 
       A[i] = A[i-1]+desloc;
-      
+
+      ++start;
       desloc = max-start*(i>=k);
    }
 
-   memset(A[0], 0, tam*sizeof(double));
+   //memset(A[0], 0, k*sizeof(double));
 
    end = n-k;
    desloc = k;
@@ -251,12 +238,14 @@ int main(int argc, char **argv){
       //comeca em 0 até i >= k, e para em n-k até i <= n-k 
       int max = n - ((end-i)*(i <= end));
       desloc = max-start*(i>=k);
+      int jstart = start*(i>=k);
 
       for(int j = 0; j < desloc; ++j){
+         A[i][j] = SL->A[i][j+jstart];
          printf("%10g ", A[i][j]);
       }
       ++start;
-      printf("desloc: %d\n", desloc);
+      printf("\n");
    }
 
    free (A[0]);

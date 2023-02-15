@@ -42,6 +42,7 @@ void simetrizaSistema (SistLinear_t *SL) {
 
       M_res[i]   = malloc(sizeof(double)*SL ->n);
       memset(M_res[i], 0, SL->n*sizeof(double));
+
       for (int j = 0; j < SL->n; j++) { 
          M_trans[i][j] = SL -> A[j][i];
       }
