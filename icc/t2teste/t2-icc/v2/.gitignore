@@ -1,2 +1,3 @@
 *.o
-./cgsolver
+./cgSolver
+./*.txt
