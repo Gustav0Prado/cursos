@@ -213,43 +213,108 @@ int main(int argc, char **argv){
    //Teste com matrizes
    // Matriz como vetor de N ponteiros para um único vetor com N*N elementos
    double **A = malloc(n * sizeof(double *));
-   int tam = k * n + (n-k)*(k-1);
+   double **B = malloc(k * sizeof(double *));
+   double **C = malloc(n * sizeof(double *));
+   int tam = n*(k-1);
 
-   A[0] = (double *) malloc( tam * sizeof(double));
+   A[0] = (double *) malloc( n*k * sizeof(double));
+   B[0] = (double *) malloc( n*k * sizeof(double));
+   C[0] = (double *) malloc( tam * sizeof(double));
 
-   int start = -k+1;
-   int end = n-k;
-   int desloc = k;
+
    for (int i=1; i < n; ++i) {
-      int max = n - ((end-i)*(i <= end));
 
-      A[i] = A[i-1]+desloc;
-
-      ++start;
-      desloc = max-start*(i>=k);
+      A[i] = A[i-1]+k;
+      B[i] = B[i-1]+n;
+      //C[i] = C[i-1]+n;
+      memset(A[i],  0, k*sizeof(double));
+      memset(B[i],  0, n*sizeof(double));
+      //memset(B[i],  0, *sizeof(double));
    }
+
+   // int start = -k+1;
+   // int end = n-k;
+   // int desloc = k;
+   // for (int i=1; i < n; ++i) {
+   //    int max = n - ((end-i)*(i <= end));
+
+   //    A[i] = A[i-1]+desloc;
+
+   //    ++start;
+   //    desloc = max-start*(i>=k);
+   // }
 
    //memset(A[0], 0, k*sizeof(double));
 
-   end = n-k;
-   desloc = k;
-   start = -k+1;
-   for(int i = 0; i < n; ++i){
-      //comeca em 0 até i >= k, e para em n-k até i <= n-k 
-      int max = n - ((end-i)*(i <= end));
-      desloc = max-start*(i>=k);
-      int jstart = start*(i>=k);
+   // end = n-k;
+   // desloc = k;
+   // start = -k+1;
+   // for(int i = 0; i < n; ++i){
+   //    //comeca em 0 até i >= k, e para em n-k até i <= n-k 
+   //    int max = n - ((end-i)*(i <= end));
+   //    desloc = max-start*(i>=k);
+   //    int jstart = start*(i>=k);
 
-      for(int j = 0; j < desloc; ++j){
-         A[i][j] = SL->A[i][j+jstart];
-         printf("%10g ", A[i][j]);
+   //    for(int j = 0; j < desloc; ++j){
+   //       A[i][j] = SL->A[i][j+jstart];
+   //       printf("%10g ", A[i][j]);
+   //    }
+   //    ++start;
+   //    printf("\n");
+   // }
+
+   int jstart[n];
+   int jend[n];
+
+   //cria matriz com diagonais
+   for(int i = 0; i < n; ++i){
+      if(i < k-1){
+         jstart[i] = 0;
+         jend[i] = k-1;
       }
-      ++start;
+      else if(i < n-1){
+         jstart[i] = i-1;
+         jend[i] = i+k-2;
+      }
+      else{
+         jstart[i] = i-2;
+         jend[i] = n-1;
+      }
+
+      //printf("%d, %d\n", jstart[i], jend[i]);
+
+      int m = 0;
+      for(int j = jstart[i]; j <= jend[i]; ++j){
+         A[i][m] = SLorig->A[i][j];
+         printf("%10g ", A[i][m]);
+         ++m;
+      }
+      printf("\n");
+   }
+   printf("\n");
+
+   //multiplica por ela mesma transposta
+   //cria matriz com diagonais
+   for(int i = 0; i < k; ++i){
+      for(int j = 0; j < n; ++j){
+         B[i][j] = A[j][i];
+      }
+   }
+
+   for(int i = 0; i < k; ++i){
+      for(int j = 0; j < n; ++j){
+         printf("%10g ", B[i][j]);
+      }
       printf("\n");
    }
 
+
    free (A[0]);
    free(A);
+   free (B[0]);
+   free(B);
+   free (C[0]);
+   free(C);
 
 
    //libera estruturas
