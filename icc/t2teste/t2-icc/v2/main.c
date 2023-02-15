@@ -290,17 +290,30 @@ int main(int argc, char **argv){
    }
    printf("\n");
 
-   for(int i = 0; i < k; ++i){
+   // int i = 0;
+   // //calcula diagonal principal
+   // for(int j = 0; j < n-i; ++j){
+   //    C[j][j+i] = 0.0;
+   //    for(int m = 0; m < k; ++m){
+   //       C[j][j+i] += A[j][m] * B[m][j+i];
+   //       //printf("C[%d][%d] += A[%d][%d] * B[%d][%d]\n", j, j+i, j, m, m, j+i);
+   //    }
+   // }
 
-      //calcula cada diagonal
+   for(int i = 0; i < n; ++i){
+      //calcula diagonal principal
       for(int j = 0; j < n-i; ++j){
          C[j][j+i] = 0.0;
-         //printf("%d,%d\n", j, j+i);
-         for(int m = 0; m < k; ++m){
-            C[j][j+i] += A[j][m] * B[m][j+i];
+         int m = jstart[j+i]-jstart[j];
+         int l = 0;
+         while(m < k){
+            C[j][j+i] += A[j][m] * B[l][j+i];
+            ++m;
+            ++l;
          }
       }
    }
+
 
    for(int i = 0; i < n; ++i){
       for(int j = 0; j < n; ++j){
