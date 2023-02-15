@@ -219,62 +219,39 @@ int main(int argc, char **argv){
 
    A[0] = (double *) malloc( n*k * sizeof(double));
    B[0] = (double *) malloc( n*k * sizeof(double));
-   C[0] = (double *) malloc( tam * sizeof(double));
+   C[0] = (double *) malloc( n*n * sizeof(double));
+   //C[0] = (double *) malloc( tam * sizeof(double));
 
 
    for (int i=1; i < n; ++i) {
 
       A[i] = A[i-1]+k;
-      B[i] = B[i-1]+n;
-      //C[i] = C[i-1]+n;
+      C[i] = C[i-1]+n;
       memset(A[i],  0, k*sizeof(double));
-      memset(B[i],  0, n*sizeof(double));
-      //memset(B[i],  0, *sizeof(double));
+      memset(C[i],  0, n*sizeof(double));
    }
 
-   // int start = -k+1;
-   // int end = n-k;
-   // int desloc = k;
-   // for (int i=1; i < n; ++i) {
-   //    int max = n - ((end-i)*(i <= end));
+   for (int i=1; i < k; ++i) {
+      B[i] = B[i-1]+n;
+      memset(B[i],  0, n*sizeof(double));
+   }
 
-   //    A[i] = A[i-1]+desloc;
-
-   //    ++start;
-   //    desloc = max-start*(i>=k);
-   // }
-
-   //memset(A[0], 0, k*sizeof(double));
-
-   // end = n-k;
-   // desloc = k;
-   // start = -k+1;
-   // for(int i = 0; i < n; ++i){
-   //    //comeca em 0 até i >= k, e para em n-k até i <= n-k 
-   //    int max = n - ((end-i)*(i <= end));
-   //    desloc = max-start*(i>=k);
-   //    int jstart = start*(i>=k);
-
-   //    for(int j = 0; j < desloc; ++j){
-   //       A[i][j] = SL->A[i][j+jstart];
-   //       printf("%10g ", A[i][j]);
-   //    }
-   //    ++start;
-   //    printf("\n");
-   // }
+   memset(A[0],  0, k*sizeof(double));
+   memset(C[0],  0, n*sizeof(double));
 
    int jstart[n];
    int jend[n];
-
+   int start = 1;
    //cria matriz com diagonais
    for(int i = 0; i < n; ++i){
-      if(i < k-1){
+      if(i <= k/2){
          jstart[i] = 0;
          jend[i] = k-1;
       }
       else if(i < n-1){
-         jstart[i] = i-1;
-         jend[i] = i+k-2;
+         jstart[i] = start;
+         jend[i] = jstart[i]+k-1;
+         ++start;
       }
       else{
          jstart[i] = i-2;
@@ -286,14 +263,18 @@ int main(int argc, char **argv){
       int m = 0;
       for(int j = jstart[i]; j <= jend[i]; ++j){
          A[i][m] = SLorig->A[i][j];
-         printf("%10g ", A[i][m]);
          ++m;
+      }
+   }
+
+   for(int i = 0; i < n; ++i){
+      for(int j = 0; j < k; ++j){
+         printf("%10g ", A[i][j]);
       }
       printf("\n");
    }
    printf("\n");
 
-   //multiplica por ela mesma transposta
    //cria matriz com diagonais
    for(int i = 0; i < k; ++i){
       for(int j = 0; j < n; ++j){
@@ -304,6 +285,26 @@ int main(int argc, char **argv){
    for(int i = 0; i < k; ++i){
       for(int j = 0; j < n; ++j){
          printf("%10g ", B[i][j]);
+      }
+      printf("\n");
+   }
+   printf("\n");
+
+   for(int i = 0; i < k; ++i){
+
+      //calcula cada diagonal
+      for(int j = 0; j < n-i; ++j){
+         C[j][j+i] = 0.0;
+         //printf("%d,%d\n", j, j+i);
+         for(int m = 0; m < k; ++m){
+            C[j][j+i] += A[j][m] * B[m][j+i];
+         }
+      }
+   }
+
+   for(int i = 0; i < n; ++i){
+      for(int j = 0; j < n; ++j){
+         printf("%10g ", C[i][j]);
       }
       printf("\n");
    }
