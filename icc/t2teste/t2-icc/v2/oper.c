@@ -99,3 +99,21 @@ double normamaxAbs (double *v1, double *v2, int n){
 
    return maior;
 }
+
+//Retorna os valores de uma matriz simetrica
+double getMatSim(double **A, int i, int j){
+
+}
+
+//Calcula residuo do sistema tridiagonal
+//unroll e jam?
+double residuoDiag(double **A, double *b, double *x, double *r, int n, int k){
+
+}
+
+//Multiplica matriz simetrica com vetor
+void multMatSimVet(double **A, double *v, double *res, int n){
+}
+
+//aplicar unroll e jam nos acessos a vetor
+//usar structs nas matrizes para usar jstart e jend

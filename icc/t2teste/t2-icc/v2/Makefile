@@ -1,7 +1,7 @@
 # Gustavo do Prado Silva - 20203942 
 # Rafael Gonçalves dos Santos - 20211798
 
-CFLAGS = -Wall -g -lm
+CFLAGS = -g -lm -O3
 objects = main.o utils.o oper.o sistema.o metodos.o
 
 all: cgSolver

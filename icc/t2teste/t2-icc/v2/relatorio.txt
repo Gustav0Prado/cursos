@@ -1,0 +1,6 @@
+matrizes diagonai n*k, e faz apenas as contas sem os zeros, reduzindo a quantidade de contas necessaria
+matriz simetrica apenas com diagonal principal e superiores, reduz tambem operacoes e qtd de memoria necessaria (para 8000 == 55.979 vs 64.000.000)
+   * aparentemente precisao melhor, dadas comparacoes com outras calculadoras de mult de matriz
+unroll e jam????
+pre-condicionador como vetor
+flags do makefile
