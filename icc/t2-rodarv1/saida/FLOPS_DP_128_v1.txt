@@ -1,0 +1,72 @@
+--------------------------------------------------------------------------------
+CPU name:	Intel(R) Core(TM) i5-7500 CPU @ 3.40GHz
+CPU type:	Intel Coffeelake processor
+CPU clock:	3.41 GHz
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+Region op1-v1, Group 1: FLOPS_DP
++-------------------+----------+
+|    Region Info    |  Core 3  |
++-------------------+----------+
+| RDTSC Runtime [s] | 0.005921 |
+|     call count    |        1 |
++-------------------+----------+
+
++------------------------------------------+---------+----------+
+|                   Event                  | Counter |  Core 3  |
++------------------------------------------+---------+----------+
+|             INSTR_RETIRED_ANY            |  FIXC0  | 31419820 |
+|           CPU_CLK_UNHALTED_CORE          |  FIXC1  | 21971820 |
+|           CPU_CLK_UNHALTED_REF           |  FIXC2  | 19755610 |
+| FP_ARITH_INST_RETIRED_128B_PACKED_DOUBLE |   PMC0  |        0 |
+|    FP_ARITH_INST_RETIRED_SCALAR_DOUBLE   |   PMC1  |  9995068 |
+| FP_ARITH_INST_RETIRED_256B_PACKED_DOUBLE |   PMC2  |  1280960 |
++------------------------------------------+---------+----------+
+
++----------------------+-----------+
+|        Metric        |   Core 3  |
++----------------------+-----------+
+|  Runtime (RDTSC) [s] |    0.0059 |
+| Runtime unhalted [s] |    0.0064 |
+|      Clock [MHz]     | 3790.2850 |
+|          CPI         |    0.6993 |
+|      DP MFLOP/s      | 2553.2330 |
+|    AVX DP MFLOP/s    |  865.2978 |
+|    Packed MUOPS/s    |  216.3244 |
+|    Scalar MUOPS/s    | 1687.9352 |
+|  Vectorization ratio |   11.3600 |
++----------------------+-----------+
+
+Region op2-v1, Group 1: FLOPS_DP
++-------------------+----------+
+|    Region Info    |  Core 3  |
++-------------------+----------+
+| RDTSC Runtime [s] | 0.000012 |
+|     call count    |        1 |
++-------------------+----------+
+
++------------------------------------------+---------+--------+
+|                   Event                  | Counter | Core 3 |
++------------------------------------------+---------+--------+
+|             INSTR_RETIRED_ANY            |  FIXC0  |  54993 |
+|           CPU_CLK_UNHALTED_CORE          |  FIXC1  |  53522 |
+|           CPU_CLK_UNHALTED_REF           |  FIXC2  |  48280 |
+| FP_ARITH_INST_RETIRED_128B_PACKED_DOUBLE |   PMC0  |      0 |
+|    FP_ARITH_INST_RETIRED_SCALAR_DOUBLE   |   PMC1  |  16394 |
+| FP_ARITH_INST_RETIRED_256B_PACKED_DOUBLE |   PMC2  |   4160 |
++------------------------------------------+---------+--------+
+
++----------------------+--------------+
+|        Metric        |    Core 3    |
++----------------------+--------------+
+|  Runtime (RDTSC) [s] | 1.159978e-05 |
+| Runtime unhalted [s] | 1.570493e-05 |
+|      Clock [MHz]     |    3777.9947 |
+|          CPI         |       0.9733 |
+|      DP MFLOP/s      |    2847.8126 |
+|    AVX DP MFLOP/s    |    1434.5100 |
+|    Packed MUOPS/s    |     358.6275 |
+|    Scalar MUOPS/s    |    1413.3027 |
+|  Vectorization ratio |      20.2394 |
++----------------------+--------------+
+
