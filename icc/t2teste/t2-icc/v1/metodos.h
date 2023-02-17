@@ -6,7 +6,7 @@
 
 #include "sistema.h"
 
-double normaL2(double *r, int n, double *tempR);
+double normaL2(double *r, int n);
 
 void simetrizaSistema ();
 

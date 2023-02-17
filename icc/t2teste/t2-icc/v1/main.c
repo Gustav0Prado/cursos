@@ -39,7 +39,7 @@ int main(int argc, char **argv){
          switch(opt){
             case 'n':
                n = atoi(optarg);
-               if(n <= 10){
+               if(n <= 3){
                   fprintf(stderr, "ERRO: Tamanho do sistema linear precisa ser maior que 10\n");
                   return ERRINPUT;
                }
@@ -112,6 +112,8 @@ int main(int argc, char **argv){
    }
    SL->i = it;
 
+   prnSisLin(SL);
+
    //copia sistema original
    memcpy(SLorig->b, SL->b, sizeof(double)*n);
    for(int i = 0; i < n; ++i){
@@ -138,6 +140,8 @@ int main(int argc, char **argv){
    tempPC = timestamp();
 
    simetrizaSistema (SL);
+
+   prnSisLin(SL);
 
    if(p == 0){
       //cria matriz identidade; I^(-1) = I, diagonais = 1
@@ -185,10 +189,26 @@ int main(int argc, char **argv){
       tempMed = GradConjErr(SL, x, M, e, arq);
    }
 
-   //calcula residuo final
-   somaVetMatxVet(SLorig->A, SLorig->b, x, -1, r, n);
+   tempR = timestamp();
 
-   fprintf(arq, "# residuo: %.15g\n", normaL2(r, n, &tempR));
+   //calcula residuo final
+   residuo(SLorig->A, SLorig->b, x, r, n);
+
+   tempR = timestamp() - tempR;
+
+   printf("r: ");
+   for(int i = 0; i < n; ++i){
+      printf("%g ", r[i]);
+   }
+   printf("\n");
+
+   printf("x: ");
+   for(int i = 0; i < n; ++i){
+      printf("%g ", x[i]);
+   }
+   printf("\n");
+
+   fprintf(arq, "# residuo: %.15g\n", normaL2(r, n));
    fprintf(arq, "# Tempo PC: %.15g\n", tempPC);
    fprintf(arq, "# Tempo iter: %.15g\n", tempMed);
    fprintf(arq, "# Tempo residuo: %.15g\n", tempR);

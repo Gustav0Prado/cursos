@@ -70,6 +70,15 @@ void somaVetMatxVet(double **A, double *v1, double *v2, double m, double *res, i
    }
 }
 
+void residuo(double **A, double *b, double *x, double *res, int n){
+   double vNovo[n];
+   multMatVet(A, x, vNovo, n);
+
+   for(int i = 0; i < n; ++i){
+      res[i] = vNovo[i] - b[i];
+   }
+}
+
 // Encontra a maior diferenca relativa entre as respostas subsequentes
 // retorna max ( |xi - xi-1| / |xi| )
 double normamax (double *v1, double *v2, int n){

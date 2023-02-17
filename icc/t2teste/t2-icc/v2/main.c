@@ -88,39 +88,42 @@ int main(int argc, char **argv){
       return ERRINPUT;
    }
 
-   SL = alocaSisLin (n);
+   SL = alocaSisLin (n, k);
    //SL = alocaSisLin (n, k);
-   SistLinear_t* SLorig = alocaSisLin (n);
+   //SistLinear_t* SLorig = alocaSisLin (n);
 
    if(!SL){
       fprintf(stderr, "Erro de alocação!\n");
       exit(ERRALLOC);
    }
 
-   // gera os coeficientes da matriz
-   for (int i = 0; i < n; i++) {
-      for (int j = 0; j < n; j++) {
-         //zera elementos que nao estao nas diagonais
-         int banda = (k-1)/2;
-         if( j > i+banda || j < i-banda ){
-            SL -> A[i][j] = 0.0;
-         }
-         else{
-            SL -> A[i][j] = generateRandomA (i, j, k);
-         }
+   /* Salva inicio e final de cada diagonal */
+   for(int i = 0; i <= k/2; ++i){
+      SL->Diag.jstart[i] = 0;
+      SL->Diag.jend[i] = (k/2)+i;
+   }
+   for(int i = (k/2)+1; i < n-(k/2); ++i){
+      SL->Diag.jstart[i] = i-(k/2);
+      SL->Diag.jend[i] = SL->Diag.jstart[i]+k-1;
+   }
+   for(int i = n-(k/2); i < n ;++i){
+      SL->Diag.jstart[i] = i-(k/2);
+      SL->Diag.jend[i] = n-1;
+   }
+
+   /* Cria matriz n*k com as diagonais */
+   for(int i = 0; i < n; ++i){
+      int m = 0;
+      //Gera coeficientes aleatorios
+      for(int j = SL->Diag.jstart[i]; j <= SL->Diag.jend[i]; ++j){
+         SL->Diag.A[i][m] = generateRandomA(i, j, k);
+         ++m;
       }
-      SL -> b[i] = generateRandomB (k);
+      SL ->Diag.b[i] = generateRandomB (k);
    }
    SL->i = it;
 
-   //prnSisLin(SL);
-
-   //copia sistema original
-   memcpy(SLorig->b, SL->b, sizeof(double)*n);
-   for(int i = 0; i < n; ++i){
-      memcpy(SLorig->A[i], SL->A[i], sizeof(double)*n);
-   }
-   SLorig->n = SL->n;
+   prnSisLinDiag(SL);
 
    //vetores do residuo e x inicial e matrix pre-condicionadora
    double *r   = malloc(sizeof(double)*n);
@@ -134,7 +137,7 @@ int main(int argc, char **argv){
    }
 
    //inicializa x = 0
-   memset(x, 0, SL->n*sizeof(*x));
+   memset(x, 0, SL->n*sizeof(double));
    
    // se p = 0, M = I
    // se p > 0, M = D
@@ -163,7 +166,7 @@ int main(int argc, char **argv){
             exit(ERRALLOC);
          }
          memset(M[i], 0, n*sizeof(double));
-         M[i][i] = SL->A[i][i] * (1 / (SL->A[i][i] * SL->A[i][i]));
+         M[i][i] = SL->Diag.A[i][0] * (1 / (SL->Diag.A[i][0] * SL->Diag.A[i][0]));
       }
    }
    tempPC = timestamp() - tempPC;
@@ -188,12 +191,13 @@ int main(int argc, char **argv){
       tempMed = GradConjErr(SL, x, M, e, arq);
    }
 
-   //prnSisLin(SL);
+   prnSisLinSim(SL);
 
    //calcula residuo final
-   somaVetMatxVet(SLorig->A, SLorig->b, x, -1, r, n);
+   memset(r, 0, n*sizeof(double));
+   tempR = residuoDiag(SL, SL->Diag.b, x, r);
 
-   fprintf(arq, "# residuo: %.15g\n", normaL2(r, n, &tempR));
+   fprintf(arq, "# residuo: %.15g\n", normaL2(r, n));
    fprintf(arq, "# Tempo PC: %.15g\n", tempPC);
    fprintf(arq, "# Tempo iter: %.15g\n", tempMed);
    fprintf(arq, "# Tempo residuo: %.15g\n", tempR);
@@ -209,189 +213,6 @@ int main(int argc, char **argv){
    //fecha arquivo de saida
    fclose(arq);
 
-
-
-   //Teste com matrizes
-   // Matriz como vetor de N ponteiros para um único vetor com N*N elementos
-   double **A = malloc(n * sizeof(double *));
-   double **B = malloc(k * sizeof(double *));
-   double **D = malloc(n * sizeof(double *));
-   int tam = ((n-k+1)*k) + ((k-1)*(k))/2;
-
-   A[0] = (double *) malloc( n*k * sizeof(double));
-   B[0] = (double *) malloc( n*k * sizeof(double));
-   D[0] = (double *) malloc( tam * sizeof(double));
-
-
-   for (int i=1; i < n; ++i) {
-
-      A[i] = A[i-1]+k;
-      memset(A[i],  0, k*sizeof(double));
-   }
-
-   for (int i=1; i < k; ++i) {
-      B[i] = B[i-1]+n;
-      memset(B[i],  0, n*sizeof(double));
-   }
-
-   for (int i=1; i <= n-k+1; ++i) {
-      D[i] = D[i-1]+k;
-      memset(D[i],  0, k*sizeof(double));
-   }
-
-   for (int i = n-k+2; i < n; ++i) {
-      D[i] = D[i-1]+(n-i+1);
-      memset(D[i],  0, (n-i)*sizeof(double));
-   }
-
-   memset(A[0],  0, k*sizeof(double));
-   memset(D[0],  0, k*sizeof(double));
-
-   int jstart[n];
-   int jend[n];
-   int start = 1;
-   
-   /* Salva inicio e final de cada diagonal */
-   for(int i = 0; i <= k/2; ++i){
-      jstart[i] = 0;
-      jend[i] = k-1;
-   }
-   for(int i = (k/2)+1; i < n-(k/2); ++i){
-      //jstart[i] = start;
-      jstart[i] = i-(k/2);
-      jend[i] = jstart[i]+k-1;
-      ++start;
-   }
-   for(int i = n-(k/2); i < n ;++i){
-      jstart[i] = i-(k/2);
-      jend[i] = n-1;
-   }
-
-   /* Cria matriz n*k com as diagonais */
-   for(int i = 0; i < n; ++i){
-      //printf("%d, %d\n", jstart[i], jend[i]);
-
-      int m = 0;
-      for(int j = jstart[i]; j <= jend[i]; ++j){
-         A[i][m] = SLorig->A[i][j];
-         ++m;
-      }
-   }
-
-   for(int i = 0; i < n; ++i){
-      for(int j = 0; j < k; ++j){
-         printf("%10g ", A[i][j]);
-      }
-      printf("\n");
-   }
-   printf("\n");
-
-   /* Cria matriz k*n transposta */
-   for(int i = 0; i < k; ++i){
-      for(int j = 0; j < n; ++j){
-         B[i][j] = A[j][i];
-      }
-   }
-
-   for(int i = 0; i < k; ++i){
-      for(int j = 0; j < n; ++j){
-         printf("%10g ", B[i][j]);
-      }
-      printf("\n");
-   }
-   printf("\n");
-
-   /* Cria matriz simetrica, com apenas diagonais da principal para cima */
-   for(int i = 0; i < n; ++i){
-      //calcula diagonal principal
-      for(int j = 0; j < n-i; ++j){
-         D[j][i];
-         int m = jstart[j+i]-jstart[j];
-         int l = 0;
-         
-         while(m < k){
-            D[j][i] += A[j][m] * B[l][j+i];
-            ++m;
-            ++l;
-         }
-      }
-   }
-
-   /* Teste de mult com vetor */
-   double vet[n];
-   double vetResSim[n];
-
-   for(int i = 0; i < n; ++i){
-      vet[i] = i+1;
-      vetResSim[i] = 0.0;
-   }
-   printf("\n\n");
-
-   int simjstart[n];
-   int simjend[n];
-   start = 1;
-   
-   /* Salva inicio e final de cada linha */
-   for(int i = 0; i <= n-k; ++i){
-      simjstart[i] = i;
-      simjend[i] = k+i-1;
-      //printf("%d,%d\n", simjstart[i], simjend[i]);
-   }
-   for(int i = n-k+1; i < n; ++i){
-      simjstart[i] = i;
-      simjend[i] = n-1;
-      //printf("%d,%d\n", simjstart[i], simjend[i]);
-   }
-
-   /* linhas com tamanho k */
-   for (int i = 0; i <= n-k; ++i) {
-      for(int j = 0; j < k; ++j){
-         printf("%10g ", D[i][j]);
-      }
-      printf("\n");
-   }
-
-   /* linhas comecam a diminuir */
-   for (int i = n-k+1; i < n; ++i) {
-      for(int j = 0; j < n-i; ++j){
-         printf("%10g ", D[i][j]);
-      }
-      printf("\n");
-   }
-
-   printf("\n");
-
-   /* multiplica com vetor */
-   for (int i = 0; i < n; ++i) {
-      int maxj = simjend[i]-simjstart[i]+1;
-      for(int j = 0; j < maxj; ++j){
-         //printf("%10g += %10g * %2g\n", vetRes[i], D[i][j], vet[simjstart[i]+j]);
-         vetResSim[i] += D[i][j] * vet[simjstart[i]+j];
-      }
-   }
-
-   /* multiplica valores simetricos com vetor */
-   for (int i = 1; i < n; ++i) {
-      int ii = i-1;
-      int jj = 1;
-
-      while(jj < k && ii >= 0){
-         vetResSim[i] += D[ii][jj] * vet[ii];
-         ii--;
-         jj++;
-      }
-   }
-   printf("\n");
-
-   /* Desaloca estruturas */
-   free (A[0]);
-   free(A);
-   free (B[0]);
-   free(B);
-   free (D[0]);
-   free(D);
-
-
    //libera estruturas
    free(x);
    free(r);
@@ -400,7 +221,6 @@ int main(int argc, char **argv){
    }
    free (M);
    liberaSisLin (SL);
-   liberaSisLin (SLorig);
 
    return 0;
 }

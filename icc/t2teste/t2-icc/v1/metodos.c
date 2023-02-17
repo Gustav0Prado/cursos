@@ -11,15 +11,11 @@
 #include "utils.h"
 
 //calcula norma L2 do residuo
-double normaL2(double *r, int n, double *tempR){
-   *tempR = timestamp();
-
+double normaL2(double *r, int n){
    double soma = 0.0;
    for(int i = 0; i < n; ++i){
       soma += r[i]*r[i];
    }
-
-   *tempR = timestamp() - (*tempR);
 
    return sqrt(soma);
 }
@@ -102,7 +98,10 @@ double GradConjIt(SistLinear_t *SL, double *x, double **M, FILE *arq){
 
    for(int iter = 0; iter < SL->i; ++iter){
       //alpha(k) := r(k)T*z(k) / p(k)T*A*p(k)
-      double alpha = (multVetVet(r, z, SL->n)) / (multVetMatVet(p, SL->A, p, SL->n));
+      //double alpha = (multVetVet(r, z, SL->n)) / (multVetMatVet(p, SL->A, p, SL->n));
+      double a = (multVetVet(r, z, SL->n));
+      double b = (multVetMatVet(p, SL->A, p, SL->n));
+      double alpha = a/b;
       if(isnan(alpha) || isinf(alpha)){
          break;
       }

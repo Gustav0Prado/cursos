@@ -2,8 +2,36 @@
 //Rafael Gonçalves dos Santos - 20211798
 
 #include "oper.h"
+#include "sistema.h"
 #include "utils.h"
 #include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+
+//Multiplica matriz simetrica com vetor
+void multMatSimVet(SistLinear_t *SL, double *vet, double *res, int n){
+   /* multiplica com vetor */
+   int k = SL->k;
+
+   for (int i = 0; i < n; ++i) {
+      int maxj = SL->Sim.jend[i]-SL->Sim.jstart[i]+1;
+      for(int j = 0; j < maxj; ++j){
+         res[i] += SL->Sim.A[i][j] * vet[SL->Sim.jstart[i]+j];
+      }
+   }
+
+   /* multiplica valores simetricos com vetor */
+   for (int i = 1; i < n; ++i) {
+      int ii = i-1;
+      int jj = 1;
+
+      while(jj < SL->k && ii >= 0){
+         res[i] += SL->Sim.A[ii][jj] * vet[ii];
+         ii--;
+         jj++;
+      }
+   }
+}
 
 //Multiplica dois vetores (produto escalar)
 double multVetVet(double *v1, double *v2, int n){
@@ -16,7 +44,7 @@ double multVetVet(double *v1, double *v2, int n){
    return soma;
 }
 // Multiplica duas matrizes de mesma ordem
-double **multMatMat (double **m1, double **m2, double **mRes, int n) {
+void multMatMat (double **m1, double **m2, double **mRes, int n) {
   for (int i = 0; i < n; i++) {
     for (int j = 0; j < n; j++) {
       mRes[i][j] = 0.0;
@@ -25,8 +53,6 @@ double **multMatMat (double **m1, double **m2, double **mRes, int n) {
       }
     }
   }
-
-  return mRes;
 }
 
 //Soma cada elemento de um vetor v1 com de o v2 multiplicado por m, devolve um vetor res
@@ -50,24 +76,33 @@ void multMatVet(double **A, double *v, double *res, int n){
 
 //Multiplica um vetor v1 com uma matriz, e o vetor resultante é multiplicado com um vetor v2
 //retorna v1*A*v2
-double multVetMatVet(double *v1, double **A, double *v2, int n){
-   double aux[n];
+double multVetMatVet(double *v1, SistLinear_t *SL, double *v2, int n){
+   double *aux = malloc(n*sizeof(double));
+   memset(aux, 0, n*sizeof(double));
 
-   multMatVet(A, v1, aux, n);
+   multMatSimVet(SL, v1, aux, n);
 
    //retorna a multiplicacao do vetor resultante com o segundo vetor
-   return multVetVet(aux, v2, n);
+   double retorno = multVetVet(aux, v2, n);
+
+   free(aux);
+
+   return retorno;
 }
 
 //Multiplica o vetor v2 e a matriz A, e os valores vetor resultante, multiplicados por m, são somados com os valores de v1
 //res = v1 + mAv2
-void somaVetMatxVet(double **A, double *v1, double *v2, double m, double *res, int n){
-   double vNovo[n];
-   multMatVet(A, v2, vNovo, n);
+void somaVetMatxVet(SistLinear_t *SL, double *v1, double *v2, double m, double *res, int n){
+   double *aux = malloc(n*sizeof(double));
+   memset(aux, 0, n*sizeof(double));
+
+   multMatSimVet(SL, v2, aux, n);
 
    for(int i = 0; i < n; ++i){
-      res[i] = v1[i] + m*vNovo[i];
+      res[i] = v1[i] + m*aux[i];
    }
+
+   free(aux);
 }
 
 // Encontra a maior diferenca relativa entre as respostas subsequentes
@@ -100,20 +135,32 @@ double normamaxAbs (double *v1, double *v2, int n){
    return maior;
 }
 
-//Retorna os valores de uma matriz simetrica
-double getMatSim(double **A, int i, int j){
-
-}
-
 //Calcula residuo do sistema tridiagonal
-//unroll e jam?
-double residuoDiag(double **A, double *b, double *x, double *r, int n, int k){
+double residuoDiag(SistLinear_t *SL, double *b, double *x, double *r){
+   int n = SL->n;
+   int k = SL->k;
 
+   double tempoR = timestamp();
+
+   for(int i = 0; i < n; ++i){
+      int m = SL->Diag.jstart[i];
+      for(int j = 0; (j < k) && (m+j < n); ++j){
+         r[i] += SL->Diag.A[i][j] * x[m+j];
+      }
+      r[i] -= SL->Diag.b[i];
+   }
+
+   printf("r: ");
+   for(int i = 0; i < n; ++i){
+      printf("%g ", r[i]);
+   }
+   printf("\n");
+
+   printf("x: ");
+   for(int i = 0; i < n; ++i){
+      printf("%g ", x[i]);
+   }
+   printf("\n");
+
+   return timestamp() - tempoR;
 }
-
-//Multiplica matriz simetrica com vetor
-void multMatSimVet(double **A, double *v, double *res, int n){
-}
-
-//aplicar unroll e jam nos acessos a vetor
-//usar structs nas matrizes para usar jstart e jend
