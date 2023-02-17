@@ -102,10 +102,7 @@ double GradConjIt(SistLinear_t *SL, double *x, double **M, FILE *arq){
 
    for(int iter = 0; iter < SL->i; ++iter){
       //alpha(k) := r(k)T*z(k) / p(k)T*A*p(k)
-      //double alpha = (multVetVet(r, z, SL->n)) / (multVetMatVet(p, SL->A, p, SL->n));
-      double a = (multVetVet(r, z, SL->n));
-      double b = (multVetMatVet(p, SL->A, p, SL->n));
-      double alpha = a/b;
+      double alpha = (multVetVet(r, z, SL->n)) / (multVetMatVet(p, SL->A, p, SL->n));
       if(isnan(alpha) || isinf(alpha)){
          break;
       }
