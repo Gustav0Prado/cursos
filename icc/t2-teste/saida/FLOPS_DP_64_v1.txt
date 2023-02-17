@@ -1,0 +1,72 @@
+--------------------------------------------------------------------------------
+CPU name:	Intel(R) Pentium(R) CPU G4560 @ 3.50GHz
+CPU type:	Intel Coffeelake processor
+CPU clock:	3.50 GHz
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+Region op1-v1, Group 1: FLOPS_DP
++-------------------+------------+
+|    Region Info    | HWThread 1 |
++-------------------+------------+
+| RDTSC Runtime [s] |   0.001688 |
+|     call count    |          1 |
++-------------------+------------+
+
++------------------------------------------+---------+------------+
+|                   Event                  | Counter | HWThread 1 |
++------------------------------------------+---------+------------+
+|             INSTR_RETIRED_ANY            |  FIXC0  |   11208130 |
+|           CPU_CLK_UNHALTED_CORE          |  FIXC1  |    5861147 |
+|           CPU_CLK_UNHALTED_REF           |  FIXC2  |    5867740 |
+| FP_ARITH_INST_RETIRED_128B_PACKED_DOUBLE |   PMC0  |     664512 |
+|    FP_ARITH_INST_RETIRED_SCALAR_DOUBLE   |   PMC1  |    2527800 |
+| FP_ARITH_INST_RETIRED_256B_PACKED_DOUBLE |   PMC2  |          0 |
++------------------------------------------+---------+------------+
+
++----------------------+------------+
+|        Metric        | HWThread 1 |
++----------------------+------------+
+|  Runtime (RDTSC) [s] |     0.0017 |
+| Runtime unhalted [s] |     0.0017 |
+|      Clock [MHz]     |  3499.6217 |
+|          CPI         |     0.5229 |
+|     DP [MFLOP/s]     |  2285.0135 |
+|   AVX DP [MFLOP/s]   |          0 |
+|   Packed [MUOPS/s]   |   393.6967 |
+|   Scalar [MUOPS/s]   |  1497.6201 |
+|  Vectorization ratio |    20.8160 |
++----------------------+------------+
+
+Region op2-v1, Group 1: FLOPS_DP
++-------------------+------------+
+|    Region Info    | HWThread 1 |
++-------------------+------------+
+| RDTSC Runtime [s] |   0.000004 |
+|     call count    |          1 |
++-------------------+------------+
+
++------------------------------------------+---------+------------+
+|                   Event                  | Counter | HWThread 1 |
++------------------------------------------+---------+------------+
+|             INSTR_RETIRED_ANY            |  FIXC0  |      23645 |
+|           CPU_CLK_UNHALTED_CORE          |  FIXC1  |      22099 |
+|           CPU_CLK_UNHALTED_REF           |  FIXC2  |      21900 |
+| FP_ARITH_INST_RETIRED_128B_PACKED_DOUBLE |   PMC0  |       2080 |
+|    FP_ARITH_INST_RETIRED_SCALAR_DOUBLE   |   PMC1  |       4111 |
+| FP_ARITH_INST_RETIRED_256B_PACKED_DOUBLE |   PMC2  |          0 |
++------------------------------------------+---------+------------+
+
++----------------------+--------------+
+|        Metric        |  HWThread 1  |
++----------------------+--------------+
+|  Runtime (RDTSC) [s] | 4.099915e-06 |
+| Runtime unhalted [s] | 6.307587e-06 |
+|      Clock [MHz]     |    3535.3943 |
+|          CPI         |       0.9346 |
+|     DP [MFLOP/s]     |    2017.3589 |
+|   AVX DP [MFLOP/s]   |            0 |
+|   Packed [MUOPS/s]   |     507.3276 |
+|   Scalar [MUOPS/s]   |    1002.7037 |
+|  Vectorization ratio |      33.5972 |
++----------------------+--------------+
+

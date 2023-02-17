@@ -1,0 +1,72 @@
+--------------------------------------------------------------------------------
+CPU name:	Intel(R) Pentium(R) CPU G4560 @ 3.50GHz
+CPU type:	Intel Coffeelake processor
+CPU clock:	3.50 GHz
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+Region op1-v2, Group 1: L3
++-------------------+------------+
+|    Region Info    | HWThread 1 |
++-------------------+------------+
+| RDTSC Runtime [s] |   0.051886 |
+|     call count    |          1 |
++-------------------+------------+
+
++-----------------------+---------+------------+
+|         Event         | Counter | HWThread 1 |
++-----------------------+---------+------------+
+|   INSTR_RETIRED_ANY   |  FIXC0  |  307298300 |
+| CPU_CLK_UNHALTED_CORE |  FIXC1  |  177948900 |
+|  CPU_CLK_UNHALTED_REF |  FIXC2  |  178151700 |
+|    L2_LINES_IN_ALL    |   PMC0  |    5354696 |
+|     L2_TRANS_L2_WB    |   PMC1  |    1379522 |
++-----------------------+---------+------------+
+
++-------------------------------+------------+
+|             Metric            | HWThread 1 |
++-------------------------------+------------+
+|      Runtime (RDTSC) [s]      |     0.0519 |
+|      Runtime unhalted [s]     |     0.0508 |
+|          Clock [MHz]          |  3499.9833 |
+|              CPI              |     0.5791 |
+|  L3 load bandwidth [MBytes/s] |  6604.8839 |
+|  L3 load data volume [GBytes] |     0.3427 |
+| L3 evict bandwidth [MBytes/s] |  1701.6060 |
+| L3 evict data volume [GBytes] |     0.0883 |
+|    L3 bandwidth [MBytes/s]    |  8306.4899 |
+|    L3 data volume [GBytes]    |     0.4310 |
++-------------------------------+------------+
+
+Region op2-v2, Group 1: L3
++-------------------+------------+
+|    Region Info    | HWThread 1 |
++-------------------+------------+
+| RDTSC Runtime [s] |   0.000910 |
+|     call count    |          1 |
++-------------------+------------+
+
++-----------------------+---------+------------+
+|         Event         | Counter | HWThread 1 |
++-----------------------+---------+------------+
+|   INSTR_RETIRED_ANY   |  FIXC0  |    6107330 |
+| CPU_CLK_UNHALTED_CORE |  FIXC1  |    2822469 |
+|  CPU_CLK_UNHALTED_REF |  FIXC2  |    2824954 |
+|    L2_LINES_IN_ALL    |   PMC0  |      13572 |
+|     L2_TRANS_L2_WB    |   PMC1  |       2107 |
++-----------------------+---------+------------+
+
++-------------------------------+------------+
+|             Metric            | HWThread 1 |
++-------------------------------+------------+
+|      Runtime (RDTSC) [s]      |     0.0009 |
+|      Runtime unhalted [s]     |     0.0008 |
+|          Clock [MHz]          |  3500.8898 |
+|              CPI              |     0.4621 |
+|  L3 load bandwidth [MBytes/s] |   954.4608 |
+|  L3 load data volume [GBytes] |     0.0009 |
+| L3 evict bandwidth [MBytes/s] |   148.1763 |
+| L3 evict data volume [GBytes] |     0.0001 |
+|    L3 bandwidth [MBytes/s]    |  1102.6371 |
+|    L3 data volume [GBytes]    |     0.0010 |
++-------------------------------+------------+
+
