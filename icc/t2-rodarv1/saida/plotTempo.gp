@@ -11,9 +11,13 @@ set xtics
 set xrange ["0":]
 set xlabel  "N (tamanho da matriz)"
 dir = system("dirname ".ARG0)."/"
+set logscale x
+set key outside
 
 set ylabel  "Segundos"
-set title   "Tempo - op1"
-set terminal qt 0 title "Tempo - op1"
-plot dir.'plot_op1-Tempo.dat' using 1:2 title "<op1-v1>" with linespoints, \
-     dir.'plot_op2-Tempo.dat' using 1:2 title "<op2-v1>" with linespoints
+set title   "Tempo - v1 x v2"
+set terminal qt 0 title "Tempo - v1 x v2"
+plot dir.'plot_Tempo-v1.dat' using 1:2 title "<op1-v1>" with linespoints, \
+     '' using 1:2 title "<op2-v1>" with linespoints, \
+     dir.'plot_Tempo-v2.dat' using 1:2 title "<op1-v2>" with linespoints, \
+     '' using 1:2 title "<op2-v2>" with linespoints

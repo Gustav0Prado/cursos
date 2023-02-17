@@ -1,7 +1,7 @@
 # Gustavo do Prado Silva - 20203942 
 # Rafael Gonçalves dos Santos - 20211798
 
-CFLAGS = -Wall -g -lm -DLIKWID_PERFMON -I${LIKWID_INCLUDE} -L${LIKWID_LIB} -llikwid  -O3 -mavx -march=native
+CFLAGS = -Wall -g -lm -DLIKWID_PERFMON -I${LIKWID_INCLUDE} -L${LIKWID_LIB} -llikwid  -O3 -march=native
 objects = main.o utils.o oper.o sistema.o metodos.o
 
 all: cgSolver

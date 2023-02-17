@@ -5,6 +5,7 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
+#include <likwid.h>
 
 #include "sistema.h"
 #include "utils.h"
@@ -12,11 +13,14 @@
 #include "metodos.h"
 
 int main(int argc, char **argv){
+   
+   LIKWID_MARKER_INIT;
+
    int opt;
    int n, k, p, it;
    double e = -1;
    char *saida;
-   FILE *arq;
+   FILE *arq, *fdone, *arqTempo;
    
    double tempMed = 0.0;
    double tempR   = 0.0;
@@ -176,6 +180,11 @@ int main(int argc, char **argv){
    fprintf(arq, "# rgs21 Rafael Gonçalves\n");
    fprintf(arq, "#\n");
 
+   double tempoOp1 = timestamp();
+
+   LIKWID_MARKER_REGISTER("op1-v1");
+   LIKWID_MARKER_START("op1-v1");
+
    //sem erro definido, apenas faz iteracoes
    if(e == -1){
       tempMed = GradConjIt(SL, x, M, arq);
@@ -185,8 +194,45 @@ int main(int argc, char **argv){
       tempMed = GradConjErr(SL, x, M, e, arq);
    }
 
+   LIKWID_MARKER_STOP("op1-v1");
+
+   tempoOp1 = timestamp() - tempoOp1;
+
+   double tempoOp2 = timestamp();
+
+   LIKWID_MARKER_REGISTER("op2-v1");
+   LIKWID_MARKER_START("op2-v1");
+
    //calcula residuo final
    somaVetMatxVet(SLorig->A, SLorig->b, x, -1, r, n);
+
+   LIKWID_MARKER_STOP("op2-v1");
+
+   tempoOp2 = timestamp() - tempoOp2;
+
+
+   //Escreve no arquivo com tempos
+   //abre arquivo com os tempos para escrita
+   char diretorio[256];
+   char done[256];
+   getcwd(diretorio, sizeof(diretorio));
+   strncpy(done, diretorio, 256);
+
+   strcat(diretorio, "/saida/plot_Tempo-v2.dat");
+   strcat(done, "/saida/done-v2");
+
+   /* checa se arquivo "done" ja existe, se sim entao o loop foi rodado uma vez
+      se nao coloca as informacoes de tempo em modo append, assim pega os tempos apenas uma vez
+   */
+   if((fdone = fopen(done, "r")) == NULL){   
+      arqTempo = fopen(diretorio, "a");
+      if(!arqTempo){
+         fprintf(stderr, "Erro ao criar arquivo com tempos!\n");
+         return ERROUTPUT;
+      }
+      fprintf(arqTempo, "%d %.5g %.5g\n", n, tempoOp1, tempoOp2);
+      fclose(arqTempo);
+   }
 
    fprintf(arq, "# residuo: %.15g\n", normaL2(r, n, &tempR));
    fprintf(arq, "# Tempo PC: %.15g\n", tempPC);
@@ -212,6 +258,8 @@ int main(int argc, char **argv){
    }
    free (M);
    liberaSisLin (SL);
+
+   LIKWID_MARKER_CLOSE;
 
    return 0;
 }

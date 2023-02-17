@@ -1,0 +1,9 @@
+v1/*.o
+v2/*.o
+.vscode
+v1/cgSolver
+v2/cgSolver
+v1/*.txt
+v1/*.log
+v2/*.txt
+v2/*.log
