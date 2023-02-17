@@ -7,3 +7,5 @@ v1/*.txt
 v1/*.log
 v2/*.txt
 v2/*.log
+saida/*.dat
+saida/*.txt
