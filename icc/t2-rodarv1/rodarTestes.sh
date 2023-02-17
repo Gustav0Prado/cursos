@@ -37,7 +37,7 @@ do
       do
          printf "\tExecutando teste para N = $N\n"    
          FILE=${O}_${N}_${V}
-         ./perfctr $CORES $O ./$V/cgSolver -i 150 -p 0 -o ./$V/saida$N.txt -n $N -k 7 > ./saida/$FILE.txt
+         likwid-perfctr -C $CORES -g $O -m ./$V/cgSolver -i 150 -p 0 -o ./$V/saida$N.txt -n $N -k 7 > ./saida/$FILE.txt
 
          case $O in
 
