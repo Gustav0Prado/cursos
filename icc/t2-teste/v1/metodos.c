@@ -100,7 +100,8 @@ double GradConjIt(SistLinear_t *SL, double *x, double **M, FILE *arq){
    //p0 = z0
    memcpy(p, z, SL->n * sizeof(double));
 
-   for(int iter = 0; iter < SL->i; ++iter){
+   int iter = 0;
+   while(iter < SL->i){
       //alpha(k) := r(k)T*z(k) / p(k)T*A*p(k)
       double alpha = (multVetVet(r, z, SL->n)) / (multVetMatVet(p, SL->A, p, SL->n));
       if(isnan(alpha) || isinf(alpha)){
@@ -136,6 +137,8 @@ double GradConjIt(SistLinear_t *SL, double *x, double **M, FILE *arq){
       memcpy(p, p1, SL->n * sizeof(double));
       //z = z1
       memcpy(z, z1, SL->n * sizeof(double));
+
+      iter++;
    }
 
    free(x1);
@@ -179,7 +182,8 @@ double GradConjErr(SistLinear_t *SL, double *x, double **M, double err, FILE *ar
    //p0 = z0
    memcpy(p, z, SL->n * sizeof(double));
 
-   for(int iter = 0; iter < SL->i; ++iter){
+   int iter = 0;
+   while(iter < SL->i){
       //alpha(k) := r(k)T*z(k) / p(k)T*A*p(k)
       double alpha = (multVetVet(r, z, SL->n)) / (multVetMatVet(p, SL->A, p, SL->n));
       if(isnan(alpha) || isinf(alpha)){
@@ -220,6 +224,8 @@ double GradConjErr(SistLinear_t *SL, double *x, double **M, double err, FILE *ar
       memcpy(p, p1, SL->n * sizeof(double));
       //z = z1
       memcpy(z, z1, SL->n * sizeof(double));
+
+      iter++;
    }
 
    free(x1);

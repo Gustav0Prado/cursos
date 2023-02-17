@@ -9,3 +9,4 @@ v2/*.txt
 v2/*.log
 saida/*.dat
 saida/*.txt
+saida/done-*
