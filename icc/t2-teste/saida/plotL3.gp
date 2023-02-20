@@ -17,7 +17,7 @@ set key outside
 set ylabel  "M/Bytes"
 set title   "L3 Bandwidth - v1 x v2"
 set terminal qt 0 title "L3 Bandwidth - v1 x v2"
-plot dir.'plot_L3-v1.dat' using 1:2 title "<op1-v1>" with linespoints, \
+plot dir.'dados_L3-v1.dat' using 1:2 title "<op1-v1>" with linespoints, \
      '' using 1:3 title "<op2-v1>" with linespoints, \
-     dir.'plot_L3-v2.dat' using 1:2 title "<op1-v2>" with linespoints, \
+     dir.'dados_L3-v2.dat' using 1:2 title "<op1-v2>" with linespoints, \
      '' using 1:3 title "<op2-v2>" with linespoints

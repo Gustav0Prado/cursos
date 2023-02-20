@@ -14,14 +14,19 @@
 //calcula norma L2 do residuo
 double normaL2(double *r, int n){
    double soma = 0.0;
-   for(int i = 0; i < n; ++i){
-      soma += r[i]*r[i];
+   for(int i = 0; i < n-n%UNROLL; i+=UNROLL){
+      soma += r[i]*r[i]     + r[i+1]*r[i+1] + 
+              r[i+2]*r[i+2] + r[i+3]*r[i+3];
+   }
+   /* residuo do calculo */
+   for(int i = n-n%UNROLL; i < n; ++i) {
+      soma   += r[i]*r[i];
    }
 
    return sqrt(soma);
 }
 
-double getTransp(double **A, int i, int j, int k){
+double getTransp(double *A, int i, int j, int k, int n){
    int diff = j-i;
 
    if(diff > (k/2) || diff < -(k/2)){
@@ -29,11 +34,11 @@ double getTransp(double **A, int i, int j, int k){
    }
    else{
       int ind = (k/2)-diff; 
-      return A[ind][j];
+      return A[n*ind+j];
    }
 }
 
-double getDiag(double **A, int i, int j, int k){
+double getDiag(double *A, int i, int j, int k){
    int diff = j-i;
 
    if(diff > (k/2) || diff < -(k/2)){
@@ -41,12 +46,13 @@ double getDiag(double **A, int i, int j, int k){
    }
    else{
       int ind = (k/2)+diff; 
-      return A[i][ind];
+      return A[k*i+ind];
    }
 }
 
 void simetrizaSistema (SistLinear_t *SL) {
-   double **M_trans = malloc(SL->k * sizeof(double *));
+   double *M_trans = malloc(SL->k * SL->n * sizeof(double));
+   memset(M_trans, 0, SL->n*SL->k*sizeof(double));
    
    int k = SL->k;
    int n = SL->n;
@@ -56,32 +62,53 @@ void simetrizaSistema (SistLinear_t *SL) {
       exit(ERRALLOC);
    }
 
-   // inicializa as duas matrizes
-   // cria a matriz trasnposta
-   for (int i = 0; i < SL->k; i++) {
-      M_trans[i] = malloc(sizeof(double)*SL ->n);
-      memset(M_trans[i], 0, SL->n*sizeof(double));
+   /* Cria matriz k*n transposta 
+      indice eh ((n de linhas)*linha)+coluna
+   */
+   for (int ii = 0; ii < k/UNROLL; ++ii) {
+      int istart = ii*UNROLL; int iend = istart+UNROLL;
 
-      /* Cria matriz k*n transposta */
-      for(int j = 0; j < SL->n; ++j){
-         M_trans[i][j] = SL->Diag.A[j][i];
+      for(int jj = 0; jj < n/UNROLL; ++jj){
+         int jstart = jj*UNROLL; int jend = jstart+UNROLL;
+
+         for (int i = istart; i < iend; i+=UNROLL) {
+            for(int j = jstart; j < jend; ++j){
+               M_trans[n*(i)+j]   = SL->Diag.A[k*j+(i)];
+               M_trans[n*(i+1)+j] = SL->Diag.A[k*j+(i+1)];
+               M_trans[n*(i+2)+j] = SL->Diag.A[k*j+(i+2)];
+               M_trans[n*(i+3)+j] = SL->Diag.A[k*j+(i+3)];
+            }
+         }
       }
    }
-   
+
+   //Residuo do blocking
+   /* Colunas fora dos blocos */
+   for(int i = 0; i < k-k%UNROLL; ++i){
+      for(int j = n-n%UNROLL; j < n; ++j){
+         M_trans[n*i+j] = SL->Diag.A[k*j+i];
+      }
+   }
+   /*Linhas fora dos blocos*/
+   for(int i = k-k%UNROLL; i < k; ++i){
+      for(int j = 0; j < n; ++j){
+         M_trans[n*i+j] = SL->Diag.A[k*j+i];
+      }
+   }
+
    /* Cria matriz simetrica, com apenas diagonais da principal para cima
       Para cada coluna (i), calcula a linha (j)
       Cada coluna vai representar uma diagonal
       Na multiplicação, leva em conta o deslocamento (m) da linha, assim nao precisa calcular
       com os 0s (que nao estao nas matrizes)
       matriz é At*A
+      indice eh (n de linhas(*linha)+coluna
    */
    for(int i = 0; i < k; ++i){
       for(int j = 0; j < n-i; ++j){
-         SL->Sim.A[j][i] = 0.0;
-         int l = 0;
-         
+         SL->Sim.A[k*j+i] = 0.0;
          for(int l = 0; l < n; ++l){
-            SL->Sim.A[j][i] += getTransp(M_trans, j, l, k) * getDiag(SL->Diag.A, l, j+i, k);
+            SL->Sim.A[k*j+i] += getTransp(M_trans, j, l, k, n) * getDiag(SL->Diag.A, l, j+i, k);
          }
       }
    }
@@ -103,20 +130,16 @@ void simetrizaSistema (SistLinear_t *SL) {
    */
    for(int i = 0; i < n; ++i){
       for(int j = 0; j < n; ++j){
-         SL->Sim.b[i] += getTransp(M_trans, i, j, k) * SL->Diag.b[j];
+         SL->Sim.b[i] += getTransp(M_trans, i, j, k, n) * SL->Diag.b[j];
       }
    }
 
-   // libera as estruturas
-   for (int i = 0; i < SL->k; i++){
-      free (M_trans[i]);
-   }
    free (M_trans);
 }
 
 //Realiza método do gradiente conjugado e retorna o tempo médio levado pelas iterações
 //Criterio de parada eh apenas o num de iteracoes
-double GradConjIt(SistLinear_t *SL, double *x, double **M, FILE *arq){
+double GradConjIt(SistLinear_t *SL, double *x, double *M, FILE *arq){
    LIKWID_MARKER_REGISTER("op1-v2");
    LIKWID_MARKER_START("op1-v2");
 
@@ -141,12 +164,13 @@ double GradConjIt(SistLinear_t *SL, double *x, double **M, FILE *arq){
    somaVetMatxVet(SL, SL->Sim.b, x, -1, r, SL->n);
 
    //z0 := M^(-1)*r
-   multMatVet(M, r, z, SL->n);
+   mulVetVetDiagonal(M, r, z, SL->n);
 
    //p0 = z0
    memcpy(p, z, SL->n * sizeof(double));
 
-   for(int iter = 0; iter < SL->i; ++iter){
+   int iter = 0;
+   while(iter < SL->i){
       //alpha(k) := r(k)T*z(k) / p(k)T*A*p(k)
       alpha = (multVetVet(r, z, SL->n))/(multVetMatVet(p, SL, p, SL->n));
       if(isnan(alpha) || isinf(alpha)){
@@ -160,7 +184,7 @@ double GradConjIt(SistLinear_t *SL, double *x, double **M, FILE *arq){
       somaVetMatxVet(SL, r, p, -alpha, r1, SL->n);
 
       //z(k+1) := M^(-1)*r1(k+1)
-      multMatVet(M, r1, z1, SL->n);
+      mulVetVetDiagonal(M, r1, z1, SL->n);
 
       //beta(k) := r(k+1)T*z(k+1) / r(k)T*z(k)
       beta = multVetVet(r1, z1, SL->n) / multVetVet(r, z, SL->n);
@@ -182,6 +206,8 @@ double GradConjIt(SistLinear_t *SL, double *x, double **M, FILE *arq){
       memcpy(p, p1, SL->n * sizeof(double));
       //z = z1
       memcpy(z, z1, SL->n * sizeof(double));
+
+      iter++;
    }
 
    free(x1);
@@ -195,12 +221,12 @@ double GradConjIt(SistLinear_t *SL, double *x, double **M, FILE *arq){
    LIKWID_MARKER_STOP("op1-v2");
 
    //retorna tempo medio por iteração
-   return (timestamp()-tempo) / SL->i;
+   return (timestamp()-tempo) / iter;
 }
 
 //Realiza método do gradiente conjugado e retorna o tempo médio levado pelas iterações
 //Criterio de parada eh o erro definido e o num de iteracoes
-double GradConjErr(SistLinear_t *SL, double *x, double **M, double err, FILE *arq){
+double GradConjErr(SistLinear_t *SL, double *x, double *M, double err, FILE *arq){
    double *r  = malloc(sizeof(double)*SL->n);
    double *r1 = malloc(sizeof(double)*SL->n);
    double *z  = malloc(sizeof(double)*SL->n);
@@ -220,12 +246,13 @@ double GradConjErr(SistLinear_t *SL, double *x, double **M, double err, FILE *ar
    somaVetMatxVet(SL, SL->Sim.b, x, -1, r, SL->n);
 
    //z0 := M^(-1)*r
-   multMatVet(M, r, z, SL->n);
+   mulVetVetDiagonal(M, r, z, SL->n);
 
    //p0 = z0
    memcpy(p, z, SL->n * sizeof(double));
 
-   for(int iter = 0; iter < SL->i; ++iter){
+   int iter = 0;
+   while(iter < SL->i){
       //alpha(k) := r(k)T*z(k) / p(k)T*A*p(k)
       double alpha = (multVetVet(r, z, SL->n)) / (multVetMatVet(p, SL, p, SL->n));
       if(isnan(alpha) || isinf(alpha)){
@@ -244,7 +271,7 @@ double GradConjErr(SistLinear_t *SL, double *x, double **M, double err, FILE *ar
       }
 
       //z(k+1) := M^(-1)*r(k+1)
-      multMatVet(M, r1, z1, SL->n);
+      mulVetVetDiagonal(M, r1, z1, SL->n);
 
       //beta(k) := r(k+1)T*z(k+1) / r(k)T*z(k)
       double beta = multVetVet(r1, z1, SL->n) / multVetVet(r, z, SL->n);
@@ -266,6 +293,8 @@ double GradConjErr(SistLinear_t *SL, double *x, double **M, double err, FILE *ar
       memcpy(p, p1, SL->n * sizeof(double));
       //z = z1
       memcpy(z, z1, SL->n * sizeof(double));
+
+      iter++;
    }
 
    free(x1);
@@ -277,5 +306,5 @@ double GradConjErr(SistLinear_t *SL, double *x, double **M, double err, FILE *ar
    free(p1);
 
    //retorna tempo medio por iteração
-   return (timestamp()-tempo) / SL->i;
+   return (timestamp()-tempo) / iter;
 }

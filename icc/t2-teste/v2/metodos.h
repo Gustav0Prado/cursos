@@ -9,12 +9,12 @@
 
 double normaL2(double *r, int n);
 
-void simetrizaSistema ();
+void simetrizaSistema (SistLinear_t *SL);
 
-double GradConjIt(SistLinear_t *SL, double *x, double **M, FILE *arq);
+double GradConjIt(SistLinear_t *SL, double *x, double *M, FILE *arq);
 
-double GradConjErr(SistLinear_t *SL, double *x, double **M, double err, FILE *arq);
+double GradConjErr(SistLinear_t *SL, double *x, double *M, double err, FILE *arq);
 
-double getDiag(double **A, int i, int j, int k);
+double getDiag(double *A, int i, int j, int k);
 
 #endif

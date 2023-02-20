@@ -1,17 +1,26 @@
-   #!/bin/bash
+#!/bin/bash
+# set -x
+# trap read debug
 
-echo "performance" > /sys/devices/system/cpu/cpufreq/policy3/scaling_governor
+if $(echo "performance" > /sys/devices/system/cpu/cpufreq/policy3/scaling_governor); then
+   echo "CPU setada para performance"
+else
+   echo "Erro tentar mudar CPU para performance, por favor rode: sudo chmod a+rw /sys/devices/system/cpu/cpufreq/policy3/scaling_governor"
+   exit
+fi
 
-make clean -C ./v1
-make -C ./v1
+echo "Rodando make clean e make..."
 
-make clean -C ./v2
-make -C ./v2
+make clean -C ./v1 > /dev/null
+make -C ./v1 > /dev/null
 
-rm -f ./saida/*.txt
-rm -f ./saida/*.dat
-rm -f ./saida/done-v1
-rm -f ./saida/done-v2
+make clean -C ./v2 > /dev/null
+make -C ./v2 > /dev/null
+
+rm -f ./saida/*.txt > /dev/null
+rm -f ./saida/*.dat > /dev/null
+rm -f ./saida/done-v1 > /dev/null
+rm -f ./saida/done-v2 > /dev/null
 
 #pega core mais isolado da CPU
 CORES=$(likwid-topology | grep Cores | cut -c 19-)
@@ -20,11 +29,11 @@ let CORES--
 #prepara arquivos de plot
 for O in L3 Tempo L2CACHE FLOPS_DP-AVX FLOPS_DP-SSE
 do
-   echo "# Marcador "v1" $O"  >> ./saida/plot_$O-v1.dat
-   echo "# n op1 op2" >> ./saida/plot_$O-v1.dat
+   echo "# Marcador "v1" $O"  >> ./saida/dados_$O-v1.dat
+   echo "# n op1 op2" >> ./saida/dados_$O-v1.dat
 
-   echo "# Marcador "v2" $O"  >> ./saida/plot_$O-v2.dat
-   echo "# n op1 op2" >> ./saida/plot_$O-v2.dat
+   echo "# Marcador "v2" $O"  >> ./saida/dados_$O-v2.dat
+   echo "# n op1 op2" >> ./saida/dados_$O-v2.dat
 done
 
 #Loop de testes
@@ -37,20 +46,27 @@ do
       do
          printf "\tExecutando teste para N = $N\n"    
          FILE=${O}_${N}_${V}
-         likwid-perfctr -C $CORES -g $O -m ./$V/cgSolver -i 150 -p 0 -o ./$V/saida$N.txt -n $N -k 7 > ./saida/$FILE.txt
+
+         #vai para o diretorio da versao
+         pushd ./$V > /dev/null
+
+         likwid-perfctr -C $CORES -g $O -m ./cgSolver -i 150 -p 0 -o ../saida/result_$N-$V.txt -n $N -k 7 > ../saida/$FILE.txt
+
+         # volta ao diretorio raiz
+         popd > /dev/null
 
          case $O in
 
          L3)
                RES=$(cat ./saida/$FILE.txt | grep "L3 bandwidth" | sed 's/[^0-9.]*//g' | sed 'N;s/\n/ /')
 
-               echo "$N $RES" >> ./saida/plot_$O-$V.dat
+               echo "$N $RES" >> ./saida/dados_$O-$V.dat
                ;;
 
          L2CACHE)
                RES="$(cat ./saida/$FILE.txt | grep "miss ratio" | sed 's/[^0-9.]*//g' | sed 'N;s/\n/ /')"
                
-               echo "$N $RES" >> ./saida/plot_$O-$V.dat
+               echo "$N $RES" >> ./saida/dados_$O-$V.dat
                ;;
 
          FLOPS_DP)
@@ -58,9 +74,9 @@ do
                AVX="$(cat ./saida/$FILE.txt | grep "MFLOP/s" | sed 's/[^0-9.]*//g' | sed -n 'n;p' | sed 'N;s/\n/ /')"
                SSE="$(cat ./saida/$FILE.txt | grep "MFLOP/s" | sed 's/[^0-9.]*//g' | sed -n 'p;n' | sed 'N;s/\n/ /')"
 
-               echo "$N $AVX" >> ./saida/plot_$O-AVX-$V.dat
+               echo "$N $AVX" >> ./saida/dados_$O-AVX-$V.dat
 
-               echo "$N $SSE" >> ./saida/plot_$O-SSE-$V.dat
+               echo "$N $SSE" >> ./saida/dados_$O-SSE-$V.dat
                ;;
 
          esac
@@ -70,3 +86,4 @@ do
 done
 
 echo "powersave" > /sys/devices/system/cpu/cpufreq/policy3/scaling_governor
+echo "CPU setada pra powersave"

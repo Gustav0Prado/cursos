@@ -42,7 +42,7 @@ int main(int argc, char **argv){
          switch(opt){
             case 'n':
                n = atoi(optarg);
-               if(n <= 3){
+               if(n <= 10){
                   fprintf(stderr, "ERRO: Tamanho do sistema linear precisa ser maior que 10\n");
                   return ERRINPUT;
                }
@@ -195,31 +195,28 @@ int main(int argc, char **argv){
    }
    tempoOp1 = timestamp() - tempoOp1;
 
-   LIKWID_MARKER_REGISTER("op2-v1");
-   LIKWID_MARKER_START("op2-v1");
-
    tempR = timestamp();
 
    //calcula residuo final
    residuo(SLorig->A, SLorig->b, x, r, n);
 
    tempR = timestamp() - tempR;
-   LIKWID_MARKER_STOP("op2-v1");
 
    //Escreve no arquivo com tempos
    //abre arquivo com os tempos para escrita
    char diretorio[256];
    char done[256];
    getcwd(diretorio, sizeof(diretorio));
+   diretorio[strlen(diretorio)-3] = '\0';
    strncpy(done, diretorio, 256);
 
-   strcat(diretorio, "/saida/plot_Tempo-v1.dat");
+   strcat(diretorio, "/saida/dados_Tempo-v1.dat");
    strcat(done, "/saida/done-v1");
 
    /* checa se arquivo "done" ja existe, se sim entao o loop foi rodado uma vez
       se nao coloca as informacoes de tempo em modo append, assim pega os tempos apenas uma vez
    */
-   if((fdone = fopen(done, "r")) == NULL){   
+   if((fdone = fopen(done, "r")) == NULL){
       arqTempo = fopen(diretorio, "a+");
       if(!arqTempo){
          fprintf(stderr, "Erro ao criar arquivo com tempos!\n");
@@ -227,6 +224,9 @@ int main(int argc, char **argv){
       }
       fprintf(arqTempo, "%d %.5g %.5g\n", n, tempoOp1, tempR);
       fclose(arqTempo);
+   }
+   else{
+      fclose(fdone);
    }
 
    fprintf(arq, "# residuo: %.15g\n", normaL2(r, n));
@@ -253,6 +253,7 @@ int main(int argc, char **argv){
    }
    free (M);
    liberaSisLin (SL);
+   liberaSisLin (SLorig);
 
    LIKWID_MARKER_CLOSE;
 

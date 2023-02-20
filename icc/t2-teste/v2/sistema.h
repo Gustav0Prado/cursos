@@ -6,7 +6,7 @@
 
 /* Estrutura de uma matriz com apenas as diagonais */
 typedef struct {
-   double **A;             // coeficientes
+   double *A;                // coeficientes
    double *b;               // termos independetes originais
    int *jstart;     // posicoes de inicio
    int *jend;       // posicoes de fim
@@ -14,7 +14,7 @@ typedef struct {
 
 /* Estrutura de uma matriz simetrica */
 typedef struct {
-   double **A;             // coeficientes
+   double *A;               // coeficientes
    double *b;               // termos independetes modificados
    int *jstart;      // posicoes de inicio
    int *jend;        // posicoes de fim
@@ -29,21 +29,12 @@ typedef struct {
    unsigned int k;      //numero maximo de iteracoes
 } SistLinear_t;
 
-/*
-// Estrutura para definiçao de um sistema linear qualquer
-typedef struct {
-   double **A; // coeficientes
-   double *b; // termos independentes
-   unsigned int n; // tamanho do SL
-   unsigned int i; //numero maximo de iteracoes
- } SistLinear_t;*/
-
 void liberaSisLin (SistLinear_t *SL);
 
-//SistLinear_t* alocaSisLin (unsigned int n);
 SistLinear_t* alocaSisLin (unsigned int n, unsigned int k);
 
 void prnSisLinDiag (SistLinear_t *SL);
+
 void prnSisLinSim (SistLinear_t *SL);
 
 #endif

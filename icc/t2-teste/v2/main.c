@@ -42,7 +42,7 @@ int main(int argc, char **argv){
          switch(opt){
             case 'n':
                n = atoi(optarg);
-               if(n <= 3){
+               if(n <= 10){
                   fprintf(stderr, "ERRO: Tamanho do sistema linear precisa ser maior que 10\n");
                   return ERRINPUT;
                }
@@ -117,7 +117,7 @@ int main(int argc, char **argv){
       int m = (k/2)-i;
       //Gera coeficientes aleatorios
       for(int j = 0; j <= SL->Diag.jend[i]; ++j){
-         SL->Diag.A[i][m] = generateRandomA(i, j, k);
+         SL->Diag.A[k*i+m] = generateRandomA(i, j, k);
          ++m;
       }
       SL ->Diag.b[i] = generateRandomB (k);
@@ -127,17 +127,19 @@ int main(int argc, char **argv){
       int m = 0;
       //Gera coeficientes aleatorios
       for(int j = SL->Diag.jstart[i]; j <= SL->Diag.jend[i]; ++j){
-         SL->Diag.A[i][m] = generateRandomA(i, j, k);
+         SL->Diag.A[k*i+m] = generateRandomA(i, j, k);
          ++m;
       }
       SL ->Diag.b[i] = generateRandomB (k);
    }
    SL->i = it;
 
+   //prnSisLinDiag(SL);
+
    //vetores do residuo e x inicial e matrix pre-condicionadora
    double *r   = malloc(sizeof(double)*n);
    double *x   = malloc(sizeof(double)*n);
-   double **M  = malloc(sizeof(double*)*n);
+   double *M   = malloc(sizeof(double)*n);
 
    //checa erros de alocação
    if(!r || !x || !M){
@@ -154,28 +156,18 @@ int main(int argc, char **argv){
 
    simetrizaSistema (SL);
 
+   //prnSisLinSim(SL);
+
    if(p == 0){
       //cria matriz identidade; I^(-1) = I, diagonais = 1
-      for(int i = 0; i < n; ++i){
-         M[i] = malloc(sizeof(double)*n);
-         if(!M[i]){
-            fprintf(stderr, "Erro de alocação!\n");
-            exit(ERRALLOC);
-         }
-         memset(M[i], 0, n*sizeof(double));
-         M[i][i] = 1.0;
-      }
+      for(int i = 0; i < n; ++i)
+         M[i] = 1.0;
    }
    else{
       //cria matriz diagonal; D^(-1) 
       for(int i = 0; i < n; ++i){
-         M[i] = malloc(sizeof(double)*n);
-         if(!M[i]){
-            fprintf(stderr, "Erro de alocação!\n");
-            exit(ERRALLOC);
-         }
-         memset(M[i], 0, n*sizeof(double));
-         M[i][i] = SL->Diag.A[i][(k/2)] * (1 / (SL->Diag.A[i][(k/2)] * SL->Diag.A[i][(k/2)]));
+         int ind = k*i+(k/2);
+         M[i] = SL->Diag.A[ind] * (1 / (SL->Diag.A[ind] * SL->Diag.A[ind]));
       }
    }
    tempPC = timestamp() - tempPC;
@@ -213,15 +205,16 @@ int main(int argc, char **argv){
    char diretorio[256];
    char done[256];
    getcwd(diretorio, sizeof(diretorio));
+   diretorio[strlen(diretorio)-3] = '\0';
    strncpy(done, diretorio, 256);
 
-   strcat(diretorio, "/saida/plot_Tempo-v2.dat");
+   strcat(diretorio, "/saida/dados_Tempo-v2.dat");
    strcat(done, "/saida/done-v2");
 
    /* checa se arquivo "done" ja existe, se sim entao o loop foi rodado uma vez
       se nao coloca as informacoes de tempo em modo append, assim pega os tempos apenas uma vez
    */
-   if((fdone = fopen(done, "r")) == NULL){   
+   if((fdone = fopen(done, "r")) == NULL){
       arqTempo = fopen(diretorio, "a+");
       if(!arqTempo){
          fprintf(stderr, "Erro ao criar arquivo com tempos!\n");
@@ -229,6 +222,9 @@ int main(int argc, char **argv){
       }
       fprintf(arqTempo, "%d %.5g %.5g\n", n, tempoOp1, tempR);
       fclose(arqTempo);
+   }
+   else{
+      fclose(fdone);
    }
 
    fprintf(arq, "# residuo: %.15g\n", normaL2(r, n));
@@ -250,9 +246,6 @@ int main(int argc, char **argv){
    //libera estruturas
    free(x);
    free(r);
-   for (int i = 0; i < n; i++){
-      free (M[i]);
-   }
    free (M);
    liberaSisLin (SL);
 

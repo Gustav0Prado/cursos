@@ -1,28 +1,30 @@
 # Gustavo do Prado Silva - 20203942 
 # Rafael Gonçalves dos Santos - 20211798
 
-CFLAGS = -g -lm -DLIKWID_PERFMON -I${LIKWID_INCLUDE} -L${LIKWID_LIB} -llikwid  -O3 -march=native
+CC = gcc -DLIKWID_PERFMON -I/usr/local/include -O3 -march=native
+CFLAGS = -g -lm
 objects = main.o utils.o oper.o sistema.o metodos.o
+LFLAGS = -L/usr/local/lib -llikwid
 
 all: cgSolver
 
 cgSolver: $(objects)
-	gcc $(objects) -o cgSolver $(CFLAGS)
+	$(CC) $(objects) -o cgSolver $(CFLAGS)  $(LFLAGS)
 
 main.o: main.c
-	gcc -c main.c $(CFLAGS)
+	$(CC) -c main.c $(CFLAGS) $(LFLAGS)
 
 utils.o: utils.c
-	gcc -c utils.c $(CFLAGS)
+	$(CC) -c utils.c $(CFLAGS) $(LFLAGS)
 
 oper.o: oper.c
-	gcc -c oper.c $(CFLAGS)
+	$(CC) -c oper.c $(CFLAGS) $(LFLAGS)
 
 sistema.o: sistema.c
-	gcc -c sistema.c $(CFLAGS)
+	$(CC) -c sistema.c $(CFLAGS) $(LFLAGS)
 
 metodos.o: metodos.c
-	gcc -c metodos.c $(CFLAGS)
+	$(CC) -c metodos.c $(CFLAGS) $(LFLAGS)
 
 #remove objetos e restos do editor
 clean:
