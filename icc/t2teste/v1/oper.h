@@ -20,6 +20,6 @@ double normamax (double *v1, double *v2, int n);
 
 double normamaxAbs (double *v1, double *v2, int n);
 
-void residuo(double **A, double *b, double *x, double *res, int n);
+double residuo(double **A, double *b, double *x, double *res, int n);
 
 #endif

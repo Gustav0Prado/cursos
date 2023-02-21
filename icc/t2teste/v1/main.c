@@ -42,7 +42,7 @@ int main(int argc, char **argv){
          switch(opt){
             case 'n':
                n = atoi(optarg);
-               if(n <= 10){
+               if(n <= 3){
                   fprintf(stderr, "ERRO: Tamanho do sistema linear precisa ser maior que 10\n");
                   return ERRINPUT;
                }
@@ -195,12 +195,8 @@ int main(int argc, char **argv){
    }
    tempoOp1 = timestamp() - tempoOp1;
 
-   tempR = timestamp();
-
    //calcula residuo final
-   residuo(SLorig->A, SLorig->b, x, r, n);
-
-   tempR = timestamp() - tempR;
+   tempR = residuo(SLorig->A, SLorig->b, x, r, n);
 
    //Escreve no arquivo com tempos
    //abre arquivo com os tempos para escrita

@@ -145,7 +145,7 @@ static inline double normamaxAbs (double *restrict v1, double *restrict v2, int 
    return maior;
 }
 
-//Calcula residuo do sistema tridiagonal
+// //Calcula residuo do sistema tridiagonal
 static inline double residuoDiag(SistLinear_t *restrict SL, double *restrict b, double *restrict x, double *restrict r){
    LIKWID_MARKER_REGISTER("op2-v2");
    LIKWID_MARKER_START("op2-v2");
@@ -153,31 +153,88 @@ static inline double residuoDiag(SistLinear_t *restrict SL, double *restrict b, 
    int n = SL->n;
    int k = SL->k;
 
-   double *res = malloc(n*sizeof(double));
-   memset(res, 0, n*sizeof(double));
-
    double tempoR = timestamp();
 
-   /* UNROLL DE TAMANHO 4 */
-   for(int i = 0; i < n-n%UNROLL; i+=UNROLL){
-      for(int j = 0; j < n; ++j){
-         r[i]   += getDiagA(SL->Diag.A, i, j, n, k)   * x[j];
-         r[i+1] += getDiagA(SL->Diag.A, (i+1), j, n, k) * x[j];
-         r[i+2] += getDiagA(SL->Diag.A, (i+2), j, n, k) * x[j];
-         r[i+3] += getDiagA(SL->Diag.A, (i+3), j, n, k) * x[j];
-      }
-      r[i]   -= SL->Diag.b[i];
-      r[i+1] -= SL->Diag.b[i+1];
-      r[i+2] -= SL->Diag.b[i+2];
-      r[i+3] -= SL->Diag.b[i+3];
-   }
+   /* UNROLL + BLOCKING DE TAMANHO 4 */
 
-   for(int i = n-n%UNROLL; i < n; ++i){
-      for(int j = 0; j < n; ++j){
-         r[i] += getDiagA(SL->Diag.A, i, j, n, k) * x[j];
-      }
-      r[i] -= SL->Diag.b[i];
-   }
+   /* Residuo da matriz n*k
+      indice eh ((n de linhas)*linha)+coluna
+   */
+   // for (int ii = 0; ii < n/UNROLL; ++ii) {
+   //    int istart = ii*UNROLL; int iend = istart+UNROLL;
+
+   //    for(int jj = 0; jj < n/UNROLL; ++jj){
+   //       int jstart = jj*UNROLL; int jend = jstart+UNROLL;
+
+   //       for (int i = istart; i < iend; i+=UNROLL) {
+   //          for(int j = jstart; j < jend; ++j){
+   //             r[i]   += getDiagA(SL->Diag.A, i, j, n, k)     * x[j];
+   //             r[i+1] += getDiagA(SL->Diag.A, (i+1), j, n, k) * x[j];
+   //             r[i+2] += getDiagA(SL->Diag.A, (i+2), j, n, k) * x[j];
+   //             r[i+3] += getDiagA(SL->Diag.A, (i+3), j, n, k) * x[j];
+   //          }
+   //       }
+   //    }
+   //    r[istart]   -= SL->Diag.b[istart];
+   //    r[istart+1] -= SL->Diag.b[istart+1];
+   //    r[istart+2] -= SL->Diag.b[istart+2];
+   //    r[istart+3] -= SL->Diag.b[istart+3];
+   // }
+
+   // //Residuo do blocking
+   // /* Colunas fora dos blocos */
+   // for(int i = 0; i < n-n%UNROLL; ++i){
+   //    for(int j = n-n%UNROLL; j < n; ++j){
+   //       r[i] += getDiagA(SL->Diag.A, i, j, n, k)   * x[j];
+   //    }
+   // }
+
+   // /*Linhas fora dos blocos*/
+   // for(int i = n-n%UNROLL; i < n; ++i){
+   //    for(int j = 0; j < n; ++j){
+   //       r[i] += getDiagA(SL->Diag.A, i, j, n, k)   * x[j];
+   //    }
+   //    r[i] -= SL->Diag.b[i];
+   // }
+
+   // for(int i = 0; i < n-n%UNROLL; i+=UNROLL){
+   //    for(int j = 0; j < n; ++j){
+   //       r[i]   += getDiagA(SL->Diag.A, i, j, n, k)   * x[j];
+   //       r[i+1] += getDiagA(SL->Diag.A, (i+1), j, n, k) * x[j];
+   //       r[i+2] += getDiagA(SL->Diag.A, (i+2), j, n, k) * x[j];
+   //       r[i+3] += getDiagA(SL->Diag.A, (i+3), j, n, k) * x[j];
+   //    }
+   //    r[i]   -= SL->Diag.b[i];
+   //    r[i+1] -= SL->Diag.b[i+1];
+   //    r[i+2] -= SL->Diag.b[i+2];
+   //    r[i+3] -= SL->Diag.b[i+3];
+   // }
+
+   // for(int i = n-n%UNROLL; i < n; ++i){
+   //    for(int j = 0; j < n; ++j){
+   //       r[i] += getDiagA(SL->Diag.A, i, j, n, k) * x[j];
+   //    }
+   //    r[i] -= SL->Diag.b[i];
+   // }
+
+
+   // /* Usando os valores direto */
+   // for(int i = 0; i < k/2; ++i){
+   //    int m = 0;
+   //    for(int j = k/2-i; j < k; ++j){
+   //       SL->Diag.A[k*i+m] = SL->Diag.A[k*i+j];
+   //       SL->Diag.A[k*i+j] = 0.0;
+   //       ++m;
+   //    }
+   // }
+
+   // for(int i = 0; i < n; ++i){
+   //    int js = SL->Diag.jstart[i];
+   //    for(int j = js; j <= SL->Diag.jend[i]; ++j){
+   //       r[i] += SL->Diag.A[k*i+(j-js)] * x[j];
+   //    }
+   //    r[i] -= SL->Diag.b[i];
+   // }
 
    LIKWID_MARKER_STOP("op2-v2");
 

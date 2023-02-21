@@ -71,9 +71,11 @@ void somaVetMatxVet(double **A, double *v1, double *v2, double m, double *res, i
    }
 }
 
-void residuo(double **A, double *b, double *x, double *res, int n){
+double residuo(double **A, double *b, double *x, double *res, int n){
    LIKWID_MARKER_REGISTER("op2-v1");
    LIKWID_MARKER_START("op2-v1");
+
+   double temp = timestamp();
 
    double vNovo[n];
    multMatVet(A, x, vNovo, n);
@@ -82,8 +84,9 @@ void residuo(double **A, double *b, double *x, double *res, int n){
       res[i] = vNovo[i] - b[i];
    }
 
-
    LIKWID_MARKER_STOP("op2-v1");
+
+   return timestamp() - temp;
 }
 
 // Encontra a maior diferenca relativa entre as respostas subsequentes

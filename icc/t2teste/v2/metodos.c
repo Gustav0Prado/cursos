@@ -26,7 +26,7 @@ double normaL2(double *r, int n){
    return sqrt(soma);
 }
 
-double getTransp(double *A, int i, int j, int k, int n){
+static inline double getTransp(double *A, int i, int j, int k, int n){
    int diff = j-i;
 
    if(diff > (k/2) || diff < -(k/2)){
@@ -38,7 +38,7 @@ double getTransp(double *A, int i, int j, int k, int n){
    }
 }
 
-double getDiag(double *A, int i, int j, int k){
+static inline double getDiag(double *A, int i, int j, int k){
    int diff = j-i;
 
    if(diff > (k/2) || diff < -(k/2)){
