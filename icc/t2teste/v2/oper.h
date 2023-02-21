@@ -11,7 +11,7 @@
 #ifndef __OPER_H__
 #define __OPER_H__
 
-#define UNROLL 4
+#define UNROLL 8
 #define getDiagA(A, i, j, n, k) ( (j-i > (k/2) || j-i < -(k/2)) ? 0.0 : A[k*i+((k/2)+(j-i))] )
 
 //Multiplica matriz simetrica com vetor
@@ -41,15 +41,19 @@ static inline void multMatSimVet(SistLinear_t *restrict SL, double *restrict vet
 static inline double multVetVet(double *restrict v1, double *restrict v2, int n){
    double soma = 0.0;
    double soma2 = 0.0;
-   double somaTemp[UNROLL] = {0.0, 0.0, 0.0, 0.0};
+   double somaTemp[UNROLL] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
 
    for(int i = 0; i < n-(n%UNROLL); i+=UNROLL){
       somaTemp[0] += v1[i]  *v2[i];
       somaTemp[1] += v1[i+1]*v2[i+1];
       somaTemp[2] += v1[i+2]*v2[i+2];
       somaTemp[3] += v1[i+3]*v2[i+3];
+      somaTemp[4] += v1[i+4]*v2[i+4];
+      somaTemp[5] += v1[i+5]*v2[i+5];
+      somaTemp[6] += v1[i+6]*v2[i+6];
+      somaTemp[7] += v1[i+7]*v2[i+7];
    }
-   soma = somaTemp[0]+somaTemp[1]+somaTemp[2]+somaTemp[3];
+   soma = somaTemp[0]+somaTemp[1]+somaTemp[2]+somaTemp[3]+somaTemp[4]+somaTemp[5]+somaTemp[6]+somaTemp[7];
    for(int i = n-(n%UNROLL); i < n; i++){
       soma += v1[i]*v2[i];
    }
@@ -64,6 +68,10 @@ static inline void mulVetVetDiagonal (double *restrict vetDiagonal, double *rest
       res[i+1] = vetDiagonal[i+1] * v2[i+1];
       res[i+2] = vetDiagonal[i+2] * v2[i+2];
       res[i+3] = vetDiagonal[i+3] * v2[i+3];
+      res[i+4] = vetDiagonal[i+4] * v2[i+4];
+      res[i+5] = vetDiagonal[i+5] * v2[i+5];
+      res[i+6] = vetDiagonal[i+6] * v2[i+6];
+      res[i+7] = vetDiagonal[i+7] * v2[i+7];
    }
    for (int i = n-n%UNROLL; i < n; i++){
       res[i] = vetDiagonal[i] * v2[i];
@@ -78,6 +86,10 @@ static inline void somaVetVet(double *restrict v1, double m, double *restrict v2
       res[i+1] = v1[i+1] + m*v2[i+1];
       res[i+2] = v1[i+2] + m*v2[i+2];
       res[i+3] = v1[i+3] + m*v2[i+3];
+      res[i+4] = v1[i+4] + m*v2[i+4];
+      res[i+5] = v1[i+5] + m*v2[i+5];
+      res[i+6] = v1[i+6] + m*v2[i+6];
+      res[i+7] = v1[i+7] + m*v2[i+7];
    }
    for (int i = n-n%UNROLL; i < n; i++){
       res[i] = v1[i] + m*v2[i];
@@ -108,7 +120,18 @@ static inline void somaVetMatxVet(SistLinear_t *restrict SL, double *restrict v1
 
    multMatSimVet(SL, v2, aux, n);
 
-   for(int i = 0; i < n; ++i){
+   for(int i = 0; i < n-n%UNROLL; i+=UNROLL){
+      res[i]   = v1[i]   + m*aux[i];
+      res[i+1] = v1[i+1] + m*aux[i+1];
+      res[i+2] = v1[i+2] + m*aux[i+2];
+      res[i+3] = v1[i+3] + m*aux[i+3];
+      res[i+4] = v1[i+4] + m*aux[i+4];
+      res[i+5] = v1[i+5] + m*aux[i+5];
+      res[i+6] = v1[i+6] + m*aux[i+6];
+      res[i+7] = v1[i+7] + m*aux[i+7];
+   }
+   
+   for(int i = n-n%UNROLL; i < n; ++i){
       res[i] = v1[i] + m*aux[i];
    }
 
@@ -155,70 +178,7 @@ static inline double residuoDiag(SistLinear_t *restrict SL, double *restrict b, 
 
    double tempoR = timestamp();
 
-   /* UNROLL + BLOCKING DE TAMANHO 4 */
-
-   /* Residuo da matriz n*k
-      indice eh ((n de linhas)*linha)+coluna
-   */
-   // for (int ii = 0; ii < n/UNROLL; ++ii) {
-   //    int istart = ii*UNROLL; int iend = istart+UNROLL;
-
-   //    for(int jj = 0; jj < n/UNROLL; ++jj){
-   //       int jstart = jj*UNROLL; int jend = jstart+UNROLL;
-
-   //       for (int i = istart; i < iend; i+=UNROLL) {
-   //          for(int j = jstart; j < jend; ++j){
-   //             r[i]   += getDiagA(SL->Diag.A, i, j, n, k)     * x[j];
-   //             r[i+1] += getDiagA(SL->Diag.A, (i+1), j, n, k) * x[j];
-   //             r[i+2] += getDiagA(SL->Diag.A, (i+2), j, n, k) * x[j];
-   //             r[i+3] += getDiagA(SL->Diag.A, (i+3), j, n, k) * x[j];
-   //          }
-   //       }
-   //    }
-   //    r[istart]   -= SL->Diag.b[istart];
-   //    r[istart+1] -= SL->Diag.b[istart+1];
-   //    r[istart+2] -= SL->Diag.b[istart+2];
-   //    r[istart+3] -= SL->Diag.b[istart+3];
-   // }
-
-   // //Residuo do blocking
-   // /* Colunas fora dos blocos */
-   // for(int i = 0; i < n-n%UNROLL; ++i){
-   //    for(int j = n-n%UNROLL; j < n; ++j){
-   //       r[i] += getDiagA(SL->Diag.A, i, j, n, k)   * x[j];
-   //    }
-   // }
-
-   // /*Linhas fora dos blocos*/
-   // for(int i = n-n%UNROLL; i < n; ++i){
-   //    for(int j = 0; j < n; ++j){
-   //       r[i] += getDiagA(SL->Diag.A, i, j, n, k)   * x[j];
-   //    }
-   //    r[i] -= SL->Diag.b[i];
-   // }
-
-   // for(int i = 0; i < n-n%UNROLL; i+=UNROLL){
-   //    for(int j = 0; j < n; ++j){
-   //       r[i]   += getDiagA(SL->Diag.A, i, j, n, k)   * x[j];
-   //       r[i+1] += getDiagA(SL->Diag.A, (i+1), j, n, k) * x[j];
-   //       r[i+2] += getDiagA(SL->Diag.A, (i+2), j, n, k) * x[j];
-   //       r[i+3] += getDiagA(SL->Diag.A, (i+3), j, n, k) * x[j];
-   //    }
-   //    r[i]   -= SL->Diag.b[i];
-   //    r[i+1] -= SL->Diag.b[i+1];
-   //    r[i+2] -= SL->Diag.b[i+2];
-   //    r[i+3] -= SL->Diag.b[i+3];
-   // }
-
-   // for(int i = n-n%UNROLL; i < n; ++i){
-   //    for(int j = 0; j < n; ++j){
-   //       r[i] += getDiagA(SL->Diag.A, i, j, n, k) * x[j];
-   //    }
-   //    r[i] -= SL->Diag.b[i];
-   // }
-
-
-   // /* Usando os valores direto */
+   // /* Move primeiras linhas pra esquerda, pra usar um loop só */
    // for(int i = 0; i < k/2; ++i){
    //    int m = 0;
    //    for(int j = k/2-i; j < k; ++j){
@@ -228,6 +188,7 @@ static inline double residuoDiag(SistLinear_t *restrict SL, double *restrict b, 
    //    }
    // }
 
+   // /* Usando os valores direto */
    // for(int i = 0; i < n; ++i){
    //    int js = SL->Diag.jstart[i];
    //    for(int j = js; j <= SL->Diag.jend[i]; ++j){
@@ -235,6 +196,25 @@ static inline double residuoDiag(SistLinear_t *restrict SL, double *restrict b, 
    //    }
    //    r[i] -= SL->Diag.b[i];
    // }
+
+   /* Primeiras linhas começam deslocadas pra direita */
+   for(int i = 0; i < k/2; ++i){
+      int m = 0;
+      for(int j = k/2-i; j < k; ++j){
+         r[i] += SL->Diag.A[k*i+j] * x[m];
+         m++;
+      }
+      r[i] -= SL->Diag.b[i];
+   }
+
+   /* Usando os valores direto */
+   for(int i = k/2; i < n; ++i){
+      int js = SL->Diag.jstart[i];
+      for(int j = js; j <= SL->Diag.jend[i]; ++j){
+         r[i] += SL->Diag.A[k*i+(j-js)] * x[j];
+      }
+      r[i] -= SL->Diag.b[i];
+   }
 
    LIKWID_MARKER_STOP("op2-v2");
 
