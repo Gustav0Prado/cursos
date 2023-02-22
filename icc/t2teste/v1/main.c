@@ -196,7 +196,7 @@ int main(int argc, char **argv){
    tempoOp1 = timestamp() - tempoOp1;
 
    //calcula residuo final
-   tempR = residuo(SLorig->A, SLorig->b, x, r, n);
+   double norma = residuo(SLorig->A, SLorig->b, x, r, n, &tempR);
 
    //Escreve no arquivo com tempos
    //abre arquivo com os tempos para escrita
@@ -225,7 +225,7 @@ int main(int argc, char **argv){
       fclose(fdone);
    }
 
-   fprintf(arq, "# residuo: %.15g\n", normaL2(r, n));
+   fprintf(arq, "# residuo: %.15g\n", norma);
    fprintf(arq, "# Tempo PC: %.15g\n", tempPC);
    fprintf(arq, "# Tempo iter: %.15g\n", tempMed);
    fprintf(arq, "# Tempo residuo: %.15g\n", tempR);

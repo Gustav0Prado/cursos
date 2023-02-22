@@ -3,7 +3,8 @@
 
 #include "oper.h"
 #include "utils.h"
-#include <stdio.h>
+#include "sistema.h"
+#include "metodos.h"
 #include <likwid.h>
 
 //Multiplica dois vetores (produto escalar)
@@ -71,11 +72,11 @@ void somaVetMatxVet(double **A, double *v1, double *v2, double m, double *res, i
    }
 }
 
-double residuo(double **A, double *b, double *x, double *res, int n){
+double residuo(double **A, double *b, double *x, double *res, int n, double *tempR){
+   *tempR = timestamp();
+
    LIKWID_MARKER_REGISTER("op2-v1");
    LIKWID_MARKER_START("op2-v1");
-
-   double temp = timestamp();
 
    double vNovo[n];
    multMatVet(A, x, vNovo, n);
@@ -84,9 +85,12 @@ double residuo(double **A, double *b, double *x, double *res, int n){
       res[i] = vNovo[i] - b[i];
    }
 
-   LIKWID_MARKER_STOP("op2-v1");
+   double ret = normaL2(res, n);
 
-   return timestamp() - temp;
+   LIKWID_MARKER_STOP("op2-v1");
+   *tempR = timestamp() - *tempR;
+
+   return ret;
 }
 
 // Encontra a maior diferenca relativa entre as respostas subsequentes

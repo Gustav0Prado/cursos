@@ -166,8 +166,7 @@ int main(int argc, char **argv){
    else{
       //cria matriz diagonal; D^(-1) 
       for(int i = 0; i < n; ++i){
-         int ind = k*i+(k/2);
-         M[i] = SL->Diag.A[ind] * (1 / (SL->Diag.A[ind] * SL->Diag.A[ind]));
+         M[i] = SL->Diag.A[k*i+(k/2)] * (1 / (SL->Diag.A[k*i+(k/2)] * SL->Diag.A[k*i+(k/2)]));
       }
    }
    tempPC = timestamp() - tempPC;
@@ -198,7 +197,7 @@ int main(int argc, char **argv){
 
    //calcula residuo final
    memset(r, 0, n*sizeof(double));
-   tempR = residuoDiag(SL, SL->Diag.b, x, r);
+   double norma = residuoDiag(SL, SL->Diag.b, x, r, &tempR);
 
    //Escreve no arquivo com tempos
    //abre arquivo com os tempos para escrita
@@ -227,7 +226,7 @@ int main(int argc, char **argv){
       fclose(fdone);
    }
 
-   fprintf(arq, "# residuo: %.15g\n", normaL2(r, n));
+   fprintf(arq, "# residuo: %.15g\n", norma);
    fprintf(arq, "# Tempo PC: %.15g\n", tempPC);
    fprintf(arq, "# Tempo iter: %.15g\n", tempMed);
    fprintf(arq, "# Tempo residuo: %.15g\n", tempR);

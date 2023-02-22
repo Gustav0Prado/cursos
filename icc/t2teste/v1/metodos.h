@@ -5,10 +5,11 @@
 #define __METODOS_H__
 
 #include "sistema.h"
+#include <stdio.h>
 
 double normaL2(double *r, int n);
 
-void simetrizaSistema ();
+void simetrizaSistema (SistLinear_t *SL);
 
 double GradConjIt(SistLinear_t *SL, double *x, double **M, FILE *arq);
 

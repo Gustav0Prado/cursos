@@ -1,10 +1,10 @@
 # Gustavo do Prado Silva - 20203942 
 # Rafael Gonçalves dos Santos - 20211798
 
-CC = gcc -DLIKWID_PERFMON -I${LIKWID_HOME}/include -O3 -march=native
+CC = gcc -DLIKWID_PERFMON -I/usr/local/include -O3 -march=native
 CFLAGS = -g -lm
 objects = main.o utils.o oper.o sistema.o metodos.o
-LFLAGS = -L${LIKWID_HOME}/lib -llikwid
+LFLAGS = -L/usr/local/lib -llikwid
 
 all: cgSolver
 

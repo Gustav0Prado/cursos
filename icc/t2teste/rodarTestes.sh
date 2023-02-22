@@ -27,7 +27,7 @@ CORES=$(likwid-topology | grep Cores | cut -c 19-)
 let CORES--
 
 #prepara arquivos de plot
-for O in L3 Tempo L2CACHE FLOPS_DP-AVX FLOPS_DP
+for O in L3 Tempo L2CACHE FLOPS_DP-AVX FLOPS_DP-SSE
 do
    echo "# Marcador "v1" $O"  >> ./saida/dados_$O-v1.dat
    echo "# n op1 op2" >> ./saida/dados_$O-v1.dat
@@ -76,7 +76,7 @@ do
 
                echo "$N $AVX" >> ./saida/dados_$O-AVX-$V.dat
 
-               echo "$N $SSE" >> ./saida/dados_$O-$V.dat
+               echo "$N $SSE" >> ./saida/dados_$O-SSE-$V.dat
                ;;
 
          esac
