@@ -17,7 +17,7 @@ set key outside
 set ylabel  "MFLOP/s - v1 x v2"
 set title   "MFLOP/s - v1 x v2"
 set terminal qt 0 title "FLOPS_DP"
-plot dir.'dados_FLOPS_DP-SSE-v1.dat' using 1:2 title "<op1-v1>" with linespoints, \
+plot dir.'dados_FLOPS_DP-v1.dat' using 1:2 title "<op1-v1>" with linespoints, \
      '' using 1:3 title "<op2-v1>" with linespoints, \
-     dir.'dados_FLOPS_DP-SSE-v2.dat' using 1:2 title "<op1-v2>" with linespoints,\
+     dir.'dados_FLOPS_DP-v2.dat' using 1:2 title "<op1-v2>" with linespoints,\
      '' using 1:3 title "<op2-v2>" with linespoints
