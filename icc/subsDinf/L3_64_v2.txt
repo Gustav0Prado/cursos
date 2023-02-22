@@ -8,18 +8,18 @@ Region op1-v2, Group 1: L3
 +-------------------+----------+
 |    Region Info    |  Core 3  |
 +-------------------+----------+
-| RDTSC Runtime [s] | 0.000268 |
+| RDTSC Runtime [s] | 0.000273 |
 |     call count    |        1 |
 +-------------------+----------+
 
 +-----------------------+---------+---------+
 |         Event         | Counter |  Core 3 |
 +-----------------------+---------+---------+
-|   INSTR_RETIRED_ANY   |  FIXC0  | 2726325 |
-| CPU_CLK_UNHALTED_CORE |  FIXC1  | 1020250 |
-|  CPU_CLK_UNHALTED_REF |  FIXC2  |  917036 |
-|    L2_LINES_IN_ALL    |   PMC0  |    2342 |
-|     L2_TRANS_L2_WB    |   PMC1  |     201 |
+|   INSTR_RETIRED_ANY   |  FIXC0  | 2709274 |
+| CPU_CLK_UNHALTED_CORE |  FIXC1  | 1040300 |
+|  CPU_CLK_UNHALTED_REF |  FIXC2  |  935354 |
+|    L2_LINES_IN_ALL    |   PMC0  |    2180 |
+|     L2_TRANS_L2_WB    |   PMC1  |     195 |
 +-----------------------+---------+---------+
 
 +-------------------------------+--------------+
@@ -27,13 +27,13 @@ Region op1-v2, Group 1: L3
 +-------------------------------+--------------+
 |      Runtime (RDTSC) [s]      |       0.0003 |
 |      Runtime unhalted [s]     |       0.0003 |
-|          Clock [MHz]          |    3791.4570 |
-|              CPI              |       0.3742 |
-|  L3 load bandwidth [MBytes/s] |     559.0685 |
+|          Clock [MHz]          |    3790.3722 |
+|              CPI              |       0.3840 |
+|  L3 load bandwidth [MBytes/s] |     510.2239 |
 |  L3 load data volume [GBytes] |       0.0001 |
-| L3 evict bandwidth [MBytes/s] |      47.9815 |
-| L3 evict data volume [GBytes] | 1.286400e-05 |
-|    L3 bandwidth [MBytes/s]    |     607.0500 |
+| L3 evict bandwidth [MBytes/s] |      45.6393 |
+| L3 evict data volume [GBytes] | 1.248000e-05 |
+|    L3 bandwidth [MBytes/s]    |     555.8631 |
 |    L3 data volume [GBytes]    |       0.0002 |
 +-------------------------------+--------------+
 
@@ -49,24 +49,24 @@ Region op2-v2, Group 1: L3
 |         Event         | Counter | Core 3 |
 +-----------------------+---------+--------+
 |   INSTR_RETIRED_ANY   |  FIXC0  |   8482 |
-| CPU_CLK_UNHALTED_CORE |  FIXC1  |  11555 |
-|  CPU_CLK_UNHALTED_REF |  FIXC2  |  10224 |
-|    L2_LINES_IN_ALL    |   PMC0  |    593 |
-|     L2_TRANS_L2_WB    |   PMC1  |     31 |
+| CPU_CLK_UNHALTED_CORE |  FIXC1  |  11526 |
+|  CPU_CLK_UNHALTED_REF |  FIXC2  |  10508 |
+|    L2_LINES_IN_ALL    |   PMC0  |    684 |
+|     L2_TRANS_L2_WB    |   PMC1  |     59 |
 +-----------------------+---------+--------+
 
 +-------------------------------+--------------+
 |             Metric            |    Core 3    |
 +-------------------------------+--------------+
-|      Runtime (RDTSC) [s]      | 7.922530e-07 |
-|      Runtime unhalted [s]     | 3.390658e-06 |
-|          Clock [MHz]          |    3851.5454 |
-|              CPI              |       1.3623 |
-|  L3 load bandwidth [MBytes/s] |   47903.8893 |
-|  L3 load data volume [GBytes] | 3.795200e-05 |
-| L3 evict bandwidth [MBytes/s] |    2504.2505 |
-| L3 evict data volume [GBytes] | 1.984000e-06 |
-|    L3 bandwidth [MBytes/s]    |   50408.1398 |
-|    L3 data volume [GBytes]    | 3.993600e-05 |
+|      Runtime (RDTSC) [s]      | 7.359147e-07 |
+|      Runtime unhalted [s]     | 3.382045e-06 |
+|          Clock [MHz]          |    3738.1594 |
+|              CPI              |       1.3589 |
+|  L3 load bandwidth [MBytes/s] |   59485.1550 |
+|  L3 load data volume [GBytes] | 4.377600e-05 |
+| L3 evict bandwidth [MBytes/s] |    5131.0295 |
+| L3 evict data volume [GBytes] | 3.776000e-06 |
+|    L3 bandwidth [MBytes/s]    |   64616.1845 |
+|    L3 data volume [GBytes]    | 4.755200e-05 |
 +-------------------------------+--------------+
 
