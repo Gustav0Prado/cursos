@@ -8,59 +8,59 @@ Region op1-v2, Group 1: L2CACHE
 +-------------------+----------+
 |    Region Info    |  Core 3  |
 +-------------------+----------+
-| RDTSC Runtime [s] | 0.001701 |
+| RDTSC Runtime [s] | 0.006737 |
 |     call count    |        1 |
 +-------------------+----------+
 
 +-----------------------+---------+----------+
 |         Event         | Counter |  Core 3  |
 +-----------------------+---------+----------+
-|   INSTR_RETIRED_ANY   |  FIXC0  | 16187500 |
-| CPU_CLK_UNHALTED_CORE |  FIXC1  |  6435312 |
-|  CPU_CLK_UNHALTED_REF |  FIXC2  |  5785506 |
-| L2_TRANS_ALL_REQUESTS |   PMC0  |   662536 |
-|     L2_RQSTS_MISS     |   PMC1  |     6972 |
+|   INSTR_RETIRED_ANY   |  FIXC0  | 59585460 |
+| CPU_CLK_UNHALTED_CORE |  FIXC1  | 25202700 |
+|  CPU_CLK_UNHALTED_REF |  FIXC2  | 22658800 |
+| L2_TRANS_ALL_REQUESTS |   PMC0  |  5220007 |
+|     L2_RQSTS_MISS     |   PMC1  |   861827 |
 +-----------------------+---------+----------+
 
 +----------------------+-----------+
 |        Metric        |   Core 3  |
 +----------------------+-----------+
-|  Runtime (RDTSC) [s] |    0.0017 |
-| Runtime unhalted [s] |    0.0019 |
-|      Clock [MHz]     | 3790.7683 |
-|          CPI         |    0.3975 |
-|    L2 request rate   |    0.0409 |
-|     L2 miss rate     |    0.0004 |
-|     L2 miss ratio    |    0.0105 |
+|  Runtime (RDTSC) [s] |    0.0067 |
+| Runtime unhalted [s] |    0.0074 |
+|      Clock [MHz]     | 3790.6108 |
+|          CPI         |    0.4230 |
+|    L2 request rate   |    0.0876 |
+|     L2 miss rate     |    0.0145 |
+|     L2 miss ratio    |    0.1651 |
 +----------------------+-----------+
 
 Region op2-v2, Group 1: L2CACHE
 +-------------------+----------+
 |    Region Info    |  Core 3  |
 +-------------------+----------+
-| RDTSC Runtime [s] | 0.000004 |
+| RDTSC Runtime [s] | 0.000011 |
 |     call count    |        1 |
 +-------------------+----------+
 
 +-----------------------+---------+--------+
 |         Event         | Counter | Core 3 |
 +-----------------------+---------+--------+
-|   INSTR_RETIRED_ANY   |  FIXC0  |  41186 |
-| CPU_CLK_UNHALTED_CORE |  FIXC1  |  22317 |
-|  CPU_CLK_UNHALTED_REF |  FIXC2  |  20448 |
-| L2_TRANS_ALL_REQUESTS |   PMC0  |   4555 |
-|     L2_RQSTS_MISS     |   PMC1  |   1462 |
+|   INSTR_RETIRED_ANY   |  FIXC0  | 149810 |
+| CPU_CLK_UNHALTED_CORE |  FIXC1  |  52560 |
+|  CPU_CLK_UNHALTED_REF |  FIXC2  |  46718 |
+| L2_TRANS_ALL_REQUESTS |   PMC0  |  12828 |
+|     L2_RQSTS_MISS     |   PMC1  |   4430 |
 +-----------------------+---------+--------+
 
 +----------------------+--------------+
 |        Metric        |    Core 3    |
 +----------------------+--------------+
-|  Runtime (RDTSC) [s] | 3.545775e-06 |
-| Runtime unhalted [s] | 6.548425e-06 |
-|      Clock [MHz]     |    3719.4948 |
-|          CPI         |       0.5419 |
-|    L2 request rate   |       0.1106 |
-|     L2 miss rate     |       0.0355 |
-|     L2 miss ratio    |       0.3210 |
+|  Runtime (RDTSC) [s] | 1.133218e-05 |
+| Runtime unhalted [s] | 1.542255e-05 |
+|      Clock [MHz]     |    3834.1593 |
+|          CPI         |       0.3508 |
+|    L2 request rate   |       0.0856 |
+|     L2 miss rate     |       0.0296 |
+|     L2 miss ratio    |       0.3453 |
 +----------------------+--------------+
 
