@@ -12,6 +12,7 @@ int queue_size (queue_t *queue){
             return 1;
         }
         else{
+            cont = 1;
             while(aux->next != queue){
                 cont++;
                 aux = aux->next;
@@ -23,7 +24,22 @@ int queue_size (queue_t *queue){
 }
 
 void queue_print (char *name, queue_t *queue, void print_elem (void*) ){
+    if(queue){
+        queue_t *aux = queue->next;
 
+        printf("%s  [", name);
+        print_elem(queue);
+
+        while(aux != queue){
+            printf(" ");
+            print_elem(aux);
+            aux = aux->next;
+        }
+        printf("]\n");
+    }
+    else{
+        printf("%s  []\n", name);
+    }
 }
 
 /*
@@ -31,7 +47,6 @@ void queue_print (char *name, queue_t *queue, void print_elem (void*) ){
 */
 int queue_append (queue_t **queue, queue_t *elem){
     queue_t *fila = *queue;
-    printf("%p\n", fila);
 
     if(elem){
         if(elem->prev == NULL && elem->next == NULL){
@@ -44,25 +59,76 @@ int queue_append (queue_t **queue, queue_t *elem){
             }
             //Caso já tenha elementos
             else{
-                elem->next = fila;
+                fila->prev->next = elem;
                 elem->prev = fila->prev;
 
+                elem->next = fila;
                 fila->prev = elem;
-
-                elem->prev->next = elem;             
             }
+            
+            return 0;
         }
-
-        return 0;
+        return -2;
     }
-
     return -1;
 }
 
+/*
+    Insere elementos na fila, mas apenas se ambos existem e o elemento esta isolado
+*/
 int queue_remove (queue_t **queue, queue_t *elem){
-    if(queue && elem){
+    queue_t *fila = *queue;
 
+    int found = 0;
+
+    if(fila && elem){
+        //Elemento está em uma fila
+        if(elem->prev != NULL && elem->next != NULL){
+            //Checa com o primeiro elemento
+            if(fila == elem){
+                found = 1;
+            }
+            //Compara com os outros até voltar ao primeiro
+            else{
+                queue_t *aux = fila->next;
+                while(aux != fila){
+                    if(aux == elem){
+                        found = 1;
+                    }
+                    aux = aux->next;
+                }
+            }
+
+            if(found){
+                //Remove de uma fila com 1 elemento
+                if(fila->next == fila && (elem == fila)){
+                    *(queue) = NULL;
+                }
+                //Mais de um elemento
+                else{
+                    queue_t *ant = elem->prev;
+                    queue_t *pos = elem->next;
+
+                    //Arruma ponteiros
+                    ant->next = pos;
+                    pos->prev = ant;
+
+                    //Caso seja o "primeiro", fila aponta para o prox
+                    if(elem == fila){
+                        *(queue) = pos;
+                    }
+                }
+
+                //Remove da fila
+                elem->prev = NULL;
+                elem->next = NULL;
+
+                return 0;
+            }
+
+            return -3;
+        }
+        return -2;
     }
-
     return -1;
 }
