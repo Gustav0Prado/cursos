@@ -68,7 +68,6 @@ int queue_append (queue_t **queue, queue_t *elem){
             
             return 0;
         }
-        return -2;
     }
     return -1;
 }
@@ -125,10 +124,7 @@ int queue_remove (queue_t **queue, queue_t *elem){
 
                 return 0;
             }
-
-            return -3;
         }
-        return -2;
     }
     return -1;
 }
