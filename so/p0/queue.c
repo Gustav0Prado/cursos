@@ -8,9 +8,11 @@ int queue_size (queue_t *queue){
     queue_t *aux = queue;
 
     if(queue){
+        //Fila com 1 elemento
         if(aux->next == aux){
             return 1;
         }
+        //Anda pela fila até voltar ao primeiro
         else{
             cont = 1;
             while(aux->next != queue){
@@ -29,7 +31,8 @@ void queue_print (char *name, queue_t *queue, void print_elem (void*) ){
 
         printf("%s  [", name);
         print_elem(queue);
-
+        
+        //Anda pela fila até voltar ao primeiro elemento
         while(aux != queue){
             printf(" ");
             print_elem(aux);
@@ -37,6 +40,7 @@ void queue_print (char *name, queue_t *queue, void print_elem (void*) ){
         }
         printf("]\n");
     }
+    //Fila vazia
     else{
         printf("%s  []\n", name);
     }
@@ -49,6 +53,7 @@ int queue_append (queue_t **queue, queue_t *elem){
     queue_t *fila = *queue;
 
     if(elem){
+        //Certifica que elemento está isolado
         if(elem->prev == NULL && elem->next == NULL){
             //Caso fila esteja vazia
             if( fila == NULL ){
