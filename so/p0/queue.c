@@ -3,6 +3,9 @@
 #include "queue.h"
 #include <stdio.h>
 
+/*
+    Quantidade de elementos em um fila
+*/
 int queue_size (queue_t *queue){
     int cont = 0;
     queue_t *aux = queue;
@@ -25,6 +28,9 @@ int queue_size (queue_t *queue){
     return cont;
 }
 
+/*
+    Printa elementos da fila usando o ponteiro para função passado
+*/
 void queue_print (char *name, queue_t *queue, void print_elem (void*) ){
     if(queue){
         queue_t *aux = queue->next;
@@ -117,7 +123,7 @@ int queue_remove (queue_t **queue, queue_t *elem){
                     ant->next = pos;
                     pos->prev = ant;
 
-                    //Caso seja o "primeiro", fila aponta para o prox
+                    //Caso remova o primeiro da fila, o prox se torna o primeiro
                     if(elem == fila){
                         *(queue) = pos;
                     }
