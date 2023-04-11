@@ -3,6 +3,9 @@
 #include <string.h>
 #include "stack.h"
 
+/*
+   Inicia estrutura da Pilha
+*/
 Pilha_t *iniciaPilha(){
    Pilha_t *aux = malloc(sizeof(Pilha_t));
 
@@ -11,8 +14,10 @@ Pilha_t *iniciaPilha(){
    return aux;
 }
 
+/*
+   Tenta inserir um identificador na pilha, retorna 0 caso sucesso e -1 caso falhe
+*/
 int inserePilha(char *ident, Pilha_t *stack){
-   
    if(ident && stack){
       Var_t *newVar = malloc(sizeof(Var_t));
       
@@ -28,6 +33,9 @@ int inserePilha(char *ident, Pilha_t *stack){
    return -1;
 }
 
+/*
+   Remove últimos n elementos da pilha e retorna 0 em caso de sucesso e -1 em caso de falha
+*/
 int removePilha(int n, Pilha_t *stack){
    if(stack){
       if(tamanhoPilha(stack) < n){
@@ -50,6 +58,9 @@ int removePilha(int n, Pilha_t *stack){
    return -1;
 }
 
+/*
+   Retorna atributos da variável buscada
+*/
 Var_t *buscaPilha(char *ident, Pilha_t *stack){
    if(stack && ident){
       Var_t *aux = stack->top;
@@ -61,10 +72,13 @@ Var_t *buscaPilha(char *ident, Pilha_t *stack){
             aux = aux->next;
          }
       }
-      return NULL;
    }
+  return NULL;
 }
 
+/*
+   Desaloca estruturas da pilha
+*/
 int finalizaPilha(Pilha_t *stack){
    if(stack){
       if(stack->top != NULL){
@@ -79,6 +93,9 @@ int finalizaPilha(Pilha_t *stack){
    return -1;
 }
 
+/*
+   Printa elementos da pilha
+*/
 void printPilha(Pilha_t *stack){
    if(stack){
       printf("----INICIO DA PILHA----\n");
@@ -91,6 +108,9 @@ void printPilha(Pilha_t *stack){
    }
 }
 
+/*
+   Retorna tamanho da pilha
+*/
 int tamanhoPilha(Pilha_t *stack){
    int cont = 0;
    if(stack){

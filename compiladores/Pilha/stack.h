@@ -1,6 +1,16 @@
+typedef enum{
+   INT,
+   BOOL
+} Tipo_e;
+
+typedef struct Attr_t{
+   Tipo_e type; 
+} Attr_t;
+
 typedef struct Var_t{
    char *ident;
    struct Var_t *next;
+   Attr_t attr;
 } Var_t;
 
 typedef struct{
