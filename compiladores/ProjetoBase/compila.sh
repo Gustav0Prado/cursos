@@ -1,0 +1,3 @@
+make
+
+./compilador $1

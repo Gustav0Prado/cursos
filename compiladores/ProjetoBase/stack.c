@@ -52,8 +52,7 @@ void printPilha(Pilha_t *pilha){
    if(pilha){
       printf("----INICIO DA PILHA----\n");
       for(int i = 0; i < pilha->topo; ++i){
-        int *int_elem = (int *) pilha->elem[pilha->topo-1];
-        printf("%d\n", *int_elem);
+         printf("%p\n", pilha->elem[i]);
       }
       printf("----FIM DA PILHA----\n\n");
    }

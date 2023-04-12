@@ -8,9 +8,12 @@
 #include <ctype.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdarg.h>
 #include "compilador.h"
+#include "stack.h"
 
 int num_vars;
+int desloc;
 
 %}
 
@@ -51,18 +54,21 @@ parte_declara_vars:  var
 ;
 
 
-var         : { } VAR declara_vars
+var         : { desloc = 0; num_vars = 0; } VAR declara_vars
             |
 ;
 
-declara_vars: declara_vars declara_var
-            | declara_var
+declara_vars: declara_vars { num_vars = 0; } declara_var
+            | { num_vars = 0; } declara_var
 ;
 
 declara_var : { }
               lista_id_var DOIS_PONTOS
               tipo
-              { /* AMEM */
+              {
+               char cmd[15];
+               sprintf(cmd, "AMEM %d", num_vars);
+               geraCodigo(NULL, cmd);
               }
               PONTO_E_VIRGULA
 ;
@@ -70,9 +76,12 @@ declara_var : { }
 tipo        : IDENT
 ;
 
-lista_id_var: lista_id_var VIRGULA IDENT
-              { /* insere �ltima vars na tabela de s�mbolos */ }
-            | IDENT { /* insere vars na tabela de s�mbolos */}
+lista_id_var: lista_id_var VIRGULA IDENT {
+               num_vars++;
+              }
+            | IDENT {
+                num_vars++;
+               }
 ;
 
 lista_idents: lista_idents VIRGULA IDENT
