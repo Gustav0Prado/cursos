@@ -8,7 +8,6 @@
 
 //Tasks e ponteiros para controle
 task_t *curr_task;
-task_t *aux_task;
 task_t main_task;
 task_t dispatcher_task;
 
@@ -50,11 +49,9 @@ void dispatcher(){
 
       switch (prox->status)
       {
-      //Coloca tarefa novamente no fim da fila
       case READY:
-        queue_remove((queue_t **)&readyTasks, (queue_t*)prox);
-        queue_append((queue_t **)&readyTasks, (queue_t*)prox);
-
+        //Gira a fila
+        readyTasks = readyTasks->next;
         break;
 
       case RUNNING:
@@ -107,6 +104,8 @@ void ppos_init(){
   task_init(&dispatcher_task, &dispatcher, NULL);
   queue_remove((queue_t **)&readyTasks, (queue_t*)&dispatcher_task);
   user_tasks--;
+
+  //task_switch(&dispatcher_task);
 }
 
 
@@ -167,7 +166,7 @@ void task_exit(int exit_code){
 int task_switch(task_t *task){
   if(task){
     //Salva task atual em old e nova task como atual
-    aux_task = curr_task;
+    task_t *aux_task = curr_task;
     curr_task = task;
 
     #ifdef DEBUG
