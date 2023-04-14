@@ -4,10 +4,10 @@
 #include "tabsimb.h"
 
 /*
-   Inicia estrutura da Pilha
+   Inicia estrutura da TabSimb
 */
-Pilha_t *iniciaPilha(){
-   Pilha_t *aux = malloc(sizeof(Pilha_t));
+TabSimb_t *iniciaTabSimb(){
+   TabSimb_t *aux = malloc(sizeof(TabSimb_t));
 
    aux->top = NULL;
 
@@ -15,38 +15,38 @@ Pilha_t *iniciaPilha(){
 }
 
 /*
-   Tenta inserir um identificador na pilha, retorna 0 caso sucesso e -1 caso falhe
+   Tenta inserir um identificador na TabSimb, retorna 0 caso sucesso e -1 caso falhe
 */
-int inserePilha(char *ident, Pilha_t *stack){
-   if(ident && stack){
+int insereTabSimb(char *ident, TabSimb_t *tab){
+   if(ident && tab){
       Var_t *newVar = malloc(sizeof(Var_t));
       
       newVar->ident = malloc(sizeof(ident));
       strncpy(newVar->ident, ident, (int)sizeof(ident));
 
-      newVar->next = stack->top;
-      stack->top = newVar;
+      newVar->next = tab->top;
+      tab->top = newVar;
 
       return 0;
    }
-   perror("Erro: Identificador ou pilha Nulos");
+   perror("Erro: Identificador ou TabSimb Nulos");
    return -1;
 }
 
 /*
-   Remove últimos n elementos da pilha e retorna 0 em caso de sucesso e -1 em caso de falha
+   Remove últimos n elementos da TabSimb e retorna 0 em caso de sucesso e -1 em caso de falha
 */
-int removePilha(int n, Pilha_t *stack){
-   if(stack){
-      if(tamanhoPilha(stack) < n){
-         perror("Erro: Tentou remover mais elementos do que a pilha possui");
+int removeTabSimb(int n, TabSimb_t *tab){
+   if(tab){
+      if(tamanhoTabSimb(tab) < n){
+         perror("Erro: Tentou remover mais elementos do que a TabSimb possui");
          return -1;
       }
       Var_t *topo;
       for(int i = 0; i < n; ++i){
-         topo = stack->top;
+         topo = tab->top;
 
-         stack->top = topo->next;
+         tab->top = topo->next;
 
          free(topo->ident);
          topo->next = NULL;
@@ -61,9 +61,9 @@ int removePilha(int n, Pilha_t *stack){
 /*
    Retorna atributos da variável buscada
 */
-Var_t *buscaPilha(char *ident, Pilha_t *stack){
-   if(stack && ident){
-      Var_t *aux = stack->top;
+Var_t *buscaTabSimb(char *ident, TabSimb_t *tab){
+   if(tab && ident){
+      Var_t *aux = tab->top;
       while(aux != NULL){
          if(strcmp(ident, aux->ident) == 0){
             return aux;
@@ -77,44 +77,44 @@ Var_t *buscaPilha(char *ident, Pilha_t *stack){
 }
 
 /*
-   Desaloca estruturas da pilha
+   Desaloca estruturas da TabSimb
 */
-int finalizaPilha(Pilha_t *stack){
-   if(stack){
-      if(stack->top != NULL){
-         perror("Erro: Tentou finalizar pilha não vazia");
+int finalizaTabSimb(TabSimb_t *tab){
+   if(tab){
+      if(tab->top != NULL){
+         perror("Erro: Tentou finalizar TabSimb não vazia");
          return -1;
       }
       else{
-         free(stack);
-         stack = NULL;
+         free(tab);
+         tab = NULL;
       }
    }
    return -1;
 }
 
 /*
-   Printa elementos da pilha
+   Printa elementos da TabSimb
 */
-void printPilha(Pilha_t *stack){
-   if(stack){
-      printf("----INICIO DA PILHA----\n");
-      Var_t *aux = stack->top;
+void printTabSimb(TabSimb_t *tab){
+   if(tab){
+      printf("----INICIO DA TabSimb----\n");
+      Var_t *aux = tab->top;
       while(aux != NULL){
          printf("%s\n", aux->ident);
          aux = aux->next;
       }
-      printf("----FIM DA PILHA----\n\n");
+      printf("----FIM DA TabSimb----\n\n");
    }
 }
 
 /*
-   Retorna tamanho da pilha
+   Retorna tamanho da TabSimb
 */
-int tamanhoPilha(Pilha_t *stack){
+int tamanhoTabSimb(TabSimb_t *tab){
    int cont = 0;
-   if(stack){
-      Var_t *aux = stack->top;
+   if(tab){
+      Var_t *aux = tab->top;
       while(aux != NULL){
          cont++;
          aux = aux->next;

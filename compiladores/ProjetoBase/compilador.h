@@ -10,10 +10,6 @@
  * Tipos, protótipos e variáveis globais do compilador (via extern)
  *
  * ------------------------------------------------------------------- */
-char buf[1023];
-#define geraCodigoArgs(rot, fmt, ...) \
-  sprintf(buf, fmt, __VA_ARGS__); \
-    geraCodigo(rot, buf);
 #define TAM_TOKEN 16
 
 typedef enum simbolos {

@@ -1,3 +1,0 @@
-make
-
-./compilador $1

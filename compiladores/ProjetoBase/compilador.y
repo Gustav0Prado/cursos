@@ -11,15 +11,28 @@
 #include <stdarg.h>
 #include "compilador.h"
 #include "stack.h"
+#include "tabsimb.h"
 
-int num_vars;
-int desloc;
+int num_vars, desloc;
+TabSimb_t tabela;
+
+void geraCodArgs(char *rot, char * cmd, int *a, int *b){
+   char str[1024];
+   if(a && b){
+      sprintf(str, cmd, *a, *b);
+      geraCodigo(rot, str);
+   }
+   else if(a && !b){
+      sprintf(str, cmd, *a);
+      geraCodigo(rot, str);
+   }
+}
 
 %}
 
 %token PROGRAM ABRE_PARENTESES FECHA_PARENTESES
 %token VIRGULA PONTO_E_VIRGULA DOIS_PONTOS PONTO
-%token T_BEGIN T_END VAR IDENT ATRIBUICAO
+%token T_BEGIN T_END VAR IDENT NUM ATRIBUICAO
 %token PROCEDURE FUNCTION GOTO
 %token IF THEN ELSE
 %token WHILE DO
@@ -30,13 +43,14 @@ int desloc;
 %%
 
 programa    :{
-             geraCodigo (NULL, "INPP");
-             }
-             PROGRAM IDENT
-             ABRE_PARENTESES lista_idents FECHA_PARENTESES PONTO_E_VIRGULA
-             bloco PONTO {
-             geraCodigo (NULL, "PARA");
-             }
+            geraCodigo (NULL, "INPP");
+            }
+            PROGRAM IDENT
+            ABRE_PARENTESES lista_idents FECHA_PARENTESES PONTO_E_VIRGULA
+            bloco PONTO {
+            geraCodArgs(NULL, "DMEM %d", &num_vars, NULL);
+            geraCodigo (NULL, "PARA");
+            }
 ;
 
 bloco       :
@@ -54,46 +68,38 @@ parte_declara_vars:  var
 ;
 
 
-var         : { desloc = 0; num_vars = 0; } VAR declara_vars
+var         : { desloc = 0; num_vars = 0; } VAR declara_vars{
+               //Aloca todas as variáveis juntas
+               geraCodArgs(NULL, "AMEM %d", &num_vars, NULL);
+               }
             |
 ;
 
-declara_vars: declara_vars { num_vars = 0; } declara_var
-            | { num_vars = 0; } declara_var
+declara_vars: declara_vars declara_var | declara_var
 ;
 
-declara_var : { }
-              lista_id_var DOIS_PONTOS
-              tipo
-              {
-               char cmd[15];
-               sprintf(cmd, "AMEM %d", num_vars);
-               geraCodigo(NULL, cmd);
-              }
-              PONTO_E_VIRGULA
+declara_var : lista_id_var DOIS_PONTOS
+              tipo PONTO_E_VIRGULA
 ;
 
 tipo        : IDENT
 ;
 
-lista_id_var: lista_id_var VIRGULA IDENT {
-               num_vars++;
-              }
-            | IDENT {
-                num_vars++;
-               }
+lista_id_var: lista_id_var VIRGULA IDENT { num_vars++; }
+            | IDENT { num_vars++; /*printf("%s\n", token); */}
 ;
 
 lista_idents: lista_idents VIRGULA IDENT
             | IDENT
 ;
 
-
 comando_composto: T_BEGIN comandos T_END
 
-comandos:
+comandos: atribuicao | 
 ;
 
+atribuicao: IDENT ATRIBUICAO NUM PONTO_E_VIRGULA
+;
 
 %%
 
