@@ -74,7 +74,7 @@ void dispatcher(){
       {
       case READY:
         //Gira a fila e reseta prioridade dinamica
-        readyTasks = readyTasks->next;
+        //readyTasks = readyTasks->next;
         prox->prio_d = prox->prio_s;
         break;
 
