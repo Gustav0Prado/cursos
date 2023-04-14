@@ -30,6 +30,8 @@ typedef struct task_t
   int id ;				// identificador da tarefa
   ucontext_t context ;			// contexto armazenado da tarefa
   State_t status ;			// pronta, rodando, suspensa, ...
+  int prio_d  ;         // Prioridade dinamica
+  int prio_s  ;         // Prioridade estatica
   // ... (outros campos serão adicionados mais tarde)
 } task_t ;
 
