@@ -6,18 +6,14 @@
 /*
    Inicia estrutura da TabSimb
 */
-TabSimb_t *iniciaTabSimb(){
-   TabSimb_t *aux = malloc(sizeof(TabSimb_t));
-
-   aux->top = NULL;
-
-   return aux;
+void iniciaTabSimb(TabSimb_t *tab){
+   tab->top = NULL;
 }
 
 /*
    Tenta inserir um identificador na TabSimb, retorna 0 caso sucesso e -1 caso falhe
 */
-int insereTabSimb(char *ident, TabSimb_t *tab){
+int insereTabSimb(char *ident, TabSimb_t *tab, int desloc){
    if(ident && tab){
       Var_t *newVar = malloc(sizeof(Var_t));
       
@@ -26,6 +22,8 @@ int insereTabSimb(char *ident, TabSimb_t *tab){
 
       newVar->next = tab->top;
       tab->top = newVar;
+
+      newVar->deslocamento = desloc;
 
       return 0;
    }
@@ -101,7 +99,7 @@ void printTabSimb(TabSimb_t *tab){
       printf("----INICIO DA TabSimb----\n");
       Var_t *aux = tab->top;
       while(aux != NULL){
-         printf("%s\n", aux->ident);
+         printf("%s - desloc: %d\n", aux->ident, aux->deslocamento);
          aux = aux->next;
       }
       printf("----FIM DA TabSimb----\n\n");

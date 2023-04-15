@@ -13,17 +13,19 @@
 #include "stack.h"
 #include "tabsimb.h"
 
-int num_vars, desloc;
+int num_vars, desloc, nivel_lex = -1;
 TabSimb_t tabela;
+Var_t *simb, *simb_aux;
+char l_elem[1023];
 
-void geraCodArgs(char *rot, char * cmd, int *a, int *b){
+void geraCodArgs(char *rot, char * cmd, int a, int b, int num){
    char str[1024];
-   if(a && b){
-      sprintf(str, cmd, *a, *b);
+   if(num == 2){
+      sprintf(str, cmd, a, b);
       geraCodigo(rot, str);
    }
-   else if(a && !b){
-      sprintf(str, cmd, *a);
+   else if(num == 1){
+      sprintf(str, cmd, a);
       geraCodigo(rot, str);
    }
 }
@@ -48,7 +50,7 @@ programa    :{
             PROGRAM IDENT
             ABRE_PARENTESES lista_idents FECHA_PARENTESES PONTO_E_VIRGULA
             bloco PONTO {
-            geraCodArgs(NULL, "DMEM %d", &num_vars, NULL);
+            geraCodArgs(NULL, "DMEM %d", num_vars, 0, 1);
             geraCodigo (NULL, "PARA");
             }
 ;
@@ -68,9 +70,9 @@ parte_declara_vars:  var
 ;
 
 
-var         : { desloc = 0; num_vars = 0; } VAR declara_vars{
+var         : { desloc = 0; num_vars = 0; nivel_lex++; } VAR declara_vars{
                //Aloca todas as variáveis juntas
-               geraCodArgs(NULL, "AMEM %d", &num_vars, NULL);
+               geraCodArgs(NULL, "AMEM %d", num_vars, 0, 1);
                }
             |
 ;
@@ -85,8 +87,8 @@ declara_var : lista_id_var DOIS_PONTOS
 tipo        : IDENT
 ;
 
-lista_id_var: lista_id_var VIRGULA IDENT { num_vars++; }
-            | IDENT { num_vars++; /*printf("%s\n", token); */}
+lista_id_var: lista_id_var VIRGULA IDENT { num_vars++; insereTabSimb(token, &tabela, desloc++); }
+            | IDENT { num_vars++; insereTabSimb(token, &tabela, desloc++); }
 ;
 
 lista_idents: lista_idents VIRGULA IDENT
@@ -95,11 +97,25 @@ lista_idents: lista_idents VIRGULA IDENT
 
 comando_composto: T_BEGIN comandos T_END
 
-comandos: atribuicao | 
+comandos: comandos atribuicao | atribuicao
 ;
 
-atribuicao: IDENT ATRIBUICAO NUM PONTO_E_VIRGULA
+atribuicao: IDENT { strcpy(l_elem, token); } ATRIBUICAO expressao PONTO_E_VIRGULA
 ;
+
+expressao: NUM {
+               // Atribui valor inteiro
+               simb = buscaTabSimb(l_elem, &tabela);
+               geraCodArgs(NULL, "CRCT %d", atoi(token), 0, 1);
+               geraCodArgs(NULL, "ARMZ %d,%d", nivel_lex, simb->deslocamento, 2);
+               }
+         | IDENT{
+               // Carrega valor de outra variavel
+               simb = buscaTabSimb(l_elem, &tabela);
+               simb_aux = buscaTabSimb(token, &tabela);
+               geraCodArgs(NULL, "CRVL %d,%d", nivel_lex, simb_aux->deslocamento, 2);
+               geraCodArgs(NULL, "ARMZ %d,%d", nivel_lex, simb->deslocamento, 2);
+               }
 
 %%
 

@@ -8,15 +8,14 @@ typedef struct Var_t{
    struct Var_t *next;
    Tipo_e tipo;
    int deslocamento;
-   int nivel_lexico;
 } Var_t;
 
 typedef struct{
    struct Var_t *top;
 } TabSimb_t;
 
-TabSimb_t *iniciaTabSimb();
-int insereTabSimb(char *ident, TabSimb_t *tab);
+void iniciaTabSimb(TabSimb_t *tab);
+int insereTabSimb(char *ident, TabSimb_t *tab, int desloc);
 int removeTabSimb(int n, TabSimb_t *tab);
 Var_t *buscaTabSimb(char *ident, TabSimb_t *tab);
 int finalizaTabSimb(TabSimb_t *tab);
