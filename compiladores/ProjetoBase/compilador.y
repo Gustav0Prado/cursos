@@ -124,15 +124,23 @@ lista_idents: lista_idents VIRGULA IDENT
 
 comando_composto: T_BEGIN comandos T_END
 
-comandos: comandos atribuicao | atribuicao
-         | comandos leitura | leitura
+comandos:     comandos atribuicao | atribuicao
+            | comandos leitura    | leitura
+            | comandos escrita    | escrita
 ;
 
 leitura: READ ABRE_PARENTESES lista_read FECHA_PARENTESES PONTO_E_VIRGULA
 ;
 
 lista_read: lista_read VIRGULA IDENT {
-
+            geraCodigo(NULL, "LEIT");
+            simb = buscaTabSimb(token, &tabela);
+            if(simb){
+               geraCodigo(NULL, buildString("ARMZ %d, %d", nivel_lex, simb->deslocamento));
+            }
+            else{
+               imprimeErro(buildString("VARIAVEL %s NAO DECLARADA", token));
+            }
          }
          | IDENT {
             geraCodigo(NULL, "LEIT");
@@ -143,6 +151,39 @@ lista_read: lista_read VIRGULA IDENT {
             else{
                imprimeErro(buildString("VARIAVEL %s NAO DECLARADA", token));
             }
+         }
+;
+
+escrita: WRITE ABRE_PARENTESES lista_write FECHA_PARENTESES PONTO_E_VIRGULA
+;
+
+lista_write: lista_write VIRGULA IDENT {
+            simb = buscaTabSimb(token, &tabela);
+            if(simb){
+               geraCodigo(NULL, buildString("CRVL %d, %d", nivel_lex, simb->deslocamento));
+               geraCodigo(NULL, "IMPR");
+            }
+            else{
+               imprimeErro(buildString("VARIAVEL %s NAO DECLARADA", token));
+            }
+         }
+         | IDENT {
+            simb = buscaTabSimb(token, &tabela);
+            if(simb){
+               geraCodigo(NULL, buildString("CRVL %d, %d", nivel_lex, simb->deslocamento));
+               geraCodigo(NULL, "IMPR");
+            }
+            else{
+               imprimeErro(buildString("VARIAVEL %s NAO DECLARADA", token));
+            }
+         }
+         | lista_write VIRGULA NUM {
+            geraCodigo(NULL, buildString("CRCT %d", atoi(token)));
+            geraCodigo(NULL, "IMPR");
+         }
+         | NUM {
+            geraCodigo(NULL, buildString("CRCT %d", atoi(token)));
+            geraCodigo(NULL, "IMPR");
          }
 ;
 

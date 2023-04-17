@@ -1,10 +1,10 @@
      INPP
      AMEM 2
-     CRCT 5
-     CRCT 40
-     SOMA
-     ARMZ 0, 0
      LEIT
      ARMZ 0, 1
+     CRVL 0, 1
+     IMPR
+     CRCT 10
+     IMPR
      DMEM 2
      PARA
