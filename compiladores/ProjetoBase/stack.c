@@ -18,14 +18,14 @@ int iniciaPilha(Pilha_t *pilha){
 /*
    Tenta inserir um identificador na pilha, retorna 0 caso sucesso e -1 caso falhe
 */
-int inserePilha(Pilha_t *pilha, void* elem){
-   if(elem && pilha){
+int empilha(Pilha_t *pilha, int elem){
+   if(pilha){
       if(pilha->topo > TAM_PILHA){
          perror("Erro: Tamanho máximo da pilha");
          return -1;
       }
       else{
-         pilha->elem[pilha->topo] = elem;
+         pilha->tipos[pilha->topo] = elem;
          pilha->topo++;
          return 0;
       }
@@ -35,14 +35,14 @@ int inserePilha(Pilha_t *pilha, void* elem){
 }
 
 /*
-   Remove últimos n elementos da pilha e retorna 0 em caso de sucesso e -1 em caso de falha
+   Retorna o elemento do topo
 */
-void* desempilha(Pilha_t *pilha){
+int desempilha(Pilha_t *pilha){
    if(pilha){
       pilha->topo--; 
-      return pilha->elem[pilha->topo];
+      return pilha->tipos[pilha->topo];
    }
-   return NULL;
+   return -1;
 }
 
 /*
@@ -51,8 +51,8 @@ void* desempilha(Pilha_t *pilha){
 void printPilha(Pilha_t *pilha){
    if(pilha){
       printf("----INICIO DA PILHA----\n");
-      for(int i = 0; i < pilha->topo; ++i){
-         printf("%p\n", pilha->elem[i]);
+      for(int i = pilha->topo-1; i >= 0; --i){
+         printf("%d\n", pilha->tipos[i]);
       }
       printf("----FIM DA PILHA----\n\n");
    }

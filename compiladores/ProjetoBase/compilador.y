@@ -15,18 +15,42 @@
 
 int num_vars, desloc, nivel_lex = -1;
 TabSimb_t tabela;
+Pilha_t pilha_tipos;
 Var_t *simb, *simb_aux;
 char l_elem[1023];
 
-void geraCodArgs(char *rot, char * cmd, int a, int b, int num){
-   char str[1024];
-   if(num == 2){
-      sprintf(str, cmd, a, b);
-      geraCodigo(rot, str);
+char str[1024];
+char* buildString(const char *fmt, ...) {
+   va_list args;
+   va_start(args, fmt);
+   vsprintf(str, fmt, args);
+   va_end(args);
+   return str;
+
+}
+
+void checaTipos( char *cmd, int tipo ){
+   int t1 = desempilha(&pilha_tipos);
+   int t2 = desempilha(&pilha_tipos);
+   if( t1 == tipo && t2 == tipo ){
+      geraCodigo(NULL, cmd);
    }
-   else if(num == 1){
-      sprintf(str, cmd, a);
-      geraCodigo(rot, str);
+   else{
+      imprimeErro("TIPOS INCOMPATIVEIS NA OPERACAO\n");
+   }
+}
+
+int confereAtribuicao( char *var ){
+   int t1 = desempilha(&pilha_tipos);
+   Var_t *simb_tipo = buscaTabSimb(var, &tabela);
+   if(simb_tipo == NULL){
+      imprimeErro(buildString("VARIAVEL \'%s\' NAO DECLARADA\n", var));
+   }
+   else if( t1 == simb_tipo->tipo ){
+      geraCodigo(NULL, buildString("ARMZ %d, %d", nivel_lex, simb_tipo->deslocamento));
+   }
+   else{
+      return 0;
    }
 }
 
@@ -40,7 +64,10 @@ void geraCodArgs(char *rot, char * cmd, int a, int b, int num){
 %token WHILE DO
 %token ARRAY OF
 %token LABEL TYPE
-%token AND OR NOT DIV
+%token AND OR NOT
+%token SOMA SUB MULT DIV
+%token TRUE FALSE
+%token READ WRITE
 
 %%
 
@@ -50,7 +77,7 @@ programa    :{
             PROGRAM IDENT
             ABRE_PARENTESES lista_idents FECHA_PARENTESES PONTO_E_VIRGULA
             bloco PONTO {
-            geraCodArgs(NULL, "DMEM %d", num_vars, 0, 1);
+            geraCodigo(NULL, buildString("DMEM %d", num_vars));
             geraCodigo (NULL, "PARA");
             }
 ;
@@ -72,7 +99,7 @@ parte_declara_vars:  var
 
 var         : { desloc = 0; num_vars = 0; nivel_lex++; } VAR declara_vars{
                //Aloca todas as variáveis juntas
-               geraCodArgs(NULL, "AMEM %d", num_vars, 0, 1);
+               geraCodigo(NULL, buildString("AMEM %d", num_vars));
                }
             |
 ;
@@ -98,24 +125,82 @@ lista_idents: lista_idents VIRGULA IDENT
 comando_composto: T_BEGIN comandos T_END
 
 comandos: comandos atribuicao | atribuicao
+         | comandos leitura | leitura
 ;
 
-atribuicao: IDENT { strcpy(l_elem, token); } ATRIBUICAO expressao PONTO_E_VIRGULA
+leitura: READ ABRE_PARENTESES lista_read FECHA_PARENTESES PONTO_E_VIRGULA
 ;
 
-expressao: NUM {
+lista_read: lista_read VIRGULA IDENT {
+
+         }
+         | IDENT {
+            geraCodigo(NULL, "LEIT");
+            simb = buscaTabSimb(token, &tabela);
+            if(simb){
+               geraCodigo(NULL, buildString("ARMZ %d, %d", nivel_lex, simb->deslocamento));
+            }
+            else{
+               imprimeErro(buildString("VARIAVEL %s NAO DECLARADA", token));
+            }
+         }
+;
+
+atribuicao: IDENT { strcpy(l_elem, token); } ATRIBUICAO expressao {
+            confereAtribuicao(l_elem);
+         } PONTO_E_VIRGULA
+;
+
+expressao: expressao SOMA termo {
+            checaTipos("SOMA", INTEIRO);
+         }
+         | expressao SUB termo {
+            checaTipos("SUBT", INTEIRO);
+         }
+         | expressao OR termo {
+            checaTipos("DISJ", BOOLEANO);
+         }
+         | termo
+;
+
+termo:   termo MULT fator {
+            checaTipos("MULT", INTEIRO);
+         }
+         | termo DIV fator {
+            checaTipos("DIVI", INTEIRO);
+         }
+         | termo AND fator {
+            checaTipos("CONJ", BOOLEANO);
+         }
+         | fator
+;
+
+fator:   NUM {
                // Atribui valor inteiro
                simb = buscaTabSimb(l_elem, &tabela);
-               geraCodArgs(NULL, "CRCT %d", atoi(token), 0, 1);
-               geraCodArgs(NULL, "ARMZ %d,%d", nivel_lex, simb->deslocamento, 2);
-               }
-         | IDENT{
+               geraCodigo(NULL, buildString("CRCT %d", atoi(token)));
+
+               empilha(&pilha_tipos, INTEIRO);
+         }
+         | IDENT {
                // Carrega valor de outra variavel
                simb = buscaTabSimb(l_elem, &tabela);
                simb_aux = buscaTabSimb(token, &tabela);
-               geraCodArgs(NULL, "CRVL %d,%d", nivel_lex, simb_aux->deslocamento, 2);
-               geraCodArgs(NULL, "ARMZ %d,%d", nivel_lex, simb->deslocamento, 2);
-               }
+               geraCodigo(NULL, buildString("CRVL %d,%d", nivel_lex, simb_aux->deslocamento));
+
+               empilha(&pilha_tipos, simb_aux->tipo);
+         }
+         | TRUE {
+               geraCodigo(NULL, buildString("CRCT %d", 1));
+
+               empilha(&pilha_tipos, BOOLEANO);
+         }
+         | FALSE {
+               geraCodigo(NULL, buildString("CRCT %d", 0));
+
+               empilha(&pilha_tipos, BOOLEANO);
+         }
+         | ABRE_PARENTESES expressao FECHA_PARENTESES
 
 %%
 

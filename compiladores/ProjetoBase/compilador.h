@@ -22,7 +22,10 @@ typedef enum simbolos {
   simb_while, simb_do, 
   simb_array, simb_of,
   simb_label, simb_type,
-  simb_div, simb_and, simb_or, simb_not
+  simb_and, simb_or, simb_not,
+  simb_div, simb_soma, simb_sub, simb_mult,
+  simb_true, simb_false,
+  simb_read, simb_write,
 } simbolos;
 
 
@@ -43,5 +46,6 @@ extern int nl;
  * ------------------------------------------------------------------- */
 
 void geraCodigo (char*, char*);
+int imprimeErro ( char* erro );
 int yylex();
 void yyerror(const char *s);

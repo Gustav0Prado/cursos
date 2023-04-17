@@ -77,7 +77,14 @@ extern int yydebug;
     AND = 283,
     OR = 284,
     NOT = 285,
-    DIV = 286
+    SOMA = 286,
+    SUB = 287,
+    MULT = 288,
+    DIV = 289,
+    TRUE = 290,
+    FALSE = 291,
+    READ = 292,
+    WRITE = 293
   };
 #endif
 

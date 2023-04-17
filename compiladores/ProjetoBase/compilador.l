@@ -148,6 +148,18 @@ div { simbolo = simb_div;
           return DIV;
  }
 
+true { simbolo = simb_true;
+          strncpy (token, yytext, TAM_TOKEN);
+          IMPRIME("true  ");
+          return TRUE;
+ }
+
+false { simbolo = simb_false;
+          strncpy (token, yytext, TAM_TOKEN);
+          IMPRIME("false  ");
+          return FALSE;
+ }
+
 and { simbolo = simb_and;
           strncpy (token, yytext, TAM_TOKEN);
           IMPRIME("and  ");
@@ -164,6 +176,18 @@ not { simbolo = simb_not;
           strncpy (token, yytext, TAM_TOKEN);
           IMPRIME("not  ");
           return NOT;
+ }
+
+read { simbolo = simb_read;
+          strncpy (token, yytext, TAM_TOKEN);
+          IMPRIME("read  ");
+          return READ;
+ }
+
+write { simbolo = simb_write;
+          strncpy (token, yytext, TAM_TOKEN);
+          IMPRIME("write  ");
+          return WRITE;
  }
 
 := { simbolo = simb_atribuicao;
@@ -207,6 +231,30 @@ not { simbolo = simb_not;
           strncpy (token, yytext, TAM_TOKEN);
           IMPRIME(" fecha_parenteses ");
           return FECHA_PARENTESES;
+ }
+
+\+ { simbolo = simb_soma;
+          strncpy (token, yytext, TAM_TOKEN);
+          IMPRIME(" mais ");
+          return SOMA;
+ }
+
+\- { simbolo = simb_sub;
+          strncpy (token, yytext, TAM_TOKEN);
+          IMPRIME(" menos ");
+          return SUB;
+ }
+
+\* { simbolo = simb_mult;
+          strncpy (token, yytext, TAM_TOKEN);
+          IMPRIME(" vezes ");
+          return MULT;
+ }
+
+\/ { simbolo = simb_div;
+          strncpy (token, yytext, TAM_TOKEN);
+          IMPRIME(" dividido ");
+          return DIV;
  }
 
 {ident} { simbolo = simb_identificador;
