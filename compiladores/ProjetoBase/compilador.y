@@ -29,9 +29,10 @@ char* buildString(const char *fmt, ...) {
 
 }
 
-void checaTipos( char *cmd, int tipo ){
+void checaTiposOP( char *cmd, int tipo ){
    int t1 = desempilha(&pilha_tipos);
    int t2 = desempilha(&pilha_tipos);
+
    if( t1 == tipo && t2 == tipo ){
       geraCodigo(NULL, cmd);
    }
@@ -40,9 +41,22 @@ void checaTipos( char *cmd, int tipo ){
    }
 }
 
-int confereAtribuicao( char *var ){
+void checaTiposCMP( char *cmd){
+   int t1 = desempilha(&pilha_tipos);
+   int t2 = desempilha(&pilha_tipos);
+
+   if( t1 == INTEIRO && t2 == INTEIRO ){
+      geraCodigo(NULL, cmd);
+   }
+   else{
+      imprimeErro("TIPOS INCOMPATIVEIS NA OPERACAO\n");
+   }
+}
+
+void confereAtribuicao( char *var ){
    int t1 = desempilha(&pilha_tipos);
    Var_t *simb_tipo = buscaTabSimb(var, &tabela);
+
    if(simb_tipo == NULL){
       imprimeErro(buildString("VARIAVEL \'%s\' NAO DECLARADA\n", var));
    }
@@ -50,7 +64,7 @@ int confereAtribuicao( char *var ){
       geraCodigo(NULL, buildString("ARMZ %d, %d", nivel_lex, simb_tipo->deslocamento));
    }
    else{
-      return 0;
+      imprimeErro("TIPOS INCOMPATIVEIS\n");
    }
 }
 
@@ -68,6 +82,7 @@ int confereAtribuicao( char *var ){
 %token SOMA SUB MULT DIV
 %token TRUE FALSE
 %token READ WRITE
+%token MAIOR MAIOR_IGUAL MENOR MENOR_IGUAL IGUAL
 
 %%
 
@@ -111,11 +126,24 @@ declara_var : lista_id_var DOIS_PONTOS
               tipo PONTO_E_VIRGULA
 ;
 
-tipo        : IDENT
+tipo        : IDENT {
+            if( strcmp(token, "integer") == 0 ){
+               atualizaTipos(&tabela, INTEIRO);
+            }
+            else if( strcmp(token, "boolean") == 0 ){
+               atualizaTipos(&tabela, BOOLEANO);
+            }
+         }
 ;
 
-lista_id_var: lista_id_var VIRGULA IDENT { num_vars++; insereTabSimb(token, &tabela, desloc++); }
-            | IDENT { num_vars++; insereTabSimb(token, &tabela, desloc++); }
+lista_id_var: lista_id_var VIRGULA IDENT {
+            num_vars++;
+            insereTabSimb(token, &tabela, desloc++, INDEFINIDO);
+         }
+         | IDENT {
+            num_vars++;
+            insereTabSimb(token, &tabela, desloc++, INDEFINIDO);
+         }
 ;
 
 lista_idents: lista_idents VIRGULA IDENT
@@ -192,26 +220,55 @@ atribuicao: IDENT { strcpy(l_elem, token); } ATRIBUICAO expressao {
          } PONTO_E_VIRGULA
 ;
 
-expressao: expressao SOMA termo {
-            checaTipos("SOMA", INTEIRO);
+expressao: expressao MAIOR expressao_simples {
+            checaTiposCMP("CMMA");
+            empilha(&pilha_tipos, BOOLEANO);
          }
-         | expressao SUB termo {
-            checaTipos("SUBT", INTEIRO);
+         | expressao MAIOR_IGUAL expressao_simples{
+            checaTiposCMP("CMAG");
+            empilha(&pilha_tipos, BOOLEANO);
          }
-         | expressao OR termo {
-            checaTipos("DISJ", BOOLEANO);
+         | expressao MENOR expressao_simples{
+            checaTiposCMP("CMME");
+            empilha(&pilha_tipos, BOOLEANO);
+         }
+         | expressao MENOR_IGUAL expressao_simples{
+            checaTiposCMP("CMEG");
+            empilha(&pilha_tipos, BOOLEANO);
+         }
+         | expressao IGUAL expressao_simples{
+            checaTiposCMP("CMIG");
+            empilha(&pilha_tipos, BOOLEANO);
+         }
+         | expressao_simples
+;
+
+expressao_simples: expressao_simples SOMA termo {
+            checaTiposOP("SOMA", INTEIRO);
+            empilha(&pilha_tipos, INTEIRO);
+         }
+         | expressao_simples SUB termo {
+            checaTiposOP("SUBT", INTEIRO);
+            empilha(&pilha_tipos, INTEIRO);
+         }
+         | expressao_simples OR termo {
+            checaTiposOP("DISJ", BOOLEANO);
+            empilha(&pilha_tipos, BOOLEANO);
          }
          | termo
 ;
 
 termo:   termo MULT fator {
-            checaTipos("MULT", INTEIRO);
+            checaTiposOP("MULT", INTEIRO);
+            empilha(&pilha_tipos, INTEIRO);
          }
          | termo DIV fator {
-            checaTipos("DIVI", INTEIRO);
+            checaTiposOP("DIVI", INTEIRO);
+            empilha(&pilha_tipos, INTEIRO);
          }
          | termo AND fator {
-            checaTipos("CONJ", BOOLEANO);
+            checaTiposOP("CONJ", BOOLEANO);
+            empilha(&pilha_tipos, BOOLEANO);
          }
          | fator
 ;

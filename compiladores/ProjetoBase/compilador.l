@@ -257,6 +257,37 @@ write { simbolo = simb_write;
           return DIV;
  }
 
+\> { simbolo = simb_maior;
+          strncpy (token, yytext, TAM_TOKEN);
+          IMPRIME(" maior que ");
+          return MAIOR;
+ }
+
+\>= { simbolo = simb_maiorigual;
+          strncpy (token, yytext, TAM_TOKEN);
+          IMPRIME(" maior ou igual que ");
+          return MAIOR_IGUAL;
+ }
+
+\< { simbolo = simb_menor;
+          strncpy (token, yytext, TAM_TOKEN);
+          IMPRIME(" menor que ");
+          return MENOR;
+ }
+
+\<= { simbolo = simb_menorigual;
+          strncpy (token, yytext, TAM_TOKEN);
+          IMPRIME(" menor ou igual que ");
+          return MENOR_IGUAL;
+}
+
+\= { simbolo = simb_igual;
+          strncpy (token, yytext, TAM_TOKEN);
+          IMPRIME(" igual a ");
+          return IGUAL;
+ }
+
+
 {ident} { simbolo = simb_identificador;
           strncpy (token, yytext, TAM_TOKEN);
           IMPRIME(" ident  ");

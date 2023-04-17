@@ -26,6 +26,7 @@ typedef enum simbolos {
   simb_div, simb_soma, simb_sub, simb_mult,
   simb_true, simb_false,
   simb_read, simb_write,
+  simb_maior, simb_maiorigual, simb_menor, simb_menorigual, simb_igual,
 } simbolos;
 
 

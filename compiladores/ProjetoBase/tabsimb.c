@@ -13,7 +13,7 @@ void iniciaTabSimb(TabSimb_t *tab){
 /*
    Tenta inserir um identificador na TabSimb, retorna 0 caso sucesso e -1 caso falhe
 */
-int insereTabSimb(char *ident, TabSimb_t *tab, int desloc){
+int insereTabSimb(char *ident, TabSimb_t *tab, int desloc, int tipo){
    if(ident && tab){
       Var_t *newVar = malloc(sizeof(Var_t));
       
@@ -24,6 +24,7 @@ int insereTabSimb(char *ident, TabSimb_t *tab, int desloc){
       tab->top = newVar;
 
       newVar->deslocamento = desloc;
+      newVar->tipo = tipo;
 
       return 0;
    }
@@ -99,10 +100,25 @@ void printTabSimb(TabSimb_t *tab){
       printf("----INICIO DA TabSimb----\n");
       Var_t *aux = tab->top;
       while(aux != NULL){
-         printf("%s - desloc: %d\n", aux->ident, aux->deslocamento);
+         printf("%s - tipo: %d\n", aux->ident, aux->tipo);
          aux = aux->next;
       }
       printf("----FIM DA TabSimb----\n\n");
+   }
+}
+
+/*
+   Atualiza todos os tipos indefinidos com o tipo passado como parametro
+*/
+void atualizaTipos(TabSimb_t *tab, int tipo){
+   if(tab){
+      Var_t *aux = tab->top;
+      while(aux != NULL){
+         if(aux->tipo == INDEF){
+            aux->tipo = tipo;
+         }
+         aux = aux->next;
+      }
    }
 }
 

@@ -1,7 +1,8 @@
 #define TAM_PILHA 255
 
-#define INTEIRO 0
-#define BOOLEANO 1
+#define INTEIRO    0
+#define BOOLEANO   1
+#define INDEFINIDO 2
 
 typedef struct{
    int tipos[TAM_PILHA];

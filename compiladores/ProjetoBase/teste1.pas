@@ -1,6 +1,6 @@
 program exemplo75 (input, output);
 var m,n :  integer;
+      o: boolean;
 begin
-      read(n);
-      write(n, 10);
+      o := 5 < 1;
 end.
