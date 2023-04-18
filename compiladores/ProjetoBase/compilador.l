@@ -287,6 +287,12 @@ write { simbolo = simb_write;
           return IGUAL;
  }
 
+\<> { simbolo = simb_desigual;
+          strncpy (token, yytext, TAM_TOKEN);
+          IMPRIME(" desigual a ");
+          return DESIGUAL;
+ }
+
 
 {ident} { simbolo = simb_identificador;
           strncpy (token, yytext, TAM_TOKEN);

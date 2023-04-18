@@ -1,10 +1,9 @@
      INPP
      AMEM 3
-     CRCT 5
      CRCT 1
-     CMME
+     CRCT 1
+     NEGA
+     DISJ
      ARMZ 0, 2
-     CRVL 0, 2
-     IMPR
      DMEM 3
      PARA

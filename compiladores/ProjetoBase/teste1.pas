@@ -2,5 +2,5 @@ program exemplo75 (input, output);
 var m,n :  integer;
       o: boolean;
 begin
-      o := 5 < 1;
+      o := true or not true;
 end.

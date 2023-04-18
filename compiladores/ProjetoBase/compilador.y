@@ -82,7 +82,7 @@ void confereAtribuicao( char *var ){
 %token SOMA SUB MULT DIV
 %token TRUE FALSE
 %token READ WRITE
-%token MAIOR MAIOR_IGUAL MENOR MENOR_IGUAL IGUAL
+%token MAIOR MAIOR_IGUAL MENOR MENOR_IGUAL IGUAL DESIGUAL
 
 %%
 
@@ -240,6 +240,10 @@ expressao: expressao MAIOR expressao_simples {
             checaTiposCMP("CMIG");
             empilha(&pilha_tipos, BOOLEANO);
          }
+         | expressao DESIGUAL expressao_simples{
+            checaTiposCMP("CMDG");
+            empilha(&pilha_tipos, BOOLEANO);
+         }
          | expressao_simples
 ;
 
@@ -297,6 +301,16 @@ fator:   NUM {
                geraCodigo(NULL, buildString("CRCT %d", 0));
 
                empilha(&pilha_tipos, BOOLEANO);
+         }
+         | NOT fator {
+               int tnot = desempilha(&pilha_tipos);
+               if(tnot == BOOLEANO){
+                  geraCodigo(NULL, "NEGA");
+                  empilha(&pilha_tipos, BOOLEANO);
+               }
+               else{
+                  imprimeErro("TIPOS INCOMPATIVEIS NA NEGACAO");
+               }
          }
          | ABRE_PARENTESES expressao FECHA_PARENTESES
 
