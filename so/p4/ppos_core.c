@@ -198,19 +198,23 @@ int task_id(){
 */
 void task_exit(int exit_code){
   curr_task->status = TERMINATED;
-  
+  curr_task->exit_code = exit_code;
+
   if(user_tasks == 0){
     //Remove task do dispatcher
     free(dispatcher_task.context.uc_stack.ss_sp);
+
     #ifdef DEBUG
     printf (RED "PPOS: task_exit    -  Exiting PPOS\n" RESET);
     #endif
-    exit(0);
+
+    exit(exit_code);
   }
   else{
     #ifdef DEBUG
     printf (YEL "PPOS: task_exit    -  Exiting task %d\n" RESET, curr_task->id);
     #endif
+
     task_switch(&dispatcher_task);
   }
 }
