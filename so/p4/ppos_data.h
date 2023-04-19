@@ -20,7 +20,7 @@
 #define RESET "\x1B[0m"
 
 typedef enum {
-  READY, RUNNING, SUSPENDED, TERMINATED
+  READY, SUSPENDED, TERMINATED
 } State_t ;
 
 // Estrutura que define um Task Control Block (TCB)

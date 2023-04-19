@@ -20,7 +20,9 @@ int user_tasks = 0;
 
 //------------------------//------------------------//------------------------//------------------------//------------------------//
 
-//Escalonador do PPOS
+/*
+  Escalonador do PPOS
+*/
 task_t *scheduler(){
   int age = -1;
 
@@ -48,7 +50,10 @@ task_t *scheduler(){
   return min;
 }
 
-//Funcao para printar elementos da fila, no caso os ids das tasks
+
+/*
+  Funcao para printar elementos da fila, no caso os ids das tasks
+*/
 void print_elem( void* a ){
   if(a){
     task_t *t = (task_t *)a;
@@ -56,7 +61,10 @@ void print_elem( void* a ){
   }
 }
 
-//Funcao do dispatcher
+
+/*
+  Funcao do dispatcher
+*/
 void dispatcher(){
   while( user_tasks > 0 ){
     #ifdef DEBUG
@@ -68,17 +76,15 @@ void dispatcher(){
     task_t *prox = scheduler();
 
     if(prox != NULL){
+      //Checar isso aqui
+      // if(prox->status != TERMINATED){
+      //   task_switch(prox);
+      // }
       task_switch(prox);
 
-      switch (prox->status)
-      {
+      switch (prox->status){
       case READY:
-        //Gira a fila e reseta prioridade dinamica
-        //readyTasks = readyTasks->next;
         prox->prio_d = prox->prio_s;
-        break;
-
-      case RUNNING:
         break;
 
       case SUSPENDED:
@@ -86,6 +92,9 @@ void dispatcher(){
 
       //Tarefa terminada, libera pilha do contexto e remove da fila
       case TERMINATED:
+        #ifdef DEBUG
+        printf (RED "PPOS: dispatcher   -  %d terminated, removing!\n" RESET, prox->id) ;
+        #endif
         free(prox->context.uc_stack.ss_sp);
         queue_remove((queue_t **)&readyTasks, (queue_t*)prox);
         user_tasks--;
@@ -100,7 +109,9 @@ void dispatcher(){
 }
 
 
-// Cria task main e coloca na fila
+/*
+  Cria task main e coloca na fila
+*/
 void createMainTask(){
   //Salva contexto atual na main
   main_task.id = curr_id;
@@ -115,7 +126,9 @@ void createMainTask(){
 }
 
 
-// Inicia o sistema do PPPOS
+/*
+  Inicia o sistema do PPOS
+*/
 void ppos_init(){
   /* desativa o buffer da saida padrao (stdout), usado pela função printf */
   setvbuf (stdout, 0, _IONBF, 0);
@@ -130,7 +143,9 @@ void ppos_init(){
 }
 
 
-// Inicializa uma nova tarefa. Retorna um ID> 0 ou erro.
+/*
+  Inicializa uma nova tarefa. Retorna um ID> 0 ou erro.
+*/
 int task_init (task_t *task,			// descritor da nova tarefa
                void  (*start_func)(void *),	// funcao corpo da tarefa
                void   *arg)		// argumentos para a tarefa
@@ -170,22 +185,40 @@ int task_init (task_t *task,			// descritor da nova tarefa
   return task->id;
 }
 
-// retorna o identificador da tarefa corrente (main deve ser 0)
+
+/*
+  Retorna o identificador da tarefa corrente (main deve ser 0)
+*/
 int task_id(){
   return (curr_task->id);
 }
 
-// Termina a tarefa corrente com um valor de status de encerramento
+/*
+  Termina a tarefa corrente com um valor de status de encerramento
+*/
 void task_exit(int exit_code){
   curr_task->status = TERMINATED;
-  #ifdef DEBUG
-  printf (YEL "PPOS: task_exit    -  Exiting task %d\n" RESET, curr_task->id);
-  #endif
   
-  task_switch(&dispatcher_task);
+  if(user_tasks == 0){
+    //Remove task do dispatcher
+    free(dispatcher_task.context.uc_stack.ss_sp);
+    #ifdef DEBUG
+    printf (RED "PPOS: task_exit    -  Exiting PPOS\n" RESET);
+    #endif
+    exit(0);
+  }
+  else{
+    #ifdef DEBUG
+    printf (YEL "PPOS: task_exit    -  Exiting task %d\n" RESET, curr_task->id);
+    #endif
+    task_switch(&dispatcher_task);
+  }
 }
 
-// alterna a execução para a tarefa indicada
+
+/*
+  Alterna a execução para a tarefa indicada
+*/
 int task_switch(task_t *task){
   if(task){
     //Salva task atual em old e nova task como atual
@@ -202,7 +235,10 @@ int task_switch(task_t *task){
   return -1;
 }
 
-// Larga a CPU e volta ao dispatcher
+
+/*
+  Larga a CPU e volta ao dispatcher
+*/
 void task_yield(){
   #ifdef DEBUG
   printf (YEL "PPOS: task_yield   -  Task %d yielded the CPU\n" RESET, curr_task->id);
@@ -212,19 +248,30 @@ void task_yield(){
   task_switch(&dispatcher_task);
 }
 
-// Seta a prioridade de uma task, se task for NULL usa a atual (curr_task)
+
+/*
+  Seta a prioridade de uma task, se task for NULL usa a atual (curr_task)
+  Task precisa estar entre -20 e 20
+*/
 void task_setprio (task_t *task, int prio){
   if(task){
-    task->prio_s = prio;
-    task->prio_d = prio;
+    if(prio >= -20 && prio <= 20){
+      task->prio_s = prio;
+      task->prio_d = prio;
+    }
   }
   else{
-    curr_task->prio_s = prio;
-    curr_task->prio_d = prio;
+    if(prio >= -20 && prio <= 20){
+      curr_task->prio_s = prio;
+      curr_task->prio_d = prio;
+    }
   }
 }
 
-// Retorna a prioridade de uma task, se task for NULL usa a atual (curr_task)
+
+/*
+  Retorna a prioridade de uma task, se task for NULL usa a atual (curr_task)
+*/
 int task_getprio (task_t *task){
   if(task){
     return (task->prio_s);
