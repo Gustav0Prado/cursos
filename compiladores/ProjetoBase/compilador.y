@@ -10,12 +10,12 @@
 #include <string.h>
 #include <stdarg.h>
 #include "compilador.h"
-#include "stack.h"
+#include "pilha.h"
 #include "tabsimb.h"
 
-int num_vars, desloc, nivel_lex = -1;
+int num_vars, desloc, nivel_lex = -1, rot_atual = 0;
 TabSimb_t tabela;
-Pilha_t pilha_tipos;
+Pilha_t pilha_tipos, pilha_rotulos;
 Var_t *simb, *simb_aux;
 char l_elem[1023];
 
@@ -66,6 +66,10 @@ void confereAtribuicao( char *var ){
    else{
       imprimeErro("TIPOS INCOMPATIVEIS\n");
    }
+}
+
+void geraRotulo(int rot){
+   geraCodigo(buildString("R%.2d", rot), "NADA");
 }
 
 %}
@@ -155,6 +159,7 @@ comando_composto: T_BEGIN comandos T_END
 comandos:     comandos atribuicao | atribuicao
             | comandos leitura    | leitura
             | comandos escrita    | escrita
+            | comandos while      | while
 ;
 
 leitura: READ ABRE_PARENTESES lista_read FECHA_PARENTESES PONTO_E_VIRGULA
@@ -313,6 +318,26 @@ fator:   NUM {
                }
          }
          | ABRE_PARENTESES expressao FECHA_PARENTESES
+
+while: WHILE {               
+               empilha(&pilha_rotulos, rot_atual);
+               geraRotulo(rot_atual);
+               rot_atual++;
+         } expressao DO{
+               int tipo_exp = desempilha(&pilha_tipos);
+               if(tipo_exp != BOOLEANO){
+                  imprimeErro("EXPRESSAO NAO BOOLEANA");
+               }
+               empilha(&pilha_rotulos, rot_atual);
+               geraCodigo(NULL, buildString("DSVF R%.2d", rot_atual));
+               rot_atual++;
+         } T_BEGIN comandos T_END {
+               int rot_saida  = desempilha(&pilha_rotulos);
+               int rot_desvio = desempilha(&pilha_rotulos);
+               geraCodigo(NULL, buildString("DSVS R%.2d", rot_desvio));
+               geraRotulo(rot_saida);
+         } PONTO_E_VIRGULA
+;
 
 %%
 
