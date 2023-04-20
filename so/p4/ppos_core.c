@@ -76,10 +76,6 @@ void dispatcher(){
     task_t *prox = scheduler();
 
     if(prox != NULL){
-      //Checar isso aqui
-      // if(prox->status != TERMINATED){
-      //   task_switch(prox);
-      // }
       task_switch(prox);
 
       switch (prox->status){
