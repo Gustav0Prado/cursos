@@ -1,15 +1,13 @@
-program exemplo75 (input, output);
-var m,n,o :  integer;
+program cmdIf (input, output);
+var i, j: integer;
 begin
-      m := 2;
-      n := 0;
-      o := 0;
-      while( n < m ) do
-      begin
-            n := n + 1;
-            while( o < n ) do
-            begin
-                  o := o + 1;
-            end;
-      end;
+	read(j);
+	i:=0;
+	while (i < j) do
+	begin
+		if (i div 2 * 2 = i)
+		then write(i,0)
+		else write(i,1);
+		i := i+1;
+	end;
 end.

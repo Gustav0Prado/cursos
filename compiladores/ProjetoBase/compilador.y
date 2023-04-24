@@ -88,6 +88,9 @@ void geraRotulo(int rot){
 %token READ WRITE
 %token MAIOR MAIOR_IGUAL MENOR MENOR_IGUAL IGUAL DESIGUAL
 
+%nonassoc LOWER_THAN_ELSE
+%nonassoc ELSE
+
 %%
 
 programa    :{
@@ -107,7 +110,7 @@ bloco       :
               }
 
               comando_composto
-              ;
+;
 
 
 
@@ -156,13 +159,23 @@ lista_idents: lista_idents VIRGULA IDENT
 
 comando_composto: T_BEGIN comandos T_END
 
-comandos:     comandos atribuicao | atribuicao
-            | comandos leitura    | leitura
-            | comandos escrita    | escrita
-            | comandos while      | while
+comandos: comandos PONTO_E_VIRGULA comando | comando
 ;
 
-leitura: READ ABRE_PARENTESES lista_read FECHA_PARENTESES PONTO_E_VIRGULA
+comando: comando_vazio | comando_sem_rotulo
+;
+
+comando_vazio:;
+
+comando_sem_rotulo: atribuicao
+                  | leitura
+                  | escrita
+                  | repeticao
+                  | condicional
+                  | comando_composto
+;
+
+leitura: READ ABRE_PARENTESES lista_read FECHA_PARENTESES
 ;
 
 lista_read: lista_read VIRGULA IDENT {
@@ -187,7 +200,7 @@ lista_read: lista_read VIRGULA IDENT {
          }
 ;
 
-escrita: WRITE ABRE_PARENTESES lista_write FECHA_PARENTESES PONTO_E_VIRGULA
+escrita: WRITE ABRE_PARENTESES lista_write FECHA_PARENTESES
 ;
 
 lista_write: lista_write VIRGULA IDENT {
@@ -222,7 +235,7 @@ lista_write: lista_write VIRGULA IDENT {
 
 atribuicao: IDENT { strcpy(l_elem, token); } ATRIBUICAO expressao {
             confereAtribuicao(l_elem);
-         } PONTO_E_VIRGULA
+         }
 ;
 
 expressao: expressao MAIOR expressao_simples {
@@ -319,7 +332,7 @@ fator:   NUM {
          }
          | ABRE_PARENTESES expressao FECHA_PARENTESES
 
-while: WHILE {               
+repeticao: WHILE {               
                empilha(&pilha_rotulos, rot_atual);
                geraRotulo(rot_atual);
                rot_atual++;
@@ -331,12 +344,40 @@ while: WHILE {
                empilha(&pilha_rotulos, rot_atual);
                geraCodigo(NULL, buildString("DSVF R%.2d", rot_atual));
                rot_atual++;
-         } T_BEGIN comandos T_END {
+         } comando {
                int rot_saida  = desempilha(&pilha_rotulos);
                int rot_desvio = desempilha(&pilha_rotulos);
                geraCodigo(NULL, buildString("DSVS R%.2d", rot_desvio));
                geraRotulo(rot_saida);
-         } PONTO_E_VIRGULA
+         }
+;
+
+condicional: if_then %prec LOWER_THAN_ELSE {
+               geraRotulo(rot_atual);
+         }
+         | if_then ELSE comando_sem_rotulo {
+               geraRotulo(rot_atual);
+         }
+;
+
+if_then: IF {
+               empilha(&pilha_rotulos, rot_atual);
+         }
+         expressao {
+               int tipo_exp = desempilha(&pilha_tipos);
+               if(tipo_exp != BOOLEANO){
+                  imprimeErro("EXPRESSAO NAO BOOLEANA");
+               }
+               int rot_desvio = desempilha(&pilha_rotulos);
+               geraCodigo(NULL, buildString("DSVF R%.2d", rot_desvio));
+               empilha(&pilha_rotulos, rot_desvio+1);
+         }
+         THEN comando_sem_rotulo {
+               int rot_desvio = desempilha(&pilha_rotulos);
+               geraCodigo(NULL, buildString("DSVS R%.2d", rot_desvio));
+               geraRotulo(rot_atual);
+               rot_atual++;
+         }
 ;
 
 %%
