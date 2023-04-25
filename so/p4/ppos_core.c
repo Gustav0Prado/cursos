@@ -92,8 +92,8 @@ void dispatcher(){
         printf (RED "PPOS: dispatcher   -  %d terminated, removing!\n" RESET, prox->id) ;
         #endif
         free(prox->context.uc_stack.ss_sp);
-        queue_remove((queue_t **)&readyTasks, (queue_t*)prox);
-        user_tasks--;
+        // queue_remove((queue_t **)&readyTasks, (queue_t*)prox);
+        // user_tasks--;
         break;
       }
     }
@@ -210,6 +210,9 @@ void task_exit(int exit_code){
     #ifdef DEBUG
     printf (YEL "PPOS: task_exit    -  Exiting task %d\n" RESET, curr_task->id);
     #endif
+
+    queue_remove((queue_t **)&readyTasks, (queue_t*)curr_task);
+    user_tasks--;
 
     task_switch(&dispatcher_task);
   }
