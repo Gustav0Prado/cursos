@@ -15,7 +15,7 @@ void iniciaTabSimb(TabSimb_t *tab){
 */
 int insereTabSimb(char *ident, TabSimb_t *tab, int desloc, int tipo){
    if(ident && tab){
-      Var_t *newVar = malloc(sizeof(Var_t));
+      Simb_t *newVar = malloc(sizeof(Simb_t));
       
       newVar->ident = malloc(sizeof(ident));
       strncpy(newVar->ident, ident, (int)sizeof(ident));
@@ -23,8 +23,8 @@ int insereTabSimb(char *ident, TabSimb_t *tab, int desloc, int tipo){
       newVar->next = tab->top;
       tab->top = newVar;
 
-      newVar->deslocamento = desloc;
-      newVar->tipo = tipo;
+      newVar->uni.vs.deslocamento = desloc;
+      newVar->uni.vs.tipo = tipo;
 
       return 0;
    }
@@ -41,7 +41,7 @@ int removeTabSimb(int n, TabSimb_t *tab){
          perror("Erro: Tentou remover mais elementos do que a TabSimb possui");
          return -1;
       }
-      Var_t *topo;
+      Simb_t *topo;
       for(int i = 0; i < n; ++i){
          topo = tab->top;
 
@@ -60,9 +60,9 @@ int removeTabSimb(int n, TabSimb_t *tab){
 /*
    Retorna atributos da variável buscada
 */
-Var_t *buscaTabSimb(char *ident, TabSimb_t *tab){
+Simb_t *buscaTabSimb(char *ident, TabSimb_t *tab){
    if(tab && ident){
-      Var_t *aux = tab->top;
+      Simb_t *aux = tab->top;
       while(aux != NULL){
          if(strcmp(ident, aux->ident) == 0){
             return aux;
@@ -98,9 +98,9 @@ int finalizaTabSimb(TabSimb_t *tab){
 void printTabSimb(TabSimb_t *tab){
    if(tab){
       printf("----INICIO DA TabSimb----\n");
-      Var_t *aux = tab->top;
+      Simb_t *aux = tab->top;
       while(aux != NULL){
-         printf("%s - tipo: %d\n", aux->ident, aux->tipo);
+         printf("%s - tipo: %d\n", aux->ident, aux->uni.vs.tipo);
          aux = aux->next;
       }
       printf("----FIM DA TabSimb----\n\n");
@@ -112,10 +112,10 @@ void printTabSimb(TabSimb_t *tab){
 */
 void atualizaTipos(TabSimb_t *tab, int tipo){
    if(tab){
-      Var_t *aux = tab->top;
+      Simb_t *aux = tab->top;
       while(aux != NULL){
-         if(aux->tipo == INDEF){
-            aux->tipo = tipo;
+         if(aux->uni.vs.tipo == INDEF){
+            aux->uni.vs.tipo = tipo;
          }
          aux = aux->next;
       }
@@ -128,7 +128,7 @@ void atualizaTipos(TabSimb_t *tab, int tipo){
 int tamanhoTabSimb(TabSimb_t *tab){
    int cont = 0;
    if(tab){
-      Var_t *aux = tab->top;
+      Simb_t *aux = tab->top;
       while(aux != NULL){
          cont++;
          aux = aux->next;

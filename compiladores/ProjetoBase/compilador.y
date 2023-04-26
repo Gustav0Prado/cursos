@@ -16,7 +16,7 @@
 int num_vars, desloc, nivel_lex = -1, rot_atual = 0;
 TabSimb_t tabela;
 Pilha_t pilha_tipos, pilha_rotulos;
-Var_t *simb, *simb_aux;
+Simb_t *simb, *simb_aux;
 char l_elem[1023];
 
 char str[1024];
@@ -55,13 +55,13 @@ void checaTiposCMP( char *cmd){
 
 void confereAtribuicao( char *var ){
    int t1 = desempilha(&pilha_tipos);
-   Var_t *simb_tipo = buscaTabSimb(var, &tabela);
+   Simb_t *simb_tipo = buscaTabSimb(var, &tabela);
 
    if(simb_tipo == NULL){
       imprimeErro(buildString("VARIAVEL \'%s\' NAO DECLARADA\n", var));
    }
-   else if( t1 == simb_tipo->tipo ){
-      geraCodigo(NULL, buildString("ARMZ %d, %d", nivel_lex, simb_tipo->deslocamento));
+   else if( t1 == simb_tipo->uni.vs.tipo ){
+      geraCodigo(NULL, buildString("ARMZ %d, %d", nivel_lex, simb_tipo->uni.vs.deslocamento));
    }
    else{
       imprimeErro("TIPOS INCOMPATIVEIS\n");
@@ -182,7 +182,7 @@ lista_read: lista_read VIRGULA IDENT {
             geraCodigo(NULL, "LEIT");
             simb = buscaTabSimb(token, &tabela);
             if(simb){
-               geraCodigo(NULL, buildString("ARMZ %d, %d", nivel_lex, simb->deslocamento));
+               geraCodigo(NULL, buildString("ARMZ %d, %d", nivel_lex, simb->uni.vs.deslocamento));
             }
             else{
                imprimeErro(buildString("VARIAVEL %s NAO DECLARADA", token));
@@ -192,7 +192,7 @@ lista_read: lista_read VIRGULA IDENT {
             geraCodigo(NULL, "LEIT");
             simb = buscaTabSimb(token, &tabela);
             if(simb){
-               geraCodigo(NULL, buildString("ARMZ %d, %d", nivel_lex, simb->deslocamento));
+               geraCodigo(NULL, buildString("ARMZ %d, %d", nivel_lex, simb->uni.vs.deslocamento));
             }
             else{
                imprimeErro(buildString("VARIAVEL %s NAO DECLARADA", token));
@@ -206,7 +206,7 @@ escrita: WRITE ABRE_PARENTESES lista_write FECHA_PARENTESES
 lista_write: lista_write VIRGULA IDENT {
             simb = buscaTabSimb(token, &tabela);
             if(simb){
-               geraCodigo(NULL, buildString("CRVL %d, %d", nivel_lex, simb->deslocamento));
+               geraCodigo(NULL, buildString("CRVL %d, %d", nivel_lex, simb->uni.vs.deslocamento));
                geraCodigo(NULL, "IMPR");
             }
             else{
@@ -216,7 +216,7 @@ lista_write: lista_write VIRGULA IDENT {
          | IDENT {
             simb = buscaTabSimb(token, &tabela);
             if(simb){
-               geraCodigo(NULL, buildString("CRVL %d, %d", nivel_lex, simb->deslocamento));
+               geraCodigo(NULL, buildString("CRVL %d, %d", nivel_lex, simb->uni.vs.deslocamento));
                geraCodigo(NULL, "IMPR");
             }
             else{
@@ -306,9 +306,9 @@ fator:   NUM {
                // Carrega valor de outra variavel
                simb = buscaTabSimb(l_elem, &tabela);
                simb_aux = buscaTabSimb(token, &tabela);
-               geraCodigo(NULL, buildString("CRVL %d,%d", nivel_lex, simb_aux->deslocamento));
+               geraCodigo(NULL, buildString("CRVL %d,%d", nivel_lex, simb_aux->uni.vs.deslocamento));
 
-               empilha(&pilha_tipos, simb_aux->tipo);
+               empilha(&pilha_tipos, simb_aux->uni.vs.tipo);
          }
          | TRUE {
                geraCodigo(NULL, buildString("CRCT %d", 1));
