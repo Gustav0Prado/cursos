@@ -25,6 +25,8 @@ int user_tasks = 0;
 struct sigaction action ;
 struct itimerval timer;
 
+unsigned int sysClock;
+
 //------------------------//------------------------//------------------------//------------------------//------------------------//
 
 /*
@@ -32,10 +34,13 @@ struct itimerval timer;
   Caso tempo tenha acabado, retorna ao dispatcher
 */
 void timer_tick(){
+  curr_task->cpuTime++;
+  sysClock++;
+
   if(curr_task->task_type == USER && --curr_task->quantum == 0){
-    #ifdef DEBUG
-    printf (GRN "PPOS: timer   -  %d quantum over!\n" RESET, curr_task->id);
-    #endif
+    // #ifdef DEBUG
+    // printf (GRN "PPOS: timer   -  %d quantum over!\n" RESET, curr_task->id);
+    // #endif
     task_yield();
   }
 }
@@ -195,6 +200,9 @@ void createMainTask(){
   main_task.quantum = DEFQUANTUM;
   main_task.task_type = USER;
 
+  main_task.activations = 1;
+  main_task.cpuTime = 0;
+
   // Adiciona na fila de prontos
   user_tasks++;
   curr_id++;
@@ -219,6 +227,7 @@ void ppos_init(){
   user_tasks--;
   dispatcher_task.task_type = SYSTEM;
 
+  sysClock = 0;
   timer_start();
 }
 
@@ -248,6 +257,11 @@ int task_init (task_t *task,			// descritor da nova tarefa
 
     //Tarefas comecam como de usuário
     task->task_type = USER;
+
+    //Seta valores iniciais de ativação e tempo de cpu
+    task->activations = 0;
+    task->cpuTime = 0;
+    task->creationTime = systime();
 
     #ifdef DEBUG
     printf (YEL "PPOS: task_init    -  Starting task %d\n" RESET, task->id ) ;
@@ -283,6 +297,10 @@ void task_exit(int exit_code){
   curr_task->status = TERMINATED;
   curr_task->exit_code = exit_code;
 
+  //Printa tempo e ativacoes
+  printf("Task %d exit: execution time %d ms,", curr_task->id, systime()-curr_task->creationTime);
+  printf(" processor time %d ms, %d activations\n", curr_task->cpuTime, curr_task->activations);
+
   if(user_tasks == 0){
     //Remove task do dispatcher
     free(dispatcher_task.context.uc_stack.ss_sp);
@@ -298,6 +316,7 @@ void task_exit(int exit_code){
     printf (YEL "PPOS: task_exit    -  Exiting task %d\n" RESET, curr_task->id);
     #endif
 
+    //Remove tarefa da fila
     queue_remove((queue_t **)&readyTasks, (queue_t*)curr_task);
     user_tasks--;
 
@@ -319,6 +338,8 @@ int task_switch(task_t *task){
     printf (YEL "PPOS: task_switch  -  Switching task %d -> %d\n" RESET, aux_task->id, task->id);
     #endif
 
+    curr_task->activations++;
+
     return (swapcontext(&(aux_task->context), &(task->context)));
   }
 
@@ -336,4 +357,11 @@ void task_yield(){
 
   //Tarefa larga a CPU e chama o dispatcher
   task_switch(&dispatcher_task);
+}
+
+/*
+  Retorna tempo atual do relogio
+*/
+unsigned int systime (){
+  return (sysClock);
 }

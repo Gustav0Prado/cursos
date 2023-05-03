@@ -9,11 +9,11 @@ int main(){
 
   fork () ;
   x++ ;
-  sleep (5) ;
+  sleep (1) ;
   wait (0) ;
   fork () ;
   wait (0) ;
-  sleep (5) ;
+  sleep (1) ;
   x++ ;
   printf ("Valor de x: %d\n", x) ;
 }
