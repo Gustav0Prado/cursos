@@ -29,6 +29,7 @@ ls_t switchH, switchM;
 void ls_lock(ls_t *ls, sem_t *sem){
    sem_wait(&ls->mutex);
    ls->counter++;
+   //Se for o(a) primeiro(a) a entrar, liga o switch
    if (ls->counter == 1)
    {
       sem_wait(sem);
@@ -39,6 +40,7 @@ void ls_lock(ls_t *ls, sem_t *sem){
 void ls_unlock(ls_t *ls, sem_t* sem){
    sem_wait(&ls->mutex);
    ls->counter--;
+   //Se for o ultimo(a) a sair, desliga o switch
    if (ls->counter == 0)
    {
       printf("Banheiro Livre!!\n");
@@ -66,27 +68,37 @@ void trabalhar(long i, int hm){
 
 void usar_banheiro_h(long i){
    printf("\tHomem  %ld quer entrar no banheiro\n", i);
+   //Tenta entrar no banheiro e caso seja o primeiro e o banheiro esteja vazio, liga o switch
    ls_lock(&switchH, &vazio);
 
+   //Entrou no banheiro, tenta entrar em uma porta
    sem_wait(&vagas_H);
    printf("\t\tHomem  %ld entrou no banheiro\n", i);
    sleep(tempo());
 
+   //Sai da porta
    sem_post(&vagas_H);
    printf("\t\tHomem  %ld saiu do banheiro\n", i);
+
+   //Sai do banheiro e caso seja o ultimo, desliga o switch
    ls_unlock(&switchH, &vazio);
 }
 
 void usar_banheiro_m(long i){
    printf("\tMulher  %ld quer entrar no banheiro\n", i);
+   //Tenta entrar no banheiro e caso seja a primeira e o banheiro esteja vazio, liga o switch
    ls_lock(&switchM, &vazio);
 
+   //Entrou no banheiro, tenta entrar em uma porta
    sem_wait(&vagas_M);
    printf("\t\tMulher  %ld entrou no banheiro\n", i);
    sleep(tempo());
 
+   //Sai da porta
    sem_post(&vagas_M);
    printf("\t\tMulher  %ld saiu do banheiro\n", i);
+   
+   //Sai do banheiro e caso seja o ultimo, desliga o switch
    ls_unlock(&switchM, &vazio);
 }
 

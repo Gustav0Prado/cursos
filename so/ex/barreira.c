@@ -33,7 +33,6 @@ void barrier_wait(barrier_t *b){
    // initialize semaphore to num
    sem_wait(&c);
    count++;
-   //printf("%d  --  %d\n", count, b->n);
    if(count < b->n){
       sem_post(&c);
       sem_wait(&b->s);
