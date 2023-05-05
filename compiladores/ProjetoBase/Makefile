@@ -9,8 +9,10 @@
 
 $DEPURA=1
 
+CFLAGS = -ll -ly -lc -g
+
 compilador: lex.yy.c compilador.tab.c compilador.o compilador.h pilha.o tabsimb.o
-	gcc lex.yy.c compilador.tab.c compilador.o pilha.o tabsimb.o -o compilador -ll -ly -lc -g
+	gcc lex.yy.c compilador.tab.c compilador.o pilha.o tabsimb.o -o compilador $(CFLAGS)
 
 lex.yy.c: compilador.l compilador.h
 	flex compilador.l

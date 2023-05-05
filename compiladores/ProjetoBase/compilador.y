@@ -18,8 +18,9 @@ TabSimb_t tabela;
 Pilha_t pilha_tipos, pilha_rotulos;
 Simb_t *simb, *simb_aux;
 char l_elem[1023];
-
 char str[1024];
+char l_proc[1023];
+
 char* buildString(const char *fmt, ...) {
    va_list args;
    va_start(args, fmt);
@@ -68,7 +69,7 @@ void confereAtribuicao( char *var ){
    }
 }
 
-void geraRotulo(int rot){
+char *geraRotulo(int rot){
    geraCodigo(buildString("R%.2d", rot), "NADA");
 }
 
@@ -93,27 +94,29 @@ void geraRotulo(int rot){
 
 %%
 
-programa    :{
+/* Esqueleto do programa */
+
+programa :{
             geraCodigo (NULL, "INPP");
             }
             PROGRAM IDENT
-            ABRE_PARENTESES lista_idents FECHA_PARENTESES PONTO_E_VIRGULA
-            bloco PONTO {
+            ABRE_PARENTESES lista_idents FECHA_PARENTESES PONTO_E_VIRGULA bloco PONTO {
             geraCodigo(NULL, buildString("DMEM %d", num_vars));
             geraCodigo (NULL, "PARA");
             }
 ;
 
-bloco       :
+bloco :
               parte_declara_vars
               {
               }
 
+              declara_procs
+
               comando_composto
 ;
 
-
-
+/* Declaracao de variaveis */
 
 parte_declara_vars:  var
 ;
@@ -137,25 +140,27 @@ tipo        : IDENT {
             if( strcmp(token, "integer") == 0 ){
                atualizaTipos(&tabela, INTEIRO);
             }
-            else if( strcmp(token, "boolean") == 0 ){
-               atualizaTipos(&tabela, BOOLEANO);
-            }
+            // else if( strcmp(token, "boolean") == 0 ){
+            //    atualizaTipos(&tabela, BOOLEANO);
+            // }
          }
 ;
 
 lista_id_var: lista_id_var VIRGULA IDENT {
             num_vars++;
-            insereTabSimb(token, &tabela, desloc++, INDEFINIDO);
+            insereTabSimbVS(token, &tabela, desloc++, INDEFINIDO);
          }
          | IDENT {
             num_vars++;
-            insereTabSimb(token, &tabela, desloc++, INDEFINIDO);
+            insereTabSimbVS(token, &tabela, desloc++, INDEFINIDO);
          }
 ;
 
 lista_idents: lista_idents VIRGULA IDENT
             | IDENT
 ;
+
+/* Comandos */
 
 comando_composto: T_BEGIN comandos T_END
 
@@ -174,6 +179,8 @@ comando_sem_rotulo: atribuicao
                   | condicional
                   | comando_composto
 ;
+
+/* leitura (read), escrita (write) e atribuicao */
 
 leitura: READ ABRE_PARENTESES lista_read FECHA_PARENTESES
 ;
@@ -237,6 +244,8 @@ atribuicao: IDENT { strcpy(l_elem, token); } ATRIBUICAO expressao {
             confereAtribuicao(l_elem);
          }
 ;
+
+/* Expressoes matematicas */
 
 expressao: expressao MAIOR expressao_simples {
             checaTiposCMP("CMMA");
@@ -332,6 +341,9 @@ fator:   NUM {
          }
          | ABRE_PARENTESES expressao FECHA_PARENTESES
 
+
+/* Comando repetitivo (while) */
+
 repeticao: WHILE {               
                empilha(&pilha_rotulos, rot_atual);
                geraRotulo(rot_atual);
@@ -351,6 +363,8 @@ repeticao: WHILE {
                geraRotulo(rot_saida);
          }
 ;
+
+/* Comandos condicionais (if) */
 
 condicional: if_then %prec LOWER_THAN_ELSE {
                geraRotulo(rot_atual);
@@ -379,6 +393,50 @@ if_then: IF {
                rot_atual++;
          }
 ;
+
+/* Procedimentos (Procedures) */
+
+declara_procs : declara_procs declara_proc | declara_proc | 
+;
+
+declara_proc:  PROCEDURE { nivel_lex++; } IDENT {
+               strcpy(l_proc, token);
+               printf("%s\n%s\n", buildString("R%.2d", rot_atual), buildString("ENPR %d", nivel_lex));
+               //geraCodigo(buildString("R%.2d", rot_atual), buildString("ENPR %d", nivel_lex));
+               rot_atual++;
+         } ABRE_PARENTESES FECHA_PARENTESES PONTO_E_VIRGULA
+         blocoPF PONTO_E_VIRGULA { nivel_lex--; }
+;
+
+blocoPF :
+              parte_declara_vars
+              {
+              }
+
+              declara_procs
+
+              comando_composto
+;
+
+/* declara_params: declara_params declara_param | declara_param
+;
+
+declara_param : lista_id_param DOIS_PONTOS
+              tipo PONTO_E_VIRGULA
+;
+
+lista_id_param: lista_id_param VIRGULA IDENT {
+            simb = buscaTabSimb(l_proc, &tabela);
+            printf("%s\n", simb->ident);
+            insereTabSimbVS(token, &tabela, desloc++, INDEFINIDO);
+         }
+         | IDENT {
+            num_vars++;
+            insereTabSimbVS(token, &tabela, desloc++, INDEFINIDO);
+         }
+; */
+
+
 
 %%
 

@@ -11,9 +11,9 @@ void iniciaTabSimb(TabSimb_t *tab){
 }
 
 /*
-   Tenta inserir um identificador na TabSimb, retorna 0 caso sucesso e -1 caso falhe
+   Tenta inserir um identificador de VS na TabSimb, retorna 0 caso sucesso e -1 caso falhe
 */
-int insereTabSimb(char *ident, TabSimb_t *tab, int desloc, int tipo){
+int insereTabSimbVS(char *ident, TabSimb_t *tab, int desloc, int tipo){
    if(ident && tab){
       Simb_t *newVar = malloc(sizeof(Simb_t));
       
@@ -25,6 +25,29 @@ int insereTabSimb(char *ident, TabSimb_t *tab, int desloc, int tipo){
 
       newVar->uni.vs.deslocamento = desloc;
       newVar->uni.vs.tipo = tipo;
+
+      return 0;
+   }
+   perror("Erro: Identificador ou TabSimb Nulos");
+   return -1;
+}
+
+/*
+   Tenta inserir um identificador de Procedimento na TabSimb, retorna 0 caso sucesso e -1 caso falhe
+*/
+int insereTabSimbProc(char *ident, TabSimb_t *tab, int desloc, int nl){
+   if(ident && tab){
+      Simb_t *newVar = malloc(sizeof(Simb_t));
+      
+      newVar->ident = malloc(sizeof(ident));
+      strncpy(newVar->ident, ident, (int)sizeof(ident));
+
+      newVar->next = tab->top;
+      tab->top = newVar;
+
+      newVar->tipoSimb = PROC;
+      newVar->uni.proc.nivel_lex = nl;
+      newVar->uni.proc.num_param = 0;
 
       return 0;
    }
@@ -100,7 +123,29 @@ void printTabSimb(TabSimb_t *tab){
       printf("----INICIO DA TabSimb----\n");
       Simb_t *aux = tab->top;
       while(aux != NULL){
-         printf("%s - tipo: %d\n", aux->ident, aux->uni.vs.tipo);
+         switch (aux->tipoSimb){
+         case VS:
+            switch (aux->uni.vs.tipo){
+            case INT:
+               printf("%s - VS - tipo: INTEGER\n", aux->ident);
+               break;
+
+            case INDEF:
+               printf("%s - VS - tipo: INDEFINIDO\n", aux->ident);
+               break;
+            
+            default:
+               break;
+            }
+            break;
+         
+         case PROC:
+            printf("%s - PROC - nl: %d\n", aux->ident, aux->uni.proc.nivel_lex);
+            break;
+         
+         default:
+            break;
+         }
          aux = aux->next;
       }
       printf("----FIM DA TabSimb----\n\n");
@@ -108,12 +153,13 @@ void printTabSimb(TabSimb_t *tab){
 }
 
 /*
-   Atualiza todos os tipos indefinidos com o tipo passado como parametro
+   Atualiza todos os tipos indefinidos de variaveis simples com
+   com o tipo passado como parametro
 */
 void atualizaTipos(TabSimb_t *tab, int tipo){
    if(tab){
       Simb_t *aux = tab->top;
-      while(aux != NULL){
+      while(aux != NULL && aux->tipoSimb == VS){
          if(aux->uni.vs.tipo == INDEF){
             aux->uni.vs.tipo = tipo;
          }
