@@ -10,4 +10,4 @@ clean:
 	rm -rf ./*.o ./main
 
 dryrun: clean all
-	./main
+	sudo ./main
