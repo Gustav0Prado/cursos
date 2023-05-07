@@ -5,23 +5,48 @@
 #include "socket.h"
 
 int main(){
-   int papel;
+   int servidor;
    unsigned char msg[256];
+   unsigned char rcve[256];
+   char lixo;
 
+   #ifdef DEBUG
    int socket = ConexaoRawSocket("lo");
+   int test = 0;
+
+   #else
+   int socket = ConexaoRawSocket("enp3s0");
+   #endif
 
    printf("0 - Cliente\n1 - Servidor\n");
-   scanf("%d", &papel);
+   scanf("%d", &servidor);
+   scanf("%c", &lixo);
 
-   if(papel){
+   memset(rcve, 0, 256);
+
+   if(servidor){
       while(1){
-         if(recv(socket, msg, sizeof(msg), 0) >= 0){
-            printf("%s\n", msg);
+         #ifdef DEBUG
+         if(recv(socket, rcve, 256, 0) != -1){
+            if(test % 2 == 0){
+               printf("%s", rcve);
+               memset(rcve, 0, 256);
+            }
+            test++;
          }
+
+         #else
+         if(recv(socket, rcve, 256, 0) != -1){
+            printf("%s", rcve);
+            memset(rcve, 0, 256);
+         }
+         #endif
       }
    }
    else{
-      strncpy(msg, "Hello, World!", 15);
-      send(socket, msg, sizeof(msg), 0);
+      while(1){
+         fgets((char *)msg, 256, stdin);
+         send(socket, msg, 256, 0);
+      }
    }
 }
