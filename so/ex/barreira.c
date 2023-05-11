@@ -14,35 +14,33 @@ Carlos Maziero, DINF/UFPR 2020
 #define NUM_THREADS  3
 
 typedef struct barrier{
-   sem_t s;
-   int n;
+   int cont, max;
+   sem_t lock, wall;
 } barrier_t;
 
 barrier_t b;
-sem_t c;
-int count;
 
 void barrier_init(barrier_t *b, int num){
-   sem_init  (&b->s, 0, 0) ;
-   sem_init  (&c, 0, 1) ;
-   b->n = num;
-   count = 0;
+   sem_init  (&b->lock, 0, 1);      //Acesso exclusivo a barreira
+   sem_init  (&b->wall, 0, 0);      //Muro para as threads esperarem a barreira
+   b->cont = 0;
+   b->max = num;
 }
 
 void barrier_wait(barrier_t *b){
-   // initialize semaphore to num
-   sem_wait(&c);
-   count++;
-   if(count < b->n){
-      sem_post(&c);
-      sem_wait(&b->s);
-      sem_post(&b->s);
+   sem_wait(&(b->lock));
+   b->cont++;
+   if(b->cont < b->max){
+      sem_post(&(b->lock));
+      sem_wait(&(b->wall));
    }
    else{
-      sem_post(&b->s);
-      count = 0;
+      b->cont = 0;
+      for(int i = 0; i < b->max-1; ++i){
+         sem_post(&(b->wall));
+      }
+      sem_post(&(b->lock));
    }
-   
 }
 
 void *A(){
