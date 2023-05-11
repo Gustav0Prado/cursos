@@ -12,50 +12,59 @@ Carlos Maziero, DINF/UFPR 2020
 #include <unistd.h>
 #include <semaphore.h>
 
-#define NUM_THREADS 6
+#define NUM_THREADS 2
+#define CADEIRAS 4
 
-#define PORCOES 3
+sem_t mutex, barbeiroPronto, clientePronto, barbeiro, cliente;
+int clientes = 0;
 
-sem_t vazio, cheio, mutex;
-int cont = PORCOES;
+void temCabeloCortado(long id){
+   printf("\tCliente %ld está tendo o cabelo cortado\n", id);
+   sleep(2);
+};
 
-void serve_porcao(long id){
-   printf("\tConvidado %ld pegou uma porção!\n", id);
-}
+void cortaCabelo(){
 
-void enche_caldeirao(int N){
-   printf("Cozinheiro foi chamado! Reabastecendo caldeirao\n");
-}
+};
 
-void come(long id){
-   printf("\t\tConvidado %ld comendo!\n", id);
-   sleep( 1 + rand() % 3 );
-}
-
-void *Cozinheiro(){
+void *Barbeiro(){
    while(1){
-      sem_wait(&vazio);
-      enche_caldeirao(PORCOES);
-      sem_post(&cheio);
+      sem_wait(&cliente);
+      sem_post(&barbeiro);
+
+      cortaCabelo();
+
+      sem_wait(&clientePronto);
+      sem_post(&barbeiroPronto);
    }
 
    pthread_exit (NULL) ;
 }
 
-void *Convidado(void *id){
+void *Cliente(void *id){
    while(1){
+      printf("Cliente %ld chegou\n", (long)id);
       sem_wait(&mutex);
-      if(cont == 0){
-         sem_post(&vazio);
-         sem_wait(&cheio);
-         cont = PORCOES;
+      if(clientes == CADEIRAS){
+         sem_post(&mutex);
+         break;
       }
-
-      cont--;
-      serve_porcao((long) id);
+      clientes++;
       sem_post(&mutex);
 
-      come((long) id);
+      printf("Cliente %ld aguardando o barbeiro\n", (long)id);
+      sem_post(&cliente);
+      sem_wait(&barbeiro);
+
+      temCabeloCortado((long) id);
+
+      sem_post(&clientePronto);
+      printf("Cliente %ld terminou\n", (long)id);
+      sem_wait(&barbeiroPronto);
+
+      sem_wait(&mutex);
+      clientes--;
+      sem_post(&mutex);
    }
 
    pthread_exit (NULL) ;
@@ -68,21 +77,23 @@ int main (int argc, char *argv[]){
 
    // initialize semaphore
    sem_init (&mutex, 0, 1);
-   sem_init (&vazio, 0, 0);
-   sem_init (&cheio, 0, 0);
+   sem_init (&barbeiro, 0, 0);
+   sem_init (&cliente, 0, 0);
+   sem_init (&barbeiroPronto, 0, 0);
+   sem_init (&clientePronto, 0, 0);
 
    // define attribute for joinable threads
    pthread_attr_init (&attr) ;
    pthread_attr_setdetachstate (&attr, PTHREAD_CREATE_JOINABLE) ;
 
-   status = pthread_create (&thread[0], &attr, Cozinheiro, NULL) ;
+   status = pthread_create (&thread[0], &attr, Barbeiro, NULL) ;
    if (status){
       perror ("pthread_create") ;
       exit (1) ;
    }
 
    for(i = 0; i < NUM_THREADS; ++i){
-      status = pthread_create (&thread[i], &attr, Convidado, (void *) i) ;
+      status = pthread_create (&thread[i], &attr, Cliente, (void *) i) ;
       if (status){
          perror ("pthread_create") ;
          exit (1) ;
