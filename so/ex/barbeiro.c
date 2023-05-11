@@ -12,7 +12,7 @@ Carlos Maziero, DINF/UFPR 2020
 #include <unistd.h>
 #include <semaphore.h>
 
-#define NUM_THREADS 2
+#define NUM_THREADS 5
 #define CADEIRAS 4
 
 sem_t mutex, barbeiroPronto, clientePronto, barbeiro, cliente;
@@ -24,17 +24,20 @@ void temCabeloCortado(long id){
 };
 
 void cortaCabelo(){
-
+   return;
 };
 
 void *Barbeiro(){
    while(1){
+      printf("\tBarbeiro dorme esperando\n");
       sem_wait(&cliente);
+      printf("\tBarbeiro acordou\n");
       sem_post(&barbeiro);
 
       cortaCabelo();
 
       sem_wait(&clientePronto);
+      printf("\tBarbeiro terminou de cortar\n");
       sem_post(&barbeiroPronto);
    }
 
@@ -47,6 +50,7 @@ void *Cliente(void *id){
       sem_wait(&mutex);
       if(clientes == CADEIRAS){
          sem_post(&mutex);
+         printf("\t\tSala cheia! Cliente %ld vai embora\n", (long) id);
          break;
       }
       clientes++;
@@ -55,16 +59,19 @@ void *Cliente(void *id){
       printf("Cliente %ld aguardando o barbeiro\n", (long)id);
       sem_post(&cliente);
       sem_wait(&barbeiro);
+      printf("\tCliente %ld chamou o barbeiro\n", (long)id);
 
       temCabeloCortado((long) id);
 
       sem_post(&clientePronto);
-      printf("Cliente %ld terminou\n", (long)id);
+      printf("\tCliente %ld terminou\n", (long)id);
       sem_wait(&barbeiroPronto);
-
+      
+      printf("\tCliente %ld indo embora\n", (long) id);
       sem_wait(&mutex);
       clientes--;
       sem_post(&mutex);
+      printf("Cliente %ld saiu\n", (long) id);
    }
 
    pthread_exit (NULL) ;
