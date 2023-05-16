@@ -13,7 +13,7 @@ void iniciaTabSimb(TabSimb_t *tab){
 /*
    Tenta inserir um identificador de VS na TabSimb, retorna 0 caso sucesso e -1 caso falhe
 */
-int insereTabSimbVS(char *ident, TabSimb_t *tab, int desloc, int tipo){
+int insereTabSimbVS(char *ident, TabSimb_t *tab, int desloc, int nv, int tipo){
    if(ident && tab){
       Simb_t *newVar = malloc(sizeof(Simb_t));
       
@@ -24,6 +24,7 @@ int insereTabSimbVS(char *ident, TabSimb_t *tab, int desloc, int tipo){
       tab->top = newVar;
 
       newVar->uni.vs.deslocamento = desloc;
+      newVar->uni.vs.nivel_lex = nv;
       newVar->uni.vs.tipo = tipo;
 
       return 0;
@@ -127,7 +128,7 @@ void printTabSimb(TabSimb_t *tab){
          case VS:
             switch (aux->uni.vs.tipo){
             case INT:
-               printf("%s - VS - tipo: INTEGER\n", aux->ident);
+               printf("%s - VS - tipo: INTEGER - nv: %d, desloc: %d\n", aux->ident, aux->uni.vs.nivel_lex, aux->uni.vs.deslocamento);
                break;
 
             case INDEF:

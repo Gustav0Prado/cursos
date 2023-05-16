@@ -56,7 +56,7 @@ typedef struct{
 } TabSimb_t;
 
 void iniciaTabSimb(TabSimb_t *tab);
-int insereTabSimbVS(char *ident, TabSimb_t *tab, int desloc, int tipo);
+int insereTabSimbVS(char *ident, TabSimb_t *tab, int desloc, int nv, int tipo);
 int insereTabSimbProc(char *ident, TabSimb_t *tab, int desloc, int nl);
 int removeTabSimb(int n, TabSimb_t *tab);
 Simb_t *buscaTabSimb(char *ident, TabSimb_t *tab);

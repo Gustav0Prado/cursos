@@ -1,12 +1,28 @@
      INPP
      AMEM 1
-     CRVL 1,0
-     CRCT 10
+     DSVS R00
+R01: ENPR 1 
+     CRVL 0,0
+     CRCT 2
      SOMA
-     ARMZ 1, 0
+     ARMZ 0,0
+     DMEM 1
+     RTPR 1,0
+R00: NADA 
+     DSVS R02
+R03: ENPR 1 
+     CRVL 0,0
+     CRCT 1
+     SOMA
+     ARMZ 0,0
+     CHPR R02,1
+     DMEM 1
+     RTPR 1,0
+R03: NADA 
      LEIT
-     ARMZ 0, 0
-     CRVL 0, 0
+     ARMZ 0,0
+     CHPR R01,0
+     CRVL 0,0
      IMPR
      DMEM 1
      PARA

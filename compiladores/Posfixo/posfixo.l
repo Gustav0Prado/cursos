@@ -1,5 +1,7 @@
 %{
 #include "posfixo.tab.h"
+#include "compiladorF.h"
+#include<string.h>
 %}
 
 %%
@@ -8,16 +10,20 @@
 
 \+    { return MAIS; }
 \-    { return MENOS; }
-\*    { return ASTERISCO;  }
+\*    { return ASTERISCO; }
 \/    { return DIV;  }
-a     { 
-   yylval = 0;
-   return IDENT; }
-b     { 
-   yylval = 1;
-   return IDENT; }
 and   { return AND; }
-or   { return OR; }
+or    { return OR; }
+\(    { return ABRE_PARENTESES; }
+\)    { return FECHA_PARENTESES; }
+a     { 
+         return IDENT;
+         strncpy (token, yytext, 256);
+      }
+b     { 
+         return IDENT;
+         strncpy (token, yytext, 256);
+      }
 
 %%
 

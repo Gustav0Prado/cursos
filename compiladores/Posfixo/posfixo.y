@@ -1,7 +1,7 @@
 
 %{
 #include <stdio.h>
-int yylex();
+#include "compiladorF.h"
 %}
 
 %token IDENT MAIS MENOS AND OR ASTERISCO DIV ABRE_PARENTESES FECHA_PARENTESES
@@ -9,23 +9,18 @@ int yylex();
 %%
 
 expr       : expr MAIS termo {printf ("+"); } |
-             expr MENOS termo {printf ("-"); } |
+             expr MENOS termo {printf ("-"); } | 
+             expr OR termo { printf (" OR "); } | 
              termo
 ;
 
 termo      : termo ASTERISCO fator  {printf ("*"); }| 
              termo DIV fator  {printf ("/"); }|
+             termo AND fator  {printf (" AND "); }|
              fator
 ;
 
-fator      : IDENT {
-   if(yylval == 0){
-      printf ("A");
-   }
-   else{
-      printf ("B");
-   }
-}
+fator      : IDENT {printf ("%s", token); } | ABRE_PARENTESES expr FECHA_PARENTESES
 ;
 
 %%
