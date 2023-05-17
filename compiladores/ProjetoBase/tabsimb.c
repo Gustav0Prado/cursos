@@ -36,7 +36,7 @@ int insereTabSimbVS(char *ident, TabSimb_t *tab, int desloc, int nv, int tipo){
 /*
    Tenta inserir um identificador de Procedimento na TabSimb, retorna 0 caso sucesso e -1 caso falhe
 */
-int insereTabSimbProc(char *ident, TabSimb_t *tab, int desloc, int nl){
+int insereTabSimbProc(char *ident, TabSimb_t *tab, int rot, int nl){
    if(ident && tab){
       Simb_t *newVar = malloc(sizeof(Simb_t));
       
@@ -46,8 +46,9 @@ int insereTabSimbProc(char *ident, TabSimb_t *tab, int desloc, int nl){
       newVar->next = tab->top;
       tab->top = newVar;
 
-      newVar->tipoSimb = PROC;
+      newVar->tipo = PROC;
       newVar->uni.proc.nivel_lex = nl;
+      newVar->uni.proc.rotulo = rot;
       newVar->uni.proc.num_param = 0;
 
       return 0;
@@ -124,7 +125,7 @@ void printTabSimb(TabSimb_t *tab){
       printf("----INICIO DA TabSimb----\n");
       Simb_t *aux = tab->top;
       while(aux != NULL){
-         switch (aux->tipoSimb){
+         switch (aux->tipo){
          case VS:
             switch (aux->uni.vs.tipo){
             case INT:
@@ -160,7 +161,7 @@ void printTabSimb(TabSimb_t *tab){
 void atualizaTipos(TabSimb_t *tab, int tipo){
    if(tab){
       Simb_t *aux = tab->top;
-      while(aux != NULL && aux->tipoSimb == VS){
+      while(aux != NULL && aux->tipo == VS){
          if(aux->uni.vs.tipo == INDEF){
             aux->uni.vs.tipo = tipo;
          }

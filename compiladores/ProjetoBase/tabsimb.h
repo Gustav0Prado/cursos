@@ -13,7 +13,7 @@ typedef enum{
    VS,
    PFORM,
    PROC
-} TipoSimb_e;
+} tipo_e;
 
 // Informacoes usadas nos parametros formais
 typedef struct ParamF_t{
@@ -28,6 +28,7 @@ typedef struct ParamF_t{
 typedef struct Proc_t{
    int nivel_lex;
    int num_param;
+   int rotulo;
 } Proc_t;
 
 // Informacoes da tabela de simbolos para variaveis simples
@@ -41,7 +42,7 @@ typedef struct VarS_t{
 typedef struct Simb_t{
    char *ident;
    struct Simb_t *next;
-   TipoSimb_e tipoSimb;
+   tipo_e tipo;
    union
    {
       VarS_t vs;
