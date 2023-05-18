@@ -23,8 +23,8 @@
 #define SYSTEM 0
 #define USER   1
 
-// Quantum padrao eh de 20 "ticks"
-#define DEFQUANTUM 20
+// Quantum padrao eh de 10 "ticks"
+#define DEFQUANTUM 10
 
 typedef enum {
   READY, SUSPENDED, TERMINATED
