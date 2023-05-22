@@ -22,6 +22,8 @@ queue_t *sleepingTaks;
 int curr_id = 0;
 int user_tasks = 0;
 
+int timestamp = 0;
+
 // Estruturas para os alarmes dos "ticks do relogio"
 struct sigaction action ;
 struct itimerval timer;
@@ -150,6 +152,13 @@ void print_elem( void* a ){
   }
 }
 
+void print_sleep( void* a ){
+  if(a){
+    task_t *t = (task_t *)a;
+    printf("%d(%d)", t->id, t->wakeTime);
+  }
+}
+
 
 /*
   Funcao do dispatcher
@@ -188,21 +197,28 @@ void dispatcher(){
     }
 
     task_t *first = (task_t *)sleepingTaks;
-    if(first != NULL){
+    int t2 = systime();
+    if( (t2 - timestamp == 1) && first != NULL){
+      timestamp = t2;
+
       task_t *aux = first;
       task_t *prox;
 
       // Acorda tarefas que cujo periodo já passou
       do{
         prox = aux->next;
-        if( aux->wakeTime == systime() ){
+        if(timestamp == 5400) queue_print("Dormindo: ", sleepingTaks, print_sleep);
+        if( aux->wakeTime == timestamp ){
           #ifdef DEBUG
           printf (BLU "PPOS: dispatcher   -  Waking up task %d on %dms\n" RESET, aux->id, systime()) ;
           #endif
+
           task_resume(aux, (task_t **)&sleepingTaks);
+
+          first = (task_t *)sleepingTaks;
         }
         aux = prox;
-      } while(aux != aux->next);
+      } while(aux != first && aux != NULL);
     }
   }
   #ifdef DEBUG
