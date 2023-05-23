@@ -196,8 +196,10 @@ void dispatcher(){
       }
     }
 
+    //Checa se fila de dormindo existe e se já passou 1ms desde a ultima checagem
     task_t *first = (task_t *)sleepingTaks;
     int t2 = systime();
+
     if( (t2 - timestamp == 1) && first != NULL){
       timestamp = t2;
 
@@ -473,7 +475,7 @@ int task_wait (task_t *task){
 }
 
 /*
-  Adormece uma tarefa por t milissegundos
+  Adormece uma tarefa por t milissegundos, desde que t > 0
 */
 void task_sleep (int t){
   curr_task->wakeTime = systime() + t;
