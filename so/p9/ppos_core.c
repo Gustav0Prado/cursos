@@ -202,23 +202,27 @@ void dispatcher(){
       timestamp = t2;
 
       task_t *aux = first;
-      task_t *prox;
+      // Array com tarefas a serem acordadas
+      task_t *mark[queue_size(sleepingTaks)];
+      int marked = 0;
 
-      // Acorda tarefas que cujo periodo já passou
+      // Coloca tarefas que acordam nesse instante em um array para serem acordadas
       do{
-        prox = aux->next;
-        if(timestamp == 5400) queue_print("Dormindo: ", sleepingTaks, print_sleep);
         if( aux->wakeTime == timestamp ){
           #ifdef DEBUG
           printf (BLU "PPOS: dispatcher   -  Waking up task %d on %dms\n" RESET, aux->id, systime()) ;
           #endif
 
-          task_resume(aux, (task_t **)&sleepingTaks);
-
-          first = (task_t *)sleepingTaks;
+          mark[marked] = aux;
+          marked++;
         }
-        aux = prox;
-      } while(aux != first && aux != NULL);
+        aux = aux->next;
+      } while(aux != first);
+
+      //Acorda todas as tarefas marcadas
+      for(int i = 0; i < marked; ++i){
+        task_resume(mark[i], (task_t **)&sleepingTaks);
+      }
     }
   }
   #ifdef DEBUG
@@ -478,5 +482,7 @@ void task_sleep (int t){
   printf (BLU "PPOS: task_sleep   -  Task %d will sleep until %dms\n" RESET, curr_task->id, curr_task->wakeTime);
   #endif
 
-  task_suspend((task_t **)&sleepingTaks);
+  if(t > 0){
+    task_suspend((task_t **)&sleepingTaks);
+  }
 }
