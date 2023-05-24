@@ -183,12 +183,12 @@ void dispatcher(){
           printf (BLU "PPOS: dispatcher   -  Waking up task %d on %dms\n" RESET, aux->id, systime()) ;
           #endif
 
-          if( sleepingTaks != NULL )queue_print("Dormindo: ", sleepingTaks, print_sleep);
+          //if( sleepingTaks != NULL )queue_print("Dormindo: ", sleepingTaks, print_sleep);
 
           task_resume(aux, (task_t **)&sleepingTaks);
         }
         aux = prox;
-      } while(aux != (task_t *)sleepingTaks);
+      } while(aux != (task_t *)sleepingTaks && sleepingTaks != NULL);
     }
 
     task_t *prox = scheduler();
