@@ -22,8 +22,6 @@ queue_t *sleepingTaks;
 int curr_id = 0;
 int user_tasks = 0;
 
-int timestamp = 0;
-
 // Estruturas para os alarmes dos "ticks do relogio"
 struct sigaction action ;
 struct itimerval timer;
@@ -171,6 +169,28 @@ void dispatcher(){
     printf(RESET);
     #endif
 
+    // Checa se há alguma tarefa dormindo que pode ser acordada
+    if(sleepingTaks != NULL){
+      int time = systime();
+      task_t *aux = (task_t *)sleepingTaks;
+      task_t *prox;
+
+      // Acorda tarefas que tem limite nesse instante ou anterior
+      do{
+        prox = aux->next;
+        if( aux->wakeTime == time ){
+          #ifdef DEBUG
+          printf (BLU "PPOS: dispatcher   -  Waking up task %d on %dms\n" RESET, aux->id, systime()) ;
+          #endif
+
+          if( sleepingTaks != NULL )queue_print("Dormindo: ", sleepingTaks, print_sleep);
+
+          task_resume(aux, (task_t **)&sleepingTaks);
+        }
+        aux = prox;
+      } while(aux != (task_t *)sleepingTaks);
+    }
+
     task_t *prox = scheduler();
 
     if(prox != NULL){
@@ -195,36 +215,9 @@ void dispatcher(){
         break;
       }
     }
+    //Coloca dispatcher pra dormir pra economizar cpu
+    else{
 
-    //Checa se fila de dormindo existe e se já passou 1ms desde a ultima checagem
-    task_t *first = (task_t *)sleepingTaks;
-    int t2 = systime();
-
-    if( (t2 - timestamp == 1) && first != NULL){
-      timestamp = t2;
-
-      task_t *aux = first;
-      // Array com tarefas a serem acordadas
-      task_t *mark[queue_size(sleepingTaks)];
-      int marked = 0;
-
-      // Coloca tarefas que acordam nesse instante em um array para serem acordadas
-      do{
-        if( aux->wakeTime == timestamp ){
-          #ifdef DEBUG
-          printf (BLU "PPOS: dispatcher   -  Waking up task %d on %dms\n" RESET, aux->id, systime()) ;
-          #endif
-
-          mark[marked] = aux;
-          marked++;
-        }
-        aux = aux->next;
-      } while(aux != first);
-
-      //Acorda todas as tarefas marcadas
-      for(int i = 0; i < marked; ++i){
-        task_resume(mark[i], (task_t **)&sleepingTaks);
-      }
     }
   }
   #ifdef DEBUG
@@ -429,6 +422,7 @@ void task_suspend (task_t **queue){
     printf (GRN "PPOS: task_suspend -  Suspending task %d\n" RESET, curr_task->id);
     #endif
     
+    int type = curr_task->task_type;
     curr_task->task_type = SYSTEM;
 
     queue_remove((queue_t **)&readyTasks, (queue_t*)curr_task);
@@ -436,7 +430,7 @@ void task_suspend (task_t **queue){
     queue_append((queue_t **)queue, (queue_t*)curr_task);
     //user_tasks--;
 
-    curr_task->task_type = USER;
+    curr_task->task_type = type;
 
     task_yield();
   }
