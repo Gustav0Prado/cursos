@@ -39,9 +39,6 @@ void timer_tick(){
   sysClock++;
 
   if(curr_task->task_type == USER && --curr_task->quantum == 0){
-    // #ifdef DEBUG
-    // printf (GRN "PPOS: timer   -  %d quantum over!\n" RESET, curr_task->id);
-    // #endif
     task_yield();
   }
 }
@@ -165,7 +162,7 @@ void dispatcher(){
   while( user_tasks > 0 ){
     #ifdef DEBUG
     printf(MAG);
-    queue_print("PPOS: dispatcher   -  Task(s) Queued: ", (queue_t *)readyTasks, print_elem);
+    if(readyTasks != NULL) queue_print("PPOS: dispatcher   -  Task(s) Queued: ", (queue_t *)readyTasks, print_elem);
     printf(RESET);
     #endif
 
@@ -337,7 +334,7 @@ void task_exit(int exit_code){
 
   //Printa tempo e ativacoes
   printf("Task %d exit: execution time %d ms,", curr_task->id, systime()-curr_task->creationTime);
-  printf(" processor time %d ms, %d activations\n", curr_task->cpuTime, curr_task->activations);
+  printf(" processor time %5d ms, %d activations\n", curr_task->cpuTime, curr_task->activations);
 
   if(user_tasks == 0){
     //Remove task do dispatcher
@@ -381,9 +378,9 @@ int task_switch(task_t *task){
     task_t *aux_task = curr_task;
     curr_task = task;
 
-    #ifdef DEBUG
-    printf (YEL "PPOS: task_switch  -  Switching task %d -> %d\n" RESET, aux_task->id, task->id);
-    #endif
+    // #ifdef DEBUG
+    // printf (YEL "PPOS: task_switch  -  Switching task %d -> %d\n" RESET, aux_task->id, task->id);
+    // #endif
 
     curr_task->activations++;
 
@@ -398,13 +395,17 @@ int task_switch(task_t *task){
   Larga a CPU e volta ao dispatcher
 */
 void task_yield(){
-  #ifdef DEBUG
-  printf (YEL "PPOS: task_yield   -  Task %d yielded the CPU\n" RESET, curr_task->id);
-  #endif
+  // #ifdef DEBUG
+  // printf (YEL "PPOS: task_yield   -  Task %d yielded the CPU\n" RESET, curr_task->id);
+  // #endif
 
   //Tarefa larga a CPU e chama o dispatcher
   task_switch(&dispatcher_task);
 }
+
+
+//------------------------------------------------------------------------------------------ P6 ------------------------------------------------------------------------------------//
+
 
 /*
   Retorna tempo atual do relogio
@@ -413,8 +414,12 @@ unsigned int systime (){
   return (sysClock);
 }
 
+
+//------------------------------------------------------------------------------------------ P8 ------------------------------------------------------------------------------------//
+
+
 /*
-  Suspende uma tarefa, movendo ela da fila de prontas para a fila indicada
+  Suspende a tarefa atual, movendo ela da fila de prontas para a fila indicada
 */
 void task_suspend (task_t **queue){
   if(queue){
@@ -428,7 +433,7 @@ void task_suspend (task_t **queue){
     queue_remove((queue_t **)&readyTasks, (queue_t*)curr_task);
     curr_task->status = SUSPENDED;
     queue_append((queue_t **)queue, (queue_t*)curr_task);
-    //user_tasks--;
+    curr_task->prio_d = curr_task->prio_s;
 
     curr_task->task_type = type;
 
@@ -448,7 +453,6 @@ void task_resume (task_t *task, task_t **queue){
     queue_remove((queue_t **)queue, (queue_t*)task);
     task->status = READY;
     queue_append((queue_t **)&readyTasks, (queue_t*)task);
-    //user_tasks++;
   }
 }
 
@@ -468,6 +472,10 @@ int task_wait (task_t *task){
   return -1;
 }
 
+
+//------------------------------------------------------------------------------------------ P9 ------------------------------------------------------------------------------------//
+
+
 /*
   Adormece uma tarefa por t milissegundos, desde que t > 0
 */
@@ -481,4 +489,118 @@ void task_sleep (int t){
   if(t > 0){
     task_suspend((task_t **)&sleepingTaks);
   }
+}
+
+
+//------------------------------------------------------------------------------------------ P10 ------------------------------------------------------------------------------------//
+
+
+/*
+  Inicia um semaforo com contador igual a value
+  Bloqueia a preempção tratando a tarefa como de sistema, depois a retornando ao tipo original
+*/
+int sem_init (semaphore_t *s, int value){
+  //Bloqueia preempção
+  int orig_type = curr_task->task_type;
+  curr_task->task_type = SYSTEM;
+
+  if(s && s->state == SEM_DEAD){
+    s->cont = value;
+    s->lock = 0;
+    s->queue = NULL;
+    s->state = SEM_ALIVE;
+
+    curr_task->task_type = orig_type;
+    return 0;
+  }
+
+  curr_task->task_type = orig_type;
+  return -1;
+}
+
+/*
+  Operacao de down em um semaforo, tenta acessar e caso o valor interno seja < 0, entra na fila
+  Retorna 0 em caso de sucesso e -1 em caso de erro (semáforo não existe ou foi destruído)
+*/
+int sem_down (semaphore_t *s){
+  //Bloqueia preempção
+  int orig_type = curr_task->task_type;
+  curr_task->task_type = SYSTEM;
+
+  if(s && s->state == SEM_ALIVE){
+    // busy waiting
+    while (__sync_fetch_and_or ( &(s->lock), 1) ) {};
+    s->cont--;
+    if(s->cont < 0){
+      //Semáforo cheio, suspende tarefa atual
+      s->lock = 0;
+      task_suspend( &(s->queue) );
+    }
+    s->lock = 0;
+
+    curr_task->task_type = orig_type;
+    return 0;
+  }
+
+  curr_task->task_type = orig_type;
+  return -1;
+}
+
+/*
+  Operacao de up em um semaforo, libera uma vaga no semaforo para alguem da fila
+  Retorna 0 em caso de sucesso e -1 em caso de erro (semáforo não existe ou foi destruído)
+*/
+int sem_up (semaphore_t *s){
+  //Bloqueia preempção
+  int orig_type = curr_task->task_type;
+  curr_task->task_type = SYSTEM;
+
+  if(s && s->state == SEM_ALIVE){
+    // busy waiting
+    while (__sync_fetch_and_or ( &(s->lock), 1) ) {};
+    s->cont++;
+    if(s->cont <= 0){
+      //Semáforo com vagas, acorda a primeira tarefa da fila
+      task_resume( s->queue, &(s->queue) );
+    }
+    s->lock = 0;
+
+    curr_task->task_type = orig_type;
+    return 0;
+  }
+
+  curr_task->task_type = orig_type;
+  return -1;
+}
+
+/*
+  Destroi semaforo
+  Retorna 0 em caso de sucesso e -1 em caso de erro (semáforo não existe ou já foi destruído)
+*/
+int sem_destroy (semaphore_t *s){
+  //Bloqueia preempção
+  int orig_type = curr_task->task_type;
+  curr_task->task_type = SYSTEM;
+
+  if(s){
+    if(s->queue){
+      task_t *first = s->queue;
+      task_t *aux = first;
+      task_t *prox;
+
+      // Acorda todas as tarefas do semáforo
+      do{
+        prox = aux->next;
+        task_resume(s->queue, &(s->queue));
+        aux = prox;
+      } while(s->queue != NULL);
+    }
+    s->state = SEM_DEAD;
+
+    curr_task->task_type = orig_type;
+    return 0;
+  }
+
+  curr_task->task_type = orig_type;
+  return -1;
 }

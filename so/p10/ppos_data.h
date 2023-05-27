@@ -26,6 +26,11 @@
 // Quantum padrao eh de 20 "ticks"
 #define DEFQUANTUM 10
 
+// Define estados do semáforo
+#define SEM_DEAD  0
+#define SEM_ALIVE 1
+
+// Tipo enumerado com estados das tarefas
 typedef enum {
   READY, SUSPENDED, TERMINATED
 } State_t ;
@@ -53,7 +58,10 @@ typedef struct task_t
 // estrutura que define um semáforo
 typedef struct
 {
-  // preencher quando necessário
+  int state;                     //Semaforo esta destruido/não inicializado(0) ou inicializado(1)
+  int cont;                      //Contador de vagas no semáforo
+  short lock;                    //Trava do semaforo para acessá-lo
+  task_t *queue;                 //Fila de tarefas travadas no semáforo
 } semaphore_t ;
 
 // estrutura que define um mutex
