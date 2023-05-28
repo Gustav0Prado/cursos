@@ -1,5 +1,5 @@
-#define VALOR
-#define REFERENCIA
+#define VALOR 0
+#define REF   1
 
 // Enumerado com tipos possiveis
 typedef enum{
@@ -13,36 +13,34 @@ typedef enum{
    VS,
    PFORM,
    PROC
-} tipo_e;
+} tipoSimb_e;
 
 // Informacoes usadas nos parametros formais
 typedef struct ParamF_t{
    Tipo_e tipo;
-   short passagem;
-   int nivel_lex;
-   int rotulo;
+   int passagem;
    int deslocamento;
 } ParamF_t;
 
 // Informacoes da tabela de simbolos para procedimentos
 typedef struct Proc_t{
-   int nivel_lex;
    int num_param;
    int rotulo;
+   int num_params;
 } Proc_t;
 
 // Informacoes da tabela de simbolos para variaveis simples
 typedef struct VarS_t{
    Tipo_e tipo;
    int deslocamento;
-   int nivel_lex;
 } VarS_t;
 
 // Struct de cada simbolo da tabela
 typedef struct Simb_t{
    char *ident;
    struct Simb_t *next;
-   tipo_e tipo;
+   tipoSimb_e tipo;
+   int nivel_lex;
    union
    {
       VarS_t vs;
@@ -65,3 +63,4 @@ int finalizaTabSimb(TabSimb_t *tab);
 void printTabSimb(TabSimb_t *tab);
 int tamanhoTabSimb(TabSimb_t *tab);
 void atualizaTipos(TabSimb_t *tab, int tipo);
+int insereTabSimbParam(char *ident, TabSimb_t *tab, int pass, int nl, int desloc, int tipo);

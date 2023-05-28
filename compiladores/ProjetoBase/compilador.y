@@ -13,14 +13,14 @@
 #include "pilha.h"
 #include "tabsimb.h"
 
-int num_vars, desloc, nivel_lex = 0, rot_atual = 0, n_params;
+int num_vars, desloc, nivel_lex = 0, rot_atual = 0, n_params, paramPassados;
 TabSimb_t tabela;
 Pilha_t pilha_tipos, pilha_rotulos, pilha_vars;
 Simb_t *simb, *simb_aux;
 char l_elem[1023];
 char str[1024];
 char strAux[1024];
-char l_proc[1023];
+Simb_t *proc;
 
 char* buildString(char *fmt, ...) {
    va_list args;
@@ -63,7 +63,7 @@ void confereAtribuicao( char *var ){
       imprimeErro(buildString("VARIAVEL \'%s\' NAO DECLARADA\n", var));
    }
    else if( t1 == simb_tipo->uni.vs.tipo ){
-      geraCodigo(NULL, buildString("ARMZ %d,%d", simb_tipo->uni.vs.nivel_lex, simb_tipo->uni.vs.deslocamento));
+      geraCodigo(NULL, buildString("ARMZ %d,%d", simb_tipo->nivel_lex, simb_tipo->uni.vs.deslocamento));
    }
    else{
       imprimeErro("TIPOS INCOMPATIVEIS\n");
@@ -96,7 +96,7 @@ char *geraRotulo(int rot){
 
 %%
 
-/* Esqueleto do programa */
+//---------------------------------------------------------------- Esqueleto do Programa -------------------------------------------------------------------------------------//
 
 programa :{
                geraCodigo (NULL, "INPP");
@@ -119,7 +119,7 @@ bloco :
             comando_composto
 ;
 
-/* Declaracao de variaveis */
+//---------------------------------------------------------------- Declaração de variáveis -------------------------------------------------------------------------------------//
 
 parte_declara_vars:  var
 ;
@@ -130,7 +130,7 @@ var         : { desloc = 0; num_vars = 0; } VAR declara_vars{
                geraCodigo(NULL, buildString("AMEM %d", num_vars));
                empilha(&pilha_vars, num_vars);
                }
-            |
+            | { empilha(&pilha_vars, 0); }
 ;
 
 declara_vars: declara_vars declara_var | declara_var
@@ -164,7 +164,7 @@ lista_idents: lista_idents VIRGULA IDENT
             | IDENT
 ;
 
-/* Comandos */
+//---------------------------------------------------------------- Comandos -------------------------------------------------------------------------------------//
 
 comando_composto: T_BEGIN comandos T_END
 
@@ -184,7 +184,7 @@ comando_sem_rotulo: IDENT { strcpy(l_elem, token); } atribuicao_ou_proc
                   | comando_composto
 ;
 
-/* leitura (read), escrita (write) e atribuicao */
+//---------------------------------------------------------------- Leitura, Escrita, Atribuição -------------------------------------------------------------------------------------//
 
 leitura: READ ABRE_PARENTESES lista_read FECHA_PARENTESES
 ;
@@ -193,7 +193,15 @@ lista_read: lista_read VIRGULA IDENT {
             geraCodigo(NULL, "LEIT");
             simb = buscaTabSimb(token, &tabela);
             if(simb){
-               geraCodigo(NULL, buildString("ARMZ %d,%d", simb->uni.vs.nivel_lex, simb->uni.vs.deslocamento));
+               switch (simb->tipo){
+                  case VS:
+                     geraCodigo(NULL, buildString("ARMZ %d,%d", simb->nivel_lex, simb->uni.vs.deslocamento));
+                     break;
+
+                  case PFORM:
+                     geraCodigo(NULL, buildString("ARMZ %d,%d", simb->nivel_lex, simb->uni.parform.deslocamento));
+                     break;
+               }
             }
             else{
                imprimeErro(buildString("VARIAVEL %s NAO DECLARADA", token));
@@ -203,7 +211,7 @@ lista_read: lista_read VIRGULA IDENT {
             geraCodigo(NULL, "LEIT");
             simb = buscaTabSimb(token, &tabela);
             if(simb){
-               geraCodigo(NULL, buildString("ARMZ %d,%d", simb->uni.vs.nivel_lex, simb->uni.vs.deslocamento));
+               geraCodigo(NULL, buildString("ARMZ %d,%d", simb->nivel_lex, simb->uni.vs.deslocamento));
             }
             else{
                imprimeErro(buildString("VARIAVEL %s NAO DECLARADA", token));
@@ -217,7 +225,15 @@ escrita: WRITE ABRE_PARENTESES lista_write FECHA_PARENTESES
 lista_write: lista_write VIRGULA IDENT {
             simb = buscaTabSimb(token, &tabela);
             if(simb){
-               geraCodigo(NULL, buildString("CRVL %d,%d", simb->uni.vs.nivel_lex, simb->uni.vs.deslocamento));
+               switch (simb->tipo){
+                  case VS:
+                     geraCodigo(NULL, buildString("CRVL %d,%d", simb->nivel_lex, simb->uni.vs.deslocamento));
+                     break;
+
+                  case PFORM:
+                     geraCodigo(NULL, buildString("CRVL %d,%d", simb->nivel_lex, simb->uni.parform.deslocamento));
+                     break;
+               }
                geraCodigo(NULL, "IMPR");
             }
             else{
@@ -227,7 +243,15 @@ lista_write: lista_write VIRGULA IDENT {
          | IDENT {
             simb = buscaTabSimb(token, &tabela);
             if(simb){
-               geraCodigo(NULL, buildString("CRVL %d,%d", simb->uni.vs.nivel_lex, simb->uni.vs.deslocamento));
+               switch (simb->tipo){
+                  case VS:
+                     geraCodigo(NULL, buildString("CRVL %d,%d", simb->nivel_lex, simb->uni.vs.deslocamento));
+                     break;
+
+                  case PFORM:
+                     geraCodigo(NULL, buildString("CRVL %d,%d", simb->nivel_lex, simb->uni.parform.deslocamento));
+                     break;
+               }
                geraCodigo(NULL, "IMPR");
             }
             else{
@@ -247,7 +271,7 @@ lista_write: lista_write VIRGULA IDENT {
 atribuicao_ou_proc: ATRIBUICAO expressao { confereAtribuicao(l_elem); } | chamaProc { strcpy(l_elem, token); }
 ;
 
-/* Expressoes matematicas */
+//---------------------------------------------------------------- Expressões Matemáticas -------------------------------------------------------------------------------------//
 
 expressao: expressao MAIOR expressao_simples {
             checaTiposCMP("CMMA");
@@ -317,7 +341,7 @@ fator:   NUM {
                // Carrega valor de outra variavel
                simb = buscaTabSimb(l_elem, &tabela);
                simb_aux = buscaTabSimb(token, &tabela);
-               geraCodigo(NULL, buildString("CRVL %d,%d", simb_aux->uni.vs.nivel_lex, simb_aux->uni.vs.deslocamento));
+               geraCodigo(NULL, buildString("CRVL %d,%d", simb_aux->nivel_lex, simb_aux->uni.vs.deslocamento));
 
                empilha(&pilha_tipos, simb_aux->uni.vs.tipo);
          }
@@ -344,7 +368,7 @@ fator:   NUM {
          | ABRE_PARENTESES expressao FECHA_PARENTESES
 
 
-/* Comando repetitivo (while) */
+//---------------------------------------------------------------- Comandos repetitivos (while) -------------------------------------------------------------------------------------//
 
 repeticao: WHILE {               
                empilha(&pilha_rotulos, rot_atual);
@@ -365,7 +389,7 @@ repeticao: WHILE {
          }
 ;
 
-/* Comandos condicionais (if) */
+//---------------------------------------------------------------- Comandos condicionais (if) -------------------------------------------------------------------------------------//
 
 condicional: if_then %prec LOWER_THAN_ELSE {
                geraRotulo(rot_atual);
@@ -394,7 +418,8 @@ if_then: IF {
          }
 ;
 
-/* Procedimentos (Procedures) */
+//---------------------------------------------------------------- Procedimentos (Procedures) -------------------------------------------------------------------------------------//
+
 parte_declara_procs: declara_procs {
                int rot_desvio = desempilha(&pilha_rotulos);
                geraCodigo(buildString("R%.2d", rot_desvio), "NADA");
@@ -409,20 +434,39 @@ declara_procs: declara_procs declara_proc | {
 declara_proc: PROCEDURE {
                nivel_lex++;
          }
-      IDENT {
+           IDENT {
                insereTabSimbProc(token, &tabela, rot_atual, nivel_lex);
-               strcpy(strAux, buildString("R%.2d", rot_atual)); 
+               proc = buscaTabSimb(token, &tabela);
+               strcpy(strAux, buildString("R%.2d", rot_atual));
                geraCodigo(strAux, buildString("ENPR %d", nivel_lex));
                rot_atual++;
+         } paramsFormais PONTO_E_VIRGULA blocoPF { removeTabSimb(proc->uni.proc.num_params, &tabela); }
+
+
+paramsFormais: ABRE_PARENTESES listaParamsForms FECHA_PARENTESES { printTabSimb(&tabela); } | 
+
+
+listaParamsForms: listaParamsForms PONTO_E_VIRGULA declaraParam | declaraParam
+
+
+declaraParam: IDENT {
+               proc->uni.proc.num_params++;
+               insereTabSimbParam(token, &tabela, VALOR, nivel_lex, proc->uni.proc.num_params, INDEFINIDO);
+         } DOIS_PONTOS tipoParam
+
+
+tipoParam: IDENT {
+            if( strcmp(token, "integer") == 0 ){
+               atualizaTipos(&tabela, INTEIRO);
+            }
          }
-      PONTO_E_VIRGULA blocoPF
 
 blocoPF: parte_declara_vars parte_declara_procs comando_composto { 
                int vars = desempilha(&pilha_vars);
                if(vars > 0){
                   geraCodigo(NULL, buildString("DMEM %d", vars));
                }
-               geraCodigo(NULL, buildString("RTPR %d,%d", nivel_lex, n_params));
+               geraCodigo(NULL, buildString("RTPR %d,%d", nivel_lex, proc->uni.proc.num_params));
                nivel_lex--;
          } PONTO_E_VIRGULA
 
@@ -435,6 +479,19 @@ chamaProc: {
                else{
                   imprimeErro(buildString("Procedimento %s não declarado", l_elem));
                }
+         } paramsProc
+
+paramsProc: ABRE_PARENTESES {int passados = 0;} listaParams FECHA_PARENTESES {
+               if(paramPassados != proc->uni.proc.num_params){
+                  imprimeErro("N° de parametros invalido para esse procedimento\n");
+               }
+         } | 
+
+listaParams: listaParams VIRGULA param | param
+
+param: IDENT {
+               simb = buscaTabSimb(token, &tabela);
+               paramPassados++;
          }
 
 %%

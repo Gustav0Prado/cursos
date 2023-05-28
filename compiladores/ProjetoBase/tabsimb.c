@@ -24,7 +24,7 @@ int insereTabSimbVS(char *ident, TabSimb_t *tab, int desloc, int nv, int tipo){
       tab->top = newVar;
 
       newVar->uni.vs.deslocamento = desloc;
-      newVar->uni.vs.nivel_lex = nv;
+      newVar->nivel_lex = nv;
       newVar->uni.vs.tipo = tipo;
 
       return 0;
@@ -47,7 +47,7 @@ int insereTabSimbProc(char *ident, TabSimb_t *tab, int rot, int nl){
       tab->top = newVar;
 
       newVar->tipo = PROC;
-      newVar->uni.proc.nivel_lex = nl;
+      newVar->nivel_lex = nl;
       newVar->uni.proc.rotulo = rot;
       newVar->uni.proc.num_param = 0;
 
@@ -56,6 +56,32 @@ int insereTabSimbProc(char *ident, TabSimb_t *tab, int rot, int nl){
    perror("Erro: Identificador ou TabSimb Nulos");
    return -1;
 }
+
+/*
+   Tenta inserir um identificador de Procedimento na TabSimb, retorna 0 caso sucesso e -1 caso falhe
+*/
+int insereTabSimbParam(char *ident, TabSimb_t *tab, int pass, int nl, int desloc, int tipo){
+   if(ident && tab){
+      Simb_t *newVar = malloc(sizeof(Simb_t));
+      
+      newVar->ident = malloc(sizeof(ident));
+      strncpy(newVar->ident, ident, (int)sizeof(ident));
+
+      newVar->next = tab->top;
+      tab->top = newVar;
+
+      newVar->tipo = PFORM;
+      newVar->uni.parform.passagem = pass;
+      newVar->nivel_lex = nl;
+      newVar->uni.parform.deslocamento = desloc;
+      newVar->uni.parform.tipo = tipo;
+
+      return 0;
+   }
+   perror("Erro: Identificador ou TabSimb Nulos");
+   return -1;
+}
+
 
 /*
    Remove últimos n elementos da TabSimb e retorna 0 em caso de sucesso e -1 em caso de falha
@@ -77,6 +103,28 @@ int removeTabSimb(int n, TabSimb_t *tab){
          free(topo);
          topo = NULL;
       }
+      return 0;
+   }
+   return -1;
+}
+
+/*
+   Remove últimos n elementos da TabSimb e retorna 0 em caso de sucesso e -1 em caso de falha
+*/
+int removeNL(int nl, TabSimb_t *tab){
+   if(tab){
+      Simb_t *aux = tab->top;
+      Simb_t *prox;
+      do{
+         if(aux->nivel_lex == nl){
+            prox = aux->next;
+            tab->top = prox;
+
+            free(aux);
+            aux = aux->next;
+         }
+      } while (aux != NULL);
+
       return 0;
    }
    return -1;
@@ -128,21 +176,36 @@ void printTabSimb(TabSimb_t *tab){
          switch (aux->tipo){
          case VS:
             switch (aux->uni.vs.tipo){
-            case INT:
-               printf("%s - VS - tipo: INTEGER - nv: %d, desloc: %d\n", aux->ident, aux->uni.vs.nivel_lex, aux->uni.vs.deslocamento);
-               break;
+               case INT:
+                  printf("%s - VS - tipo: INTEGER - nv: %d, desloc: %d\n", aux->ident, aux->nivel_lex, aux->uni.vs.deslocamento);
+                  break;
 
-            case INDEF:
-               printf("%s - VS - tipo: INDEFINIDO\n", aux->ident);
-               break;
-            
-            default:
-               break;
+               case INDEF:
+                  printf("%s - VS - tipo: INDEFINIDO\n", aux->ident);
+                  break;
+               
+               default:
+                  break;
             }
             break;
          
          case PROC:
-            printf("%s - PROC - nl: %d\n", aux->ident, aux->uni.proc.nivel_lex);
+            printf("%s - PROC - nl: %d\n", aux->ident, aux->nivel_lex);
+            break;
+         
+         case PFORM:
+            switch (aux->uni.parform.passagem){
+               case VALOR:
+                  printf("%s - PARAM - tipo: VALOR - nl: %d, desloc: %d\n", aux->ident, aux->nivel_lex, aux->uni.parform.deslocamento);
+                  break;
+
+               case REF:
+                  printf("%s - PARAM - tipo: REF   - nl: %d, desloc: %d\n", aux->ident, aux->nivel_lex, aux->uni.parform.deslocamento);
+                  break;
+               
+               default:
+                  break;
+            }
             break;
          
          default:
