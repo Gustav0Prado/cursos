@@ -81,6 +81,9 @@ int main(){
       printf("  <= %5d;\n", limite[i]);
    }
 
+   for(int j = 0; j < n; ++j){
+      printf("x%d >= 0;\n", j);
+   }
 
    /*
       Libera todas as estruturas
