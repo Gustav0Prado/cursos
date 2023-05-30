@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <signal.h>
 #include <sys/time.h>
+#include <unistd.h>
 #include "ppos_data.h"
 #include "ppos.h"
 #include "queue.h"
@@ -180,8 +181,6 @@ void dispatcher(){
           printf (BLU "PPOS: dispatcher   -  Waking up task %d on %dms\n" RESET, aux->id, systime()) ;
           #endif
 
-          //if( sleepingTaks != NULL )queue_print("Dormindo: ", sleepingTaks, print_sleep);
-
           task_resume(aux, (task_t **)&sleepingTaks);
         }
         aux = prox;
@@ -212,9 +211,10 @@ void dispatcher(){
         break;
       }
     }
-    //Coloca dispatcher pra dormir pra economizar cpu
+    //Coloca dispatcher pra dormir pra economizar processamnto na cpu
+    //Uso de CPU vai de 100% pra ~2% em casos em que as tarefas apenas dormem
     else{
-
+      sleep(1);
     }
   }
   #ifdef DEBUG
