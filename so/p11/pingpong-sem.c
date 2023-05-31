@@ -4,13 +4,48 @@
 #include <stdlib.h>
 #include "ppos.h"
 
-#define NUMTASKS  1
+#define PROD  3
+#define CONS  2
 #define TAMBUFFER 5
 
-task_t task[NUMTASKS] ;
+task_t task[PROD+CONS] ;
 semaphore_t  s_vaga, s_buffer, s_item ;
 //Buffer com 16 vagas
-int buffer[TAMBUFFER];
+int buffer[TAMBUFFER] = {0};
+int head = 0;
+int tail = 0;
+int qtd = 0;
+
+
+/*
+   Insere um item no buffer
+*/
+void insertBuffer(int item){
+   if(qtd < 5){
+      buffer[head] = item;
+      head = (head + 1) % TAMBUFFER;
+      qtd++;
+   }
+   else{
+      printf("Erro: Buffer cheio\n");
+   }
+}
+
+/*
+   Consome um item do buffer
+*/
+int consomeBuffer(){
+   if(qtd > 0){
+      int item = buffer[tail];
+      tail = (tail + 1) % TAMBUFFER;
+      qtd--;
+      return item;
+   }
+   else{
+      printf("Erro: Buffer vazio\n");
+      return -1;
+   }
+}
 
 // corpo das tarefas
 void producerBody(void *id)
@@ -22,8 +57,8 @@ void producerBody(void *id)
       sem_down(&s_vaga);
 
       sem_down(&s_buffer);
-      //insere item no buffer
-      printf("p%d produziu %d\n", (int)id, item);
+      insertBuffer(item);
+      printf("p%ld produziu %d\n", (long)id, item);
       sem_up(&s_buffer);
 
       sem_up(&s_item);
@@ -40,13 +75,12 @@ void consumerBody(void *id)
       sem_down(&s_item);
 
       sem_down(&s_buffer);
-      //retira item do buffer
-      printf("c%d consumiu %d\n", (int)id, item);
+      item = consomeBuffer();
       sem_up(&s_buffer);
 
       sem_up(&s_vaga);
 
-      //print item
+      printf("\t\tc%ld consumiu %d\n", (long)id, item);
       task_sleep (1000);
    }
 
@@ -54,7 +88,7 @@ void consumerBody(void *id)
 }
 
 int main (int argc, char *argv[]){
-   int i ;
+   long i ;
 
    printf ("main: inicio\n") ;
 
@@ -65,16 +99,20 @@ int main (int argc, char *argv[]){
    sem_init (&s_buffer,  1) ;
    sem_init (&s_vaga,    TAMBUFFER) ;
 
-   printf ("%d Produtores e  %d Consumidores...\n",NUMTASKS, NUMTASKS);
+   printf ("%d Produtores e  %d Consumidores...\n", PROD, CONS);
 
    // inicia as tarefas
-   for (i=0; i<NUMTASKS; i++){
-      task_init (&task[i], producerBody, i) ;
-      task_init (&task[i], consumerBody, i) ;
+   for (i=0; i<PROD; i++){
+      task_init (&task[i], producerBody, (void *)i) ;
+   }
+
+   // inicia as tarefas
+   for (i=PROD; i<PROD+CONS; i++){
+      task_init (&task[i], consumerBody, (void *)i-PROD) ;
    }
 
    // aguarda as tarefas encerrarem
-   for (i=0; i<NUMTASKS; i++)
+   for (i=0; i<PROD+CONS; i++)
       task_wait (&task[i]) ;
 
    // destroi o semáforo
