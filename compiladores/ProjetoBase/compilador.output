@@ -156,8 +156,7 @@ Grammar
    91 listaParams: listaParams VIRGULA param
    92            | param
 
-   93 param: IDENT
-   94      | NUM
+   93 param: expressao
 
 
 Terminals, with rules where they appear
@@ -174,8 +173,8 @@ Terminals, with rules where they appear
     T_BEGIN (265) 17
     T_END (266) 17
     VAR (267) 7
-    IDENT (268) 2 12 13 14 15 16 24 31 32 34 35 56 76 82 83 84 93
-    NUM (269) 36 37 55 94
+    IDENT (268) 2 12 13 14 15 16 24 31 32 34 35 56 76 82 83 84
+    NUM (269) 36 37 55
     ATRIBUICAO (270) 38
     PROCEDURE (271) 76
     FUNCTION (272)
@@ -284,7 +283,7 @@ Nonterminals, with rules where they appear
         on right: 24
     expressao (70)
         on left: 40 41 42 43 44 45 46
-        on right: 38 40 41 42 43 44 45 60 63 68
+        on right: 38 40 41 42 43 44 45 60 63 68 93
     expressao_simples (71)
         on left: 47 48 49 50
         on right: 40 41 42 43 44 45 46 47 48 49
@@ -367,7 +366,7 @@ Nonterminals, with rules where they appear
         on left: 91 92
         on right: 89 91
     param (98)
-        on left: 93 94
+        on left: 93
         on right: 91 92
 
 
@@ -1216,11 +1215,19 @@ State 89
 
    89 paramsProc: ABRE_PARENTESES $@13 . listaParams FECHA_PARENTESES
 
-    IDENT  shift, and go to state 113
-    NUM    shift, and go to state 114
+    ABRE_PARENTESES  shift, and go to state 70
+    IDENT            shift, and go to state 71
+    NUM              shift, and go to state 72
+    NOT              shift, and go to state 73
+    TRUE             shift, and go to state 74
+    FALSE            shift, and go to state 75
 
-    listaParams  go to state 115
-    param        go to state 116
+    expressao          go to state 113
+    expressao_simples  go to state 77
+    termo              go to state 78
+    fator              go to state 79
+    listaParams        go to state 114
+    param              go to state 115
 
 
 State 90
@@ -1253,7 +1260,7 @@ State 91
    45          | expressao . DESIGUAL expressao_simples
    60 fator: ABRE_PARENTESES expressao . FECHA_PARENTESES
 
-    FECHA_PARENTESES  shift, and go to state 117
+    FECHA_PARENTESES  shift, and go to state 116
     MAIOR             shift, and go to state 93
     MAIOR_IGUAL       shift, and go to state 94
     MENOR             shift, and go to state 95
@@ -1280,7 +1287,7 @@ State 93
     TRUE             shift, and go to state 74
     FALSE            shift, and go to state 75
 
-    expressao_simples  go to state 118
+    expressao_simples  go to state 117
     termo              go to state 78
     fator              go to state 79
 
@@ -1296,7 +1303,7 @@ State 94
     TRUE             shift, and go to state 74
     FALSE            shift, and go to state 75
 
-    expressao_simples  go to state 119
+    expressao_simples  go to state 118
     termo              go to state 78
     fator              go to state 79
 
@@ -1312,7 +1319,7 @@ State 95
     TRUE             shift, and go to state 74
     FALSE            shift, and go to state 75
 
-    expressao_simples  go to state 120
+    expressao_simples  go to state 119
     termo              go to state 78
     fator              go to state 79
 
@@ -1328,7 +1335,7 @@ State 96
     TRUE             shift, and go to state 74
     FALSE            shift, and go to state 75
 
-    expressao_simples  go to state 121
+    expressao_simples  go to state 120
     termo              go to state 78
     fator              go to state 79
 
@@ -1344,7 +1351,7 @@ State 97
     TRUE             shift, and go to state 74
     FALSE            shift, and go to state 75
 
-    expressao_simples  go to state 122
+    expressao_simples  go to state 121
     termo              go to state 78
     fator              go to state 79
 
@@ -1360,7 +1367,7 @@ State 98
     TRUE             shift, and go to state 74
     FALSE            shift, and go to state 75
 
-    expressao_simples  go to state 123
+    expressao_simples  go to state 122
     termo              go to state 78
     fator              go to state 79
 
@@ -1369,7 +1376,7 @@ State 99
 
    68 if_then: IF $@7 expressao $@8 . THEN comando_sem_rotulo
 
-    THEN  shift, and go to state 124
+    THEN  shift, and go to state 123
 
 
 State 100
@@ -1383,7 +1390,7 @@ State 100
     TRUE             shift, and go to state 74
     FALSE            shift, and go to state 75
 
-    termo  go to state 125
+    termo  go to state 124
     fator  go to state 79
 
 
@@ -1398,7 +1405,7 @@ State 101
     TRUE             shift, and go to state 74
     FALSE            shift, and go to state 75
 
-    termo  go to state 126
+    termo  go to state 125
     fator  go to state 79
 
 
@@ -1413,7 +1420,7 @@ State 102
     TRUE             shift, and go to state 74
     FALSE            shift, and go to state 75
 
-    termo  go to state 127
+    termo  go to state 126
     fator  go to state 79
 
 
@@ -1428,7 +1435,7 @@ State 103
     TRUE             shift, and go to state 74
     FALSE            shift, and go to state 75
 
-    fator  go to state 128
+    fator  go to state 127
 
 
 State 104
@@ -1442,7 +1449,7 @@ State 104
     TRUE             shift, and go to state 74
     FALSE            shift, and go to state 75
 
-    fator  go to state 129
+    fator  go to state 128
 
 
 State 105
@@ -1456,7 +1463,7 @@ State 105
     TRUE             shift, and go to state 74
     FALSE            shift, and go to state 75
 
-    fator  go to state 130
+    fator  go to state 129
 
 
 State 106
@@ -1465,7 +1472,7 @@ State 106
 
     $default  reduce using rule 62 ($@6)
 
-    $@6  go to state 131
+    $@6  go to state 130
 
 
 State 107
@@ -1479,7 +1486,7 @@ State 108
 
    31 lista_read: lista_read VIRGULA . IDENT
 
-    IDENT  shift, and go to state 132
+    IDENT  shift, and go to state 131
 
 
 State 109
@@ -1494,66 +1501,72 @@ State 110
    34 lista_write: lista_write VIRGULA . IDENT
    36            | lista_write VIRGULA . NUM
 
-    IDENT  shift, and go to state 133
-    NUM    shift, and go to state 134
+    IDENT  shift, and go to state 132
+    NUM    shift, and go to state 133
 
 
 State 111
 
    77 paramsFormais: ABRE_PARENTESES . listaParamsForms FECHA_PARENTESES
 
-    IDENT  shift, and go to state 135
+    IDENT  shift, and go to state 134
 
-    listaParamsForms  go to state 136
-    declaraParams     go to state 137
-    declaraParam      go to state 138
+    listaParamsForms  go to state 135
+    declaraParams     go to state 136
+    declaraParam      go to state 137
 
 
 State 112
 
    76 declara_proc: PROCEDURE $@10 IDENT $@11 paramsFormais . PONTO_E_VIRGULA blocoPF
 
-    PONTO_E_VIRGULA  shift, and go to state 139
+    PONTO_E_VIRGULA  shift, and go to state 138
 
 
 State 113
 
-   93 param: IDENT .
+   40 expressao: expressao . MAIOR expressao_simples
+   41          | expressao . MAIOR_IGUAL expressao_simples
+   42          | expressao . MENOR expressao_simples
+   43          | expressao . MENOR_IGUAL expressao_simples
+   44          | expressao . IGUAL expressao_simples
+   45          | expressao . DESIGUAL expressao_simples
+   93 param: expressao .
+
+    MAIOR        shift, and go to state 93
+    MAIOR_IGUAL  shift, and go to state 94
+    MENOR        shift, and go to state 95
+    MENOR_IGUAL  shift, and go to state 96
+    IGUAL        shift, and go to state 97
+    DESIGUAL     shift, and go to state 98
 
     $default  reduce using rule 93 (param)
 
 
 State 114
 
-   94 param: NUM .
-
-    $default  reduce using rule 94 (param)
-
-
-State 115
-
    89 paramsProc: ABRE_PARENTESES $@13 listaParams . FECHA_PARENTESES
    91 listaParams: listaParams . VIRGULA param
 
-    FECHA_PARENTESES  shift, and go to state 140
-    VIRGULA           shift, and go to state 141
+    FECHA_PARENTESES  shift, and go to state 139
+    VIRGULA           shift, and go to state 140
 
 
-State 116
+State 115
 
    92 listaParams: param .
 
     $default  reduce using rule 92 (listaParams)
 
 
-State 117
+State 116
 
    60 fator: ABRE_PARENTESES expressao FECHA_PARENTESES .
 
     $default  reduce using rule 60 (fator)
 
 
-State 118
+State 117
 
    40 expressao: expressao MAIOR expressao_simples .
    47 expressao_simples: expressao_simples . SOMA termo
@@ -1567,7 +1580,7 @@ State 118
     $default  reduce using rule 40 (expressao)
 
 
-State 119
+State 118
 
    41 expressao: expressao MAIOR_IGUAL expressao_simples .
    47 expressao_simples: expressao_simples . SOMA termo
@@ -1581,7 +1594,7 @@ State 119
     $default  reduce using rule 41 (expressao)
 
 
-State 120
+State 119
 
    42 expressao: expressao MENOR expressao_simples .
    47 expressao_simples: expressao_simples . SOMA termo
@@ -1595,7 +1608,7 @@ State 120
     $default  reduce using rule 42 (expressao)
 
 
-State 121
+State 120
 
    43 expressao: expressao MENOR_IGUAL expressao_simples .
    47 expressao_simples: expressao_simples . SOMA termo
@@ -1609,7 +1622,7 @@ State 121
     $default  reduce using rule 43 (expressao)
 
 
-State 122
+State 121
 
    44 expressao: expressao IGUAL expressao_simples .
    47 expressao_simples: expressao_simples . SOMA termo
@@ -1623,7 +1636,7 @@ State 122
     $default  reduce using rule 44 (expressao)
 
 
-State 123
+State 122
 
    45 expressao: expressao DESIGUAL expressao_simples .
    47 expressao_simples: expressao_simples . SOMA termo
@@ -1637,7 +1650,7 @@ State 123
     $default  reduce using rule 45 (expressao)
 
 
-State 124
+State 123
 
    68 if_then: IF $@7 expressao $@8 THEN . comando_sem_rotulo
 
@@ -1649,7 +1662,7 @@ State 124
     WRITE    shift, and go to state 40
 
     comando_composto    go to state 41
-    comando_sem_rotulo  go to state 142
+    comando_sem_rotulo  go to state 141
     leitura             go to state 46
     escrita             go to state 47
     repeticao           go to state 48
@@ -1657,7 +1670,7 @@ State 124
     if_then             go to state 50
 
 
-State 125
+State 124
 
    49 expressao_simples: expressao_simples OR termo .
    51 termo: termo . MULT fator
@@ -1671,7 +1684,7 @@ State 125
     $default  reduce using rule 49 (expressao_simples)
 
 
-State 126
+State 125
 
    47 expressao_simples: expressao_simples SOMA termo .
    51 termo: termo . MULT fator
@@ -1685,7 +1698,7 @@ State 126
     $default  reduce using rule 47 (expressao_simples)
 
 
-State 127
+State 126
 
    48 expressao_simples: expressao_simples SUB termo .
    51 termo: termo . MULT fator
@@ -1699,28 +1712,28 @@ State 127
     $default  reduce using rule 48 (expressao_simples)
 
 
-State 128
+State 127
 
    53 termo: termo AND fator .
 
     $default  reduce using rule 53 (termo)
 
 
-State 129
+State 128
 
    51 termo: termo MULT fator .
 
     $default  reduce using rule 51 (termo)
 
 
-State 130
+State 129
 
    52 termo: termo DIV fator .
 
     $default  reduce using rule 52 (termo)
 
 
-State 131
+State 130
 
    63 repeticao: WHILE $@5 expressao DO $@6 . comando
 
@@ -1734,7 +1747,7 @@ State 131
     $default  reduce using rule 22 (comando_vazio)
 
     comando_composto    go to state 41
-    comando             go to state 143
+    comando             go to state 142
     comando_vazio       go to state 44
     comando_sem_rotulo  go to state 45
     leitura             go to state 46
@@ -1744,137 +1757,145 @@ State 131
     if_then             go to state 50
 
 
-State 132
+State 131
 
    31 lista_read: lista_read VIRGULA IDENT .
 
     $default  reduce using rule 31 (lista_read)
 
 
-State 133
+State 132
 
    34 lista_write: lista_write VIRGULA IDENT .
 
     $default  reduce using rule 34 (lista_write)
 
 
-State 134
+State 133
 
    36 lista_write: lista_write VIRGULA NUM .
 
     $default  reduce using rule 36 (lista_write)
 
 
-State 135
+State 134
 
    83 declaraParam: IDENT .
 
     $default  reduce using rule 83 (declaraParam)
 
 
-State 136
+State 135
 
    77 paramsFormais: ABRE_PARENTESES listaParamsForms . FECHA_PARENTESES
    79 listaParamsForms: listaParamsForms . PONTO_E_VIRGULA declaraParams
 
-    FECHA_PARENTESES  shift, and go to state 144
-    PONTO_E_VIRGULA   shift, and go to state 145
+    FECHA_PARENTESES  shift, and go to state 143
+    PONTO_E_VIRGULA   shift, and go to state 144
 
 
-State 137
+State 136
 
    80 listaParamsForms: declaraParams .
 
     $default  reduce using rule 80 (listaParamsForms)
 
 
-State 138
+State 137
 
    81 declaraParams: declaraParam . DOIS_PONTOS tipoParam
    82 declaraParam: declaraParam . VIRGULA IDENT
 
-    VIRGULA      shift, and go to state 146
-    DOIS_PONTOS  shift, and go to state 147
+    VIRGULA      shift, and go to state 145
+    DOIS_PONTOS  shift, and go to state 146
 
 
-State 139
+State 138
 
    76 declara_proc: PROCEDURE $@10 IDENT $@11 paramsFormais PONTO_E_VIRGULA . blocoPF
 
     VAR       reduce using rule 6 ($@3)
     $default  reduce using rule 8 (var)
 
-    parte_declara_vars  go to state 148
+    parte_declara_vars  go to state 147
     var                 go to state 15
     $@3                 go to state 16
-    blocoPF             go to state 149
+    blocoPF             go to state 148
 
 
-State 140
+State 139
 
    89 paramsProc: ABRE_PARENTESES $@13 listaParams FECHA_PARENTESES .
 
     $default  reduce using rule 89 (paramsProc)
 
 
-State 141
+State 140
 
    91 listaParams: listaParams VIRGULA . param
 
-    IDENT  shift, and go to state 113
-    NUM    shift, and go to state 114
+    ABRE_PARENTESES  shift, and go to state 70
+    IDENT            shift, and go to state 71
+    NUM              shift, and go to state 72
+    NOT              shift, and go to state 73
+    TRUE             shift, and go to state 74
+    FALSE            shift, and go to state 75
 
-    param  go to state 150
+    expressao          go to state 113
+    expressao_simples  go to state 77
+    termo              go to state 78
+    fator              go to state 79
+    param              go to state 149
 
 
-State 142
+State 141
 
    68 if_then: IF $@7 expressao $@8 THEN comando_sem_rotulo .
 
     $default  reduce using rule 68 (if_then)
 
 
-State 143
+State 142
 
    63 repeticao: WHILE $@5 expressao DO $@6 comando .
 
     $default  reduce using rule 63 (repeticao)
 
 
-State 144
+State 143
 
    77 paramsFormais: ABRE_PARENTESES listaParamsForms FECHA_PARENTESES .
 
     $default  reduce using rule 77 (paramsFormais)
 
 
-State 145
+State 144
 
    79 listaParamsForms: listaParamsForms PONTO_E_VIRGULA . declaraParams
 
-    IDENT  shift, and go to state 135
+    IDENT  shift, and go to state 134
 
-    declaraParams  go to state 151
-    declaraParam   go to state 138
+    declaraParams  go to state 150
+    declaraParam   go to state 137
+
+
+State 145
+
+   82 declaraParam: declaraParam VIRGULA . IDENT
+
+    IDENT  shift, and go to state 151
 
 
 State 146
 
-   82 declaraParam: declaraParam VIRGULA . IDENT
+   81 declaraParams: declaraParam DOIS_PONTOS . tipoParam
 
     IDENT  shift, and go to state 152
 
+    tipoParam  go to state 153
+
 
 State 147
-
-   81 declaraParams: declaraParam DOIS_PONTOS . tipoParam
-
-    IDENT  shift, and go to state 153
-
-    tipoParam  go to state 154
-
-
-State 148
 
    86 blocoPF: parte_declara_vars . parte_declara_procs comando_composto $@12 PONTO_E_VIRGULA
 
@@ -1882,79 +1903,79 @@ State 148
     $default   reduce using rule 22 (comando_vazio)
 
     comando_vazio        go to state 20
-    parte_declara_procs  go to state 155
+    parte_declara_procs  go to state 154
     declara_procs        go to state 22
     $@9                  go to state 23
 
 
-State 149
+State 148
 
    76 declara_proc: PROCEDURE $@10 IDENT $@11 paramsFormais PONTO_E_VIRGULA blocoPF .
 
     $default  reduce using rule 76 (declara_proc)
 
 
-State 150
+State 149
 
    91 listaParams: listaParams VIRGULA param .
 
     $default  reduce using rule 91 (listaParams)
 
 
-State 151
+State 150
 
    79 listaParamsForms: listaParamsForms PONTO_E_VIRGULA declaraParams .
 
     $default  reduce using rule 79 (listaParamsForms)
 
 
-State 152
+State 151
 
    82 declaraParam: declaraParam VIRGULA IDENT .
 
     $default  reduce using rule 82 (declaraParam)
 
 
-State 153
+State 152
 
    84 tipoParam: IDENT .
 
     $default  reduce using rule 84 (tipoParam)
 
 
-State 154
+State 153
 
    81 declaraParams: declaraParam DOIS_PONTOS tipoParam .
 
     $default  reduce using rule 81 (declaraParams)
 
 
-State 155
+State 154
 
    86 blocoPF: parte_declara_vars parte_declara_procs . comando_composto $@12 PONTO_E_VIRGULA
 
     T_BEGIN  shift, and go to state 28
 
-    comando_composto  go to state 156
+    comando_composto  go to state 155
 
 
-State 156
+State 155
 
    86 blocoPF: parte_declara_vars parte_declara_procs comando_composto . $@12 PONTO_E_VIRGULA
 
     $default  reduce using rule 85 ($@12)
 
-    $@12  go to state 157
+    $@12  go to state 156
 
 
-State 157
+State 156
 
    86 blocoPF: parte_declara_vars parte_declara_procs comando_composto $@12 . PONTO_E_VIRGULA
 
-    PONTO_E_VIRGULA  shift, and go to state 158
+    PONTO_E_VIRGULA  shift, and go to state 157
 
 
-State 158
+State 157
 
    86 blocoPF: parte_declara_vars parte_declara_procs comando_composto $@12 PONTO_E_VIRGULA .
 

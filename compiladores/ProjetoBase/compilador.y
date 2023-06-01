@@ -490,7 +490,7 @@ chamaProc: paramsProc {
                }
          }
 
-paramsProc: ABRE_PARENTESES {int passados = 0;} listaParams FECHA_PARENTESES {
+paramsProc: ABRE_PARENTESES { paramPassados = 0;} listaParams FECHA_PARENTESES {
                if(paramPassados != proc->uni.proc.num_params){
                   imprimeErro("N° de parametros invalido para esse procedimento\n");
                }
@@ -498,14 +498,7 @@ paramsProc: ABRE_PARENTESES {int passados = 0;} listaParams FECHA_PARENTESES {
 
 listaParams: listaParams VIRGULA param | param
 
-param: IDENT {
-               simb = buscaTabSimb(token, &tabela);
-               if(simb && simb->tipo == INTEIRO){
-                  geraCodigo(NULL, buildString("CRVL %d,%d", simb->nivel_lex, simb->deslocamento));
-                  paramPassados++;
-               }
-         } | NUM {
-               geraCodigo(NULL, buildString("CRCT %s", token));
+param: expressao { 
                paramPassados++;
          }
 
