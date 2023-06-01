@@ -1,6 +1,8 @@
 #define VALOR 0
 #define REF   1
 
+#define MAXP 64
+
 // Enumerado com tipos possiveis
 typedef enum{
    INT,
@@ -25,6 +27,7 @@ typedef struct ParamF_t{
 typedef struct Proc_t{
    int rotulo;
    int num_params;
+   int passagem[MAXP];
 } Proc_t;
 
 // Informacoes da tabela de simbolos para variaveis simples
