@@ -498,9 +498,7 @@ paramsProc: ABRE_PARENTESES { paramPassados = 0;} listaParams FECHA_PARENTESES {
 
 listaParams: listaParams VIRGULA param | param
 
-param: expressao { 
-               paramPassados++;
-         }
+param: expressao { paramPassados++; }
 
 %%
 
