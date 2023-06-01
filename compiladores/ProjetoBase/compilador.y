@@ -63,7 +63,7 @@ void confereAtribuicao( char *var ){
       imprimeErro(buildString("VARIAVEL \'%s\' NAO DECLARADA\n", var));
    }
    else if( t1 == simb_tipo->uni.vs.tipo ){
-      geraCodigo(NULL, buildString("ARMZ %d,%d", simb_tipo->nivel_lex, simb_tipo->uni.vs.deslocamento));
+      geraCodigo(NULL, buildString("ARMZ %d,%d", simb_tipo->nivel_lex, simb_tipo->deslocamento));
    }
    else{
       imprimeErro("TIPOS INCOMPATIVEIS\n");
@@ -195,11 +195,11 @@ lista_read: lista_read VIRGULA IDENT {
             if(simb){
                switch (simb->tipo){
                   case VS:
-                     geraCodigo(NULL, buildString("ARMZ %d,%d", simb->nivel_lex, simb->uni.vs.deslocamento));
+                     geraCodigo(NULL, buildString("ARMZ %d,%d", simb->nivel_lex, simb->deslocamento));
                      break;
 
                   case PFORM:
-                     geraCodigo(NULL, buildString("ARMZ %d,%d", simb->nivel_lex, simb->uni.parform.deslocamento));
+                     geraCodigo(NULL, buildString("ARMZ %d,%d", simb->nivel_lex, simb->deslocamento));
                      break;
                }
             }
@@ -211,7 +211,7 @@ lista_read: lista_read VIRGULA IDENT {
             geraCodigo(NULL, "LEIT");
             simb = buscaTabSimb(token, &tabela);
             if(simb){
-               geraCodigo(NULL, buildString("ARMZ %d,%d", simb->nivel_lex, simb->uni.vs.deslocamento));
+               geraCodigo(NULL, buildString("ARMZ %d,%d", simb->nivel_lex, simb->deslocamento));
             }
             else{
                imprimeErro(buildString("VARIAVEL %s NAO DECLARADA", token));
@@ -227,11 +227,11 @@ lista_write: lista_write VIRGULA IDENT {
             if(simb){
                switch (simb->tipo){
                   case VS:
-                     geraCodigo(NULL, buildString("CRVL %d,%d", simb->nivel_lex, simb->uni.vs.deslocamento));
+                     geraCodigo(NULL, buildString("CRVL %d,%d", simb->nivel_lex, simb->deslocamento));
                      break;
 
                   case PFORM:
-                     geraCodigo(NULL, buildString("CRVL %d,%d", simb->nivel_lex, simb->uni.parform.deslocamento));
+                     geraCodigo(NULL, buildString("CRVL %d,%d", simb->nivel_lex, simb->deslocamento));
                      break;
                }
                geraCodigo(NULL, "IMPR");
@@ -243,15 +243,7 @@ lista_write: lista_write VIRGULA IDENT {
          | IDENT {
             simb = buscaTabSimb(token, &tabela);
             if(simb){
-               switch (simb->tipo){
-                  case VS:
-                     geraCodigo(NULL, buildString("CRVL %d,%d", simb->nivel_lex, simb->uni.vs.deslocamento));
-                     break;
-
-                  case PFORM:
-                     geraCodigo(NULL, buildString("CRVL %d,%d", simb->nivel_lex, simb->uni.parform.deslocamento));
-                     break;
-               }
+               geraCodigo(NULL, buildString("CRVL %d,%d", simb->nivel_lex, simb->deslocamento));
                geraCodigo(NULL, "IMPR");
             }
             else{
@@ -341,9 +333,20 @@ fator:   NUM {
                // Carrega valor de outra variavel
                simb = buscaTabSimb(l_elem, &tabela);
                simb_aux = buscaTabSimb(token, &tabela);
-               geraCodigo(NULL, buildString("CRVL %d,%d", simb_aux->nivel_lex, simb_aux->uni.vs.deslocamento));
+               switch(simb_aux->tipo){
+                  case VS:
+                     geraCodigo(NULL, buildString("CRVL %d,%d", simb_aux->nivel_lex, simb_aux->deslocamento));
+                     empilha(&pilha_tipos, simb_aux->uni.vs.tipo);
+                     break;
 
-               empilha(&pilha_tipos, simb_aux->uni.vs.tipo);
+                  case PFORM:
+                     geraCodigo(NULL, buildString("CRVL %d,%d", simb_aux->nivel_lex, simb_aux->deslocamento));
+                     empilha(&pilha_tipos, simb_aux->uni.parform.tipo);
+                     break;
+
+                  default:
+                     break;
+               }
          }
          | TRUE {
                geraCodigo(NULL, buildString("CRCT %d", 1));
@@ -443,22 +446,28 @@ declara_proc: PROCEDURE {
          } paramsFormais PONTO_E_VIRGULA blocoPF { removeTabSimb(proc->uni.proc.num_params, &tabela); }
 
 
-paramsFormais: ABRE_PARENTESES listaParamsForms FECHA_PARENTESES { printTabSimb(&tabela); } | 
+paramsFormais: ABRE_PARENTESES listaParamsForms FECHA_PARENTESES | 
 
 
-listaParamsForms: listaParamsForms PONTO_E_VIRGULA declaraParam | declaraParam
+listaParamsForms: listaParamsForms PONTO_E_VIRGULA declaraParams | declaraParams
 
 
-declaraParam: IDENT {
+declaraParams: declaraParam DOIS_PONTOS tipoParam
+
+
+declaraParam: declaraParam VIRGULA IDENT {
                proc->uni.proc.num_params++;
                insereTabSimbParam(token, &tabela, VALOR, nivel_lex, proc->uni.proc.num_params, INDEFINIDO);
-         } DOIS_PONTOS tipoParam
+         } | IDENT {
+               proc->uni.proc.num_params++;
+               insereTabSimbParam(token, &tabela, VALOR, nivel_lex, proc->uni.proc.num_params, INDEFINIDO);
+         }
 
 
 tipoParam: IDENT {
-            if( strcmp(token, "integer") == 0 ){
-               atualizaTipos(&tabela, INTEIRO);
-            }
+               if( strcmp(token, "integer") == 0 ){
+                  atualizaParams(&tabela, proc, INTEIRO);
+               }
          }
 
 blocoPF: parte_declara_vars parte_declara_procs comando_composto { 
@@ -470,16 +479,16 @@ blocoPF: parte_declara_vars parte_declara_procs comando_composto {
                nivel_lex--;
          } PONTO_E_VIRGULA
 
-chamaProc: {
+chamaProc: paramsProc {
                simb = buscaTabSimb(l_elem, &tabela);
                if(simb && simb->tipo == PROC){
                   geraCodigo(NULL, buildString("CHPR R%.2d,%d", simb->uni.proc.rotulo, nivel_lex));
-                  n_params = simb->uni.proc.num_param;
+                  n_params = simb->uni.proc.num_params;
                }
                else{
                   imprimeErro(buildString("Procedimento %s não declarado", l_elem));
                }
-         } paramsProc
+         }
 
 paramsProc: ABRE_PARENTESES {int passados = 0;} listaParams FECHA_PARENTESES {
                if(paramPassados != proc->uni.proc.num_params){
@@ -491,6 +500,12 @@ listaParams: listaParams VIRGULA param | param
 
 param: IDENT {
                simb = buscaTabSimb(token, &tabela);
+               if(simb && simb->tipo == INTEIRO){
+                  geraCodigo(NULL, buildString("CRVL %d,%d", simb->nivel_lex, simb->deslocamento));
+                  paramPassados++;
+               }
+         } | NUM {
+               geraCodigo(NULL, buildString("CRCT %s", token));
                paramPassados++;
          }
 

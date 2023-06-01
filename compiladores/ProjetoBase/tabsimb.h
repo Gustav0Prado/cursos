@@ -19,12 +19,10 @@ typedef enum{
 typedef struct ParamF_t{
    Tipo_e tipo;
    int passagem;
-   int deslocamento;
 } ParamF_t;
 
 // Informacoes da tabela de simbolos para procedimentos
 typedef struct Proc_t{
-   int num_param;
    int rotulo;
    int num_params;
 } Proc_t;
@@ -32,7 +30,6 @@ typedef struct Proc_t{
 // Informacoes da tabela de simbolos para variaveis simples
 typedef struct VarS_t{
    Tipo_e tipo;
-   int deslocamento;
 } VarS_t;
 
 // Struct de cada simbolo da tabela
@@ -41,6 +38,7 @@ typedef struct Simb_t{
    struct Simb_t *next;
    tipoSimb_e tipo;
    int nivel_lex;
+   int deslocamento;
    union
    {
       VarS_t vs;
@@ -64,3 +62,4 @@ void printTabSimb(TabSimb_t *tab);
 int tamanhoTabSimb(TabSimb_t *tab);
 void atualizaTipos(TabSimb_t *tab, int tipo);
 int insereTabSimbParam(char *ident, TabSimb_t *tab, int pass, int nl, int desloc, int tipo);
+void atualizaParams(TabSimb_t *tab, Simb_t *procm, int tipo);

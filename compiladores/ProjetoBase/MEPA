@@ -2,9 +2,11 @@
      AMEM 2
      DSVS R00
 R01: ENPR 1 
-     CRVL 1,1
-     IMPR
-     CRVL 1,2
+     CRVL 1,-5
+     CRVL 1,-4
+     SOMA
+     ARMZ 1,-5
+     CRVL 1,-5
      IMPR
      RTPR 1,2
 R00: NADA 
@@ -12,6 +14,10 @@ R00: NADA
      ARMZ 0,0
      LEIT
      ARMZ 0,1
+     CRVL 0,0
+     CRVL 0,1
      CHPR R01,0
+     CRVL 0,0
+     IMPR
      DMEM 2
      PARA

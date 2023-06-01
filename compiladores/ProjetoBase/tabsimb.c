@@ -23,7 +23,7 @@ int insereTabSimbVS(char *ident, TabSimb_t *tab, int desloc, int nv, int tipo){
       newVar->next = tab->top;
       tab->top = newVar;
 
-      newVar->uni.vs.deslocamento = desloc;
+      newVar->deslocamento = desloc;
       newVar->nivel_lex = nv;
       newVar->uni.vs.tipo = tipo;
 
@@ -49,7 +49,7 @@ int insereTabSimbProc(char *ident, TabSimb_t *tab, int rot, int nl){
       newVar->tipo = PROC;
       newVar->nivel_lex = nl;
       newVar->uni.proc.rotulo = rot;
-      newVar->uni.proc.num_param = 0;
+      newVar->uni.proc.num_params = 0;
 
       return 0;
    }
@@ -73,7 +73,7 @@ int insereTabSimbParam(char *ident, TabSimb_t *tab, int pass, int nl, int desloc
       newVar->tipo = PFORM;
       newVar->uni.parform.passagem = pass;
       newVar->nivel_lex = nl;
-      newVar->uni.parform.deslocamento = desloc;
+      newVar->deslocamento = desloc;
       newVar->uni.parform.tipo = tipo;
 
       return 0;
@@ -177,7 +177,7 @@ void printTabSimb(TabSimb_t *tab){
          case VS:
             switch (aux->uni.vs.tipo){
                case INT:
-                  printf("%s - VS - tipo: INTEGER - nv: %d, desloc: %d\n", aux->ident, aux->nivel_lex, aux->uni.vs.deslocamento);
+                  printf("%s - VS - tipo: INTEGER - nv: %d, desloc: %d\n", aux->ident, aux->nivel_lex, aux->deslocamento);
                   break;
 
                case INDEF:
@@ -196,11 +196,11 @@ void printTabSimb(TabSimb_t *tab){
          case PFORM:
             switch (aux->uni.parform.passagem){
                case VALOR:
-                  printf("%s - PARAM - tipo: VALOR - nl: %d, desloc: %d\n", aux->ident, aux->nivel_lex, aux->uni.parform.deslocamento);
+                  printf("%s - PARAM - tipo: VALOR - nl: %d, desloc: %d\n", aux->ident, aux->nivel_lex, aux->deslocamento);
                   break;
 
                case REF:
-                  printf("%s - PARAM - tipo: REF   - nl: %d, desloc: %d\n", aux->ident, aux->nivel_lex, aux->uni.parform.deslocamento);
+                  printf("%s - PARAM - tipo: REF   - nl: %d, desloc: %d\n", aux->ident, aux->nivel_lex, aux->deslocamento);
                   break;
                
                default:
@@ -232,6 +232,22 @@ void atualizaTipos(TabSimb_t *tab, int tipo){
       }
    }
 }
+
+
+/*
+   Atualiza valor de deslocamento dos parametros de um procedimento
+*/
+void atualizaParams(TabSimb_t *tab, Simb_t *procm, int tipo){
+   int n = -4;
+   Simb_t *top = tab->top;
+   while(top->tipo == PFORM){
+      top->deslocamento = n;
+      top->uni.parform.tipo = tipo;
+      n--;
+      top = top->next;
+   }
+}
+
 
 /*
    Retorna tamanho da TabSimb
