@@ -636,14 +636,14 @@ int mqueue_init (mqueue_t *queue, int max_msgs, int msg_size){
 
 /*
   Envia mensagem para a fila. Aguarda a fila ter uma posição.
-  Retorna 0 em caso de sucesso e -1 em caso de erro (Fila ou mensagem não existe)
+  Retorna 0 em caso de sucesso e -1 em caso de erro (Fila ou mensagem não existe, semaforo foi destruido)
 */
 int mqueue_send (mqueue_t *queue, void *msg){
   if(queue && msg && queue->status == ALIVE){
 
-    sem_down(&(queue->sem_vaga));
-
-    sem_down(&(queue->sem_buff));
+    if( sem_down(&(queue->sem_vaga)) == -1 || sem_down(&(queue->sem_buff)) == -1){
+      return -1;
+    }
 
     memcpy(queue->buffer+queue->bHead, msg, queue->msg_size);
 
@@ -664,14 +664,15 @@ int mqueue_send (mqueue_t *queue, void *msg){
 
 /*
   Recupera uma mensagem da fila. Aguarda um item na fila.
-  Retorna 0 em caso de sucesso e -1 em caso de erro (Fila ou mensagem não existe)
+  Retorna 0 em caso de sucesso e -1 em caso de erro (Fila ou mensagem não existe, semaforo foi destruido)
 */
 int mqueue_recv (mqueue_t *queue, void *msg){
   if(queue && msg && queue->status == ALIVE){
 
-    sem_down(&(queue->sem_item));
-
-    sem_down(&(queue->sem_buff));
+    //Checa se semaforos foram destruidos
+    if( sem_down(&(queue->sem_item)) == -1 || sem_down(&(queue->sem_buff)) == -1){
+      return -1;
+    }
 
     memcpy(msg, queue->buffer+queue->bTail, queue->msg_size);
 

@@ -1,6 +1,6 @@
 all: ppos
 
-CFLAGS = -Wall -g
+CFLAGS = -Wall -g -lm
 OBJECTS = queue.o
 
 debug: CFLAGS+= -DDEBUG
