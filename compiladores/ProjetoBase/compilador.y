@@ -19,6 +19,7 @@ TabSimb_t tabela;
 Pilha_t pilha_tipos, pilha_rotulos, pilha_vars;
 Simb_t *simb, *simb_aux;
 char l_elem[1023];
+char func_i[1023];
 char str[1024];
 char strAux[1024];
 Simb_t *proc;
@@ -458,7 +459,12 @@ if_then: IF {
 parte_declara_procs: declara_procs {
                int rot_desvio = desempilha(&pilha_rotulos);
                geraCodigo(buildString("R%.2d", rot_desvio), "NADA");
-         } | comando_vazio
+         }
+         | declara_funcs {
+               int rot_desvio = desempilha(&pilha_rotulos);
+               geraCodigo(buildString("R%.2d", rot_desvio), "NADA");
+         }
+         | comando_vazio
 
 
 // Declaracao das procs do programa
@@ -548,6 +554,48 @@ paramsProc: ABRE_PARENTESES { paramPassados = 0;} listaParams FECHA_PARENTESES {
 
 // Lista de params de um proc => a,b,c
 listaParams: listaParams VIRGULA { entra_proc = 1; } expressao { paramPassados++; entra_proc = 0; } | { entra_proc = 1; } expressao { paramPassados++; entra_proc = 0; }
+
+
+//---------------------------------------------------------------- Funções -------------------------------------------------------------------------------------//
+// Declaracao das procs do programa
+declara_funcs: declara_funcs declara_func | {
+               empilha(&pilha_rotulos, rot_atual);
+               geraCodigo(NULL, buildString("DSVS R%.2d", rot_atual));
+               rot_atual++;
+         } declara_func
+
+
+// Declaracao da procedure => PROCEDURE IDENT paramsFormais ; blocoPF
+declara_func: FUNCTION {
+               nivel_lex++;
+         }
+           IDENT {
+               insereTabSimbFunc(token, &tabela, rot_atual, nivel_lex);
+               proc = buscaTabSimb(token, &tabela);
+               strcpy(strAux, buildString("R%.2d", rot_atual));
+               geraCodigo(strAux, buildString("ENPR %d", nivel_lex));
+               rot_atual++;
+         } paramsFormais DOIS_PONTOS tipoFunc PONTO_E_VIRGULA blocoPF { removeTabSimb(proc->uni.proc.num_params, &tabela); }
+
+tipoFunc: IDENT {
+               if( strcmp(token, "integer") == 0 ){
+                  atualizaFunc(&tabela, proc, INTEIRO);
+                  insereTabSimbVS(proc->ident, &tabela, -4-proc->uni.proc.num_params, nivel_lex, INTEIRO);
+               }
+         }
+
+// Chamada de funcao => p(x)
+chamaFunc: IDENT {strcpy(func_i, token); geraCodigo(NULL, "AMEM 1"); } paramsProc {
+               simb = buscaTabSimb(func_i, &tabela);
+               if(simb && simb->tipo == PROC){
+                  geraCodigo(NULL, buildString("CHPR R%.2d,%d", simb->uni.proc.rotulo, nivel_lex));
+                  n_params = simb->uni.proc.num_params;
+               }
+               else{
+                  imprimeErro(buildString("Procedimento %s não declarado", func_i));
+               }
+               geraCodigo(NULL, "DMEM 1");
+         }
 
 %%
 

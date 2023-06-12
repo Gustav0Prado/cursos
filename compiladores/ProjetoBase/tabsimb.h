@@ -1,6 +1,9 @@
 #define VALOR 0
 #define REF   1
 
+#define PROC_PROC 0
+#define PROC_FUNCTION 1
+
 #define MAXP 64
 
 // Enumerado com tipos possiveis
@@ -28,6 +31,8 @@ typedef struct Proc_t{
    int rotulo;
    int num_params;
    int passagem[MAXP];
+   int tipo;
+   int retorno;
 } Proc_t;
 
 // Informacoes da tabela de simbolos para variaveis simples
@@ -66,3 +71,5 @@ int tamanhoTabSimb(TabSimb_t *tab);
 void atualizaTipos(TabSimb_t *tab, int tipo);
 int insereTabSimbParam(char *ident, TabSimb_t *tab, int pass, int nl, int desloc, int tipo);
 void atualizaParams(TabSimb_t *tab, Simb_t *procm, int tipo);
+int insereTabSimbFunc(char *ident, TabSimb_t *tab, int rot, int nl);
+void atualizaFunc(TabSimb_t *tab, Simb_t *func, int tipo);

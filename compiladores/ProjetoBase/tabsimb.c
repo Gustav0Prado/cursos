@@ -50,12 +50,40 @@ int insereTabSimbProc(char *ident, TabSimb_t *tab, int rot, int nl){
       newVar->nivel_lex = nl;
       newVar->uni.proc.rotulo = rot;
       newVar->uni.proc.num_params = 0;
+      newVar->uni.proc.tipo = PROC;
 
       return 0;
    }
    perror("Erro: Identificador ou TabSimb Nulos");
    return -1;
 }
+
+
+/*
+   Insere funcao na tabela de simbolos
+*/
+int insereTabSimbFunc(char *ident, TabSimb_t *tab, int rot, int nl){
+   if(ident && tab){
+      Simb_t *newVar = malloc(sizeof(Simb_t));
+      
+      newVar->ident = malloc(sizeof(ident));
+      strncpy(newVar->ident, ident, (int)sizeof(ident));
+
+      newVar->next = tab->top;
+      tab->top = newVar;
+
+      newVar->tipo = PROC;
+      newVar->nivel_lex = nl;
+      newVar->uni.proc.rotulo = rot;
+      newVar->uni.proc.num_params = 0;
+      newVar->uni.proc.tipo = PROC_FUNCTION;
+
+      return 0;
+   }
+   perror("Erro: Identificador ou TabSimb Nulos");
+   return -1;
+}
+
 
 /*
    Tenta inserir um identificador de Procedimento na TabSimb, retorna 0 caso sucesso e -1 caso falhe
@@ -246,6 +274,17 @@ void atualizaParams(TabSimb_t *tab, Simb_t *procm, int tipo){
       n--;
       top = top->next;
    }
+}
+
+
+/*
+   Atualiza tipo de retorno da funcao
+*/
+void atualizaFunc(TabSimb_t *tab, Simb_t *func, int tipo){
+   while(func->tipo != PROC && func->uni.proc.tipo != PROC_FUNCTION){
+      func = func->next;
+   }
+   func->uni.proc.retorno = INT;
 }
 
 
