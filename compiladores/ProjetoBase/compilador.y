@@ -106,6 +106,9 @@ char *geraRotulo(int rot){
 %nonassoc LOWER_THAN_ELSE
 %nonassoc ELSE
 
+%nonassoc NADA
+%nonassoc ABRE_PARENTESES
+
 %%
 
 //---------------------------------------------------------------- Esqueleto do Programa -------------------------------------------------------------------------------------//
@@ -348,7 +351,7 @@ fator:   NUM {
          | IDENT {
                // Carrega valor de outra variavel
                simb_aux = buscaTabSimb(token, &tabela);
-               if(!entra_proc){
+               if(!entra_proc && simb_aux){
                   switch(simb_aux->tipo){
                      case VS:
                         geraCodigo(NULL, buildString("CRVL %d,%d", simb_aux->nivel_lex, simb_aux->deslocamento));
@@ -370,7 +373,7 @@ fator:   NUM {
                   }
                }
                // Caso esteja declarando procedimento, checa tipos de passagem dos parametros
-               else{
+               else if(entra_proc){
                   if(proc->uni.proc.passagem[paramPassados] == VALOR  || simb_aux->uni.parform.passagem == REF){
                      geraCodigo(NULL, buildString("CRVL %d,%d", simb_aux->nivel_lex, simb_aux->deslocamento));
                   }
@@ -378,6 +381,9 @@ fator:   NUM {
                      geraCodigo(NULL, buildString("CREN %d,%d", simb_aux->nivel_lex, simb_aux->deslocamento));
                   }
                   empilha(&pilha_tipos, simb_aux->uni.parform.tipo);
+               }
+               else{
+                  imprimeErro(buildString("VARIAVEL %s NAO DECLARADA", token));
                }
          }
          | TRUE {
@@ -400,6 +406,7 @@ fator:   NUM {
                   imprimeErro("TIPOS INCOMPATIVEIS NA NEGACAO");
                }
          }
+         | chamaFunc
          | ABRE_PARENTESES expressao FECHA_PARENTESES
 
 
@@ -584,8 +591,9 @@ tipoFunc: IDENT {
                }
          }
 
+
 // Chamada de funcao => p(x)
-chamaFunc: IDENT {strcpy(func_i, token); geraCodigo(NULL, "AMEM 1"); } paramsProc {
+chamaFunc: IDENT {strcpy(func_i, token); geraCodigo(NULL, "AMEM 1"); } ABRE_PARENTESES listaParams FECHA_PARENTESES {
                simb = buscaTabSimb(func_i, &tabela);
                if(simb && simb->tipo == PROC){
                   geraCodigo(NULL, buildString("CHPR R%.2d,%d", simb->uni.proc.rotulo, nivel_lex));
@@ -594,8 +602,9 @@ chamaFunc: IDENT {strcpy(func_i, token); geraCodigo(NULL, "AMEM 1"); } paramsPro
                else{
                   imprimeErro(buildString("Procedimento %s não declarado", func_i));
                }
+               empilha(&pilha_tipos, simb->uni.proc.retorno);
                geraCodigo(NULL, "DMEM 1");
-         }
+         } PONTO_E_VIRGULA
 
 %%
 
