@@ -1,19 +1,91 @@
 #!/bin/python3
 
-import sys
+import sys, time
 
-n = 3
+# Vars globais
+n = -1
 nodes = 0
+optL = []
+optR = []
+optConflict = 1000000;
+
+class Hero:
+   def __init__(self, id):
+      self.conflicts = []
+      self.affinities = []
+      self.id = id
+
+   def __str__(self):
+      return str(self.id)
+   
+   def __repr__(self):
+      return str(self.id)
+
+
+def individual_conflicts(subject:Hero, team:list) -> int:
+   """Retorna quantos conflitos há com o herói subject na lista team
+
+   Args:
+       subject (Hero): Herói que terá conflitos buscados
+       team (list): Grupo de heróis onde serão procurados conflitos
+
+   Returns:
+       int: Número de conflitos com o herói subject
+   """
+   c = 0
+
+   for hero in team:
+      if subject in hero.conflicts:
+         c += 1
+   
+   return c
+
+
+def num_conflicts(left:list, right:list) -> int:
+   """Calcula o número total de conflitos nos dois grupos de heróis
+
+   Args:
+       left (list): Grupo do "lado esquerdo"
+       right (list): Grupo do "lado direito"
+
+   Returns:
+       int: Número de conflitos
+   """
+   conf = 0
+
+   for hero in left:
+      for conflict in hero.conflicts:
+         if conflict in left:
+            conf += 1
+   
+   for hero in right:
+      for conflict in hero.conflicts:
+         if conflict in right:
+            conf += 1
+
+   return conf
+
 
 # Chamada recusriva de enumeração, cortando os ramos não viáveis
-def backtrack(choice, left, right, l):
-   global nodes
+def backtrack(choice:list, left:list, right:list, l:int):
+   """Processamento sem cortes de otimalidade
+
+   Args:
+       choice (list): Lista com todos os heróis que ainda não foram escolhidos para um grupo
+       left (list): Grupo do "lado esquerdo"
+       right (list): Grupo do "lado direito"
+       l (int): nú mero de heróis já escolhidos
+   """
+   global nodes, optL, optR, optConflict
    
    nodes += 1
 
    if(l == n):
-      print(f"{str(left) : <12} | {str(right) : <12}")
-      # if solucao otima: salva
+      c = num_conflicts(left, right)
+      if(c < optConflict):
+         optL = left
+         optR = right
+         optConflict = c
       return
    else:
       next = choice[0]
@@ -26,14 +98,25 @@ def backtrack(choice, left, right, l):
 
 
 # Chamada recusriva de enumeração (Sem optimalidade e viabilidade)
-def enumerate(choice, left, right, l):
-   global nodes
+def enumerate(choice:list, left:list, right:list, l:int):
+   """Processamento sem cortes de viabilidade
+
+   Args:
+       choice (list): Lista com todos os heróis que ainda não foram escolhidos para um grupo
+       left (list): Grupo do "lado esquerdo"
+       right (list): Grupo do "lado direito"
+       l (int): nú mero de heróis já escolhidos
+   """
+   global nodes, optL, optR, optConflict
 
    nodes += 1
 
    if(l == n):
-      print(f"{str(left) : <12} | {str(right) : <12}")
-      # if solucao otima: salva
+      c = num_conflicts(left, right)
+      if(c < optConflict):
+         optL = left
+         optR = right
+         optConflict = c
       return
    else:
       next = choice[0]
@@ -42,37 +125,80 @@ def enumerate(choice, left, right, l):
       enumerate(choice[1:], left, right + [next], l+1)
 
 
+def print_saida(first:Hero, time:float):
+   """Gera saida do programa na stdout e stderr
+
+   Args:
+       first (Hero): Primeiro heroi
+       time (float): Tempo gasto no processamento
+   """
+   print(optConflict)
+   if first in optL:
+      print(' '.join(map(str, optL)))
+   else:
+      print(optR)
+   print(f"{nodes} Nós na árvore e { time * 1000 } milissegundos de execução", file=sys.stderr)
+
+
 def main():
-   global nodes
+   global n, nodes, optL, optR, optConflict
 
    choice = []
    left = []
    right = []
-   optList = []
-   optConflict = -1
 
-   #inicializa lista de escolhas
+   # Le n, k e m da entrada padrão
+   inp = input()
+   inp = inp.split()
+   n = int(inp[0])
+   k = int(inp[1])
+   m = int(inp[2])
+
+   # Cria lista com n heróis
    for i in range(n):
-      choice.append(i+1)
+      choice.append(Hero(i+1))
 
-   # sem otimalidade
-   # if(sys.argv[1] == "-o"):
-   #    backtrack(choice, left, right, 0)
+   # Le os k conflitos
+   for i in range(k):
+      inp = input()
+      inp = inp.split()
 
-   # # sem viabilidade
-   # elif(sys.argv[1] == "-f"):
-   #    enumerate(choice, left, right, 0)
-      
-   # elif(sys.argv[1] == "-a"):
-   #    # funcao dada
+      index0 = int(inp[0]) - 1
+      index1 = int(inp[1]) - 1
 
-   enumerate(choice, left, right, 0)
+      # Inclui conflito na lista do primeiro heroi citado
+      choice[index0].conflicts.append(choice[index1])
 
-   print(f"\t{nodes} Nós na árvore", file=sys.stderr)
+   # Le as m afinidades
+   for i in range(m):
+      inp = input()
+      inp = inp.split()
 
-   nodes = 0
-   backtrack(choice, left, right, 0)
-   print(f"\t{nodes} Nós na árvore", file=sys.stderr)
+      index0 = int(inp[0]) - 1
+      index1 = int(inp[1]) - 1
+
+      # Inclui afinidades na lista do primeiro heroi citado
+      choice[index0].affinities.append(choice[index1])
+
+   # Caso a linha de comando tenha alguma opção
+   if len(sys.argv) == 2:
+
+      #sem otimalidade
+      if(sys.argv[1] == "-o"):
+         timer = time.time()
+         backtrack(choice, left, right, 0)
+         print_saida(choice[0], (time.time() - timer) )
+
+      # sem viabilidade
+      elif(sys.argv[1] == "-f"):
+         timer = time.time()
+         enumerate(choice, left, right, 0)
+         print_saida(choice[0], (time.time() - timer) )
+         
+      # elif(sys.argv[1] == "-a"):
+      #    # funcao dada
+   #else:
+      # BB normal
 
 
 # define main
