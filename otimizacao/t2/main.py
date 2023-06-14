@@ -66,6 +66,24 @@ def num_conflicts(left:list, right:list) -> int:
    return conf
 
 
+def has_affinity(subject:Hero, team:list) -> bool:
+   """Retorna se um alguem do grupo team tem afinidade com subject
+
+   Args:
+       subject (Hero): Herói que será comparado
+       team (list): Time de heróis em que a afinidade será buscada
+
+   Returns:
+       bool: True caso alguém tenha afinidade e False caso contrário
+   """
+
+   for h in team:
+      for af in h.affinities:
+         if af.id == subject.id:
+            return True
+   
+   return False
+
 # Chamada recusriva de enumeração, cortando os ramos não viáveis
 def backtrack(choice:list, left:list, right:list, l:int):
    """Processamento sem cortes de otimalidade
@@ -91,9 +109,9 @@ def backtrack(choice:list, left:list, right:list, l:int):
       next = choice[0]
       # enumera escolhas do próximos elementos (sem a última escolha)
       # mas apenas caso seja viável (grupo não vazio)
-      if(len(left) < n-1):
-         backtrack(choice[1:], left + [next], right, l+1)
       if(len(right) < n-1):
+         backtrack(choice[1:], left + [next], right, l+1)
+      if(len(left) < n-1):
          backtrack(choice[1:], left, right + [next], l+1)
 
 
