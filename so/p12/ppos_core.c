@@ -702,6 +702,8 @@ int mqueue_destroy (mqueue_t *queue){
     sem_destroy(&(queue->sem_item));
     sem_destroy(&(queue->sem_vaga));
 
+    free(queue->buffer);
+
     queue->status = DEAD;
 
     return 0;
