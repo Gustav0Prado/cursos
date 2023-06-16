@@ -593,7 +593,7 @@ tipoFunc: IDENT {
 
 
 // Chamada de funcao => p(x)
-chamaFunc: IDENT {strcpy(func_i, token); geraCodigo(NULL, "AMEM 1"); } ABRE_PARENTESES listaParams FECHA_PARENTESES {
+chamaFunc: PONTO_E_VIRGULA IDENT {strcpy(func_i, token); geraCodigo(NULL, "AMEM 1"); } ABRE_PARENTESES listaParams FECHA_PARENTESES{
                simb = buscaTabSimb(func_i, &tabela);
                if(simb && simb->tipo == PROC){
                   geraCodigo(NULL, buildString("CHPR R%.2d,%d", simb->uni.proc.rotulo, nivel_lex));
@@ -603,8 +603,7 @@ chamaFunc: IDENT {strcpy(func_i, token); geraCodigo(NULL, "AMEM 1"); } ABRE_PARE
                   imprimeErro(buildString("Procedimento %s não declarado", func_i));
                }
                empilha(&pilha_tipos, simb->uni.proc.retorno);
-               geraCodigo(NULL, "DMEM 1");
-         } PONTO_E_VIRGULA
+         }
 
 %%
 
