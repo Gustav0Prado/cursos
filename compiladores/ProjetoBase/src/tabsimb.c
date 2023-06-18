@@ -114,7 +114,7 @@ int insereTabSimbParam(char *ident, TabSimb_t *tab, int pass, int nl, int desloc
 /*
    Remove últimos n elementos da TabSimb e retorna 0 em caso de sucesso e -1 em caso de falha
 */
-int removeTabSimb(int n, TabSimb_t *tab){
+int removeNTabSimb(int n, TabSimb_t *tab){
    if(tab){
       if(tamanhoTabSimb(tab) < n){
          perror("Erro: Tentou remover mais elementos do que a TabSimb possui");
@@ -136,22 +136,52 @@ int removeTabSimb(int n, TabSimb_t *tab){
    return -1;
 }
 
+
 /*
    Remove últimos n elementos da TabSimb e retorna 0 em caso de sucesso e -1 em caso de falha
+*/
+int removeTabSimb(Simb_t* simb, TabSimb_t *tab){
+   if(tab && simb){
+      Simb_t *aux;
+      if(simb == tab->top){
+         aux = tab->top;
+         tab->top = aux->next;
+         free(aux);
+      }
+      else{
+         aux = tab->top;
+         while(aux->next != simb && aux->next != NULL){
+            aux = aux->next;
+         }
+
+         if(aux->next){
+            aux->next = simb->next;
+            free(simb);
+         }
+      }
+      
+      return 0;
+   }
+   return -1;
+}
+
+
+/*
+   Remove últimos n elementos de nivel lexico nl da TabSimb e retorna 0 em caso de sucesso e -1 em caso de falha
 */
 int removeNL(int nl, TabSimb_t *tab){
    if(tab){
       Simb_t *aux = tab->top;
       Simb_t *prox;
-      do{
-         if(aux->nivel_lex == nl){
-            prox = aux->next;
-            tab->top = prox;
-
-            free(aux);
-            aux = aux->next;
+      int n = 0;
+      
+      while(aux != NULL && aux->nivel_lex > nl){
+         prox = aux->next;
+         if(aux->tipo != PROC){
+            removeTabSimb(aux, tab);
          }
-      } while (aux != NULL);
+         aux = prox;
+      }
 
       return 0;
    }

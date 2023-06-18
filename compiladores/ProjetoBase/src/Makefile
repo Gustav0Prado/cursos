@@ -21,13 +21,13 @@ compilador.tab.c: compilador.y compilador.h
 	bison compilador.y -d -v
 
 compilador.o : compilador.h compiladorF.c
-	gcc -c compiladorF.c -o compilador.o
+	gcc -c compiladorF.c -o compilador.o $(CFLAGS)
 
 pilha.o : pilha.c pilha.h
-	gcc -c pilha.c -o pilha.o
+	gcc -c pilha.c -o pilha.o $(CFLAGS)
 
 tabsimb.o : tabsimb.c tabsimb.h
-	gcc -c tabsimb.c -o tabsimb.o
+	gcc -c tabsimb.c -o tabsimb.o $(CFLAGS)
 
 clean :
 	rm -f compilador.tab.* lex.yy.c compilador.o compilador pilha.o tabsimb.o

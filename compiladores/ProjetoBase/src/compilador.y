@@ -14,7 +14,7 @@
 #include "tabsimb.h"
 
 int num_vars, desloc, nivel_lex = 0, rot_atual = 0, n_params, paramPassados,
-tipo_param, entra_proc = 0;
+tipo_param, entra_proc = 0, num_vars_total = 0;
 TabSimb_t tabela;
 Pilha_t pilha_tipos, pilha_rotulos, pilha_vars;
 Simb_t *simb, *simb_aux;
@@ -66,15 +66,15 @@ void confereAtribuicao( char *var ){
    }
    // Variavel simples
    else if( (simb_tipo->tipo == VS && t1 == simb_tipo->uni.vs.tipo) ){
-      geraCodigo(NULL, buildString("ARMZ %d,%d", simb_tipo->nivel_lex, simb_tipo->deslocamento));
+      geraCodigo(NULL, buildString("ARMZ %d, %d", simb_tipo->nivel_lex, simb_tipo->deslocamento));
    }
    // Parametro formal
    else if( (simb_tipo->tipo == PFORM && t1 == simb_tipo->uni.parform.tipo)){
       if( simb_tipo->uni.parform.passagem == VALOR){
-         geraCodigo(NULL, buildString("ARMZ %d,%d", simb_tipo->nivel_lex, simb_tipo->deslocamento));
+         geraCodigo(NULL, buildString("ARMZ %d, %d", simb_tipo->nivel_lex, simb_tipo->deslocamento));
       }
       else{
-         geraCodigo(NULL, buildString("ARMI %d,%d", simb_tipo->nivel_lex, simb_tipo->deslocamento));
+         geraCodigo(NULL, buildString("ARMI %d, %d", simb_tipo->nivel_lex, simb_tipo->deslocamento));
       }
    }
    else{
@@ -117,7 +117,7 @@ programa :{
                geraCodigo (NULL, "INPP");
             }
             PROGRAM IDENT
-            ABRE_PARENTESES lista_idents FECHA_PARENTESES PONTO_E_VIRGULA bloco PONTO {
+            ABRE_PARENTESES lista_idents FECHA_PARENTESES PONTO_E_VIRGULA bloco  PONTO {
                int vars = desempilha(&pilha_vars);
                geraCodigo(NULL, buildString("DMEM %d", vars));
                geraCodigo (NULL, "PARA");
@@ -125,13 +125,13 @@ programa :{
 ;
 
 bloco :
-            parte_declara_vars
-            {
-            }
+         parte_declara_vars
+         {geraCodigo(NULL, buildString("DSVS R%02d", rot_atual));} 
 
-            parte_declara_procs
+         parte_declara_procs
 
-            comando_composto
+         {int rot_desvio = desempilha(&pilha_rotulos); geraCodigo(buildString("R%.2d", rot_desvio), "NADA"); rot_atual++;}
+         comando_composto
 ;
 
 //---------------------------------------------------------------- Declaração de variáveis -------------------------------------------------------------------------------------//
@@ -140,28 +140,23 @@ parte_declara_vars:  var
 ;
 
 
-var         : { desloc = 0; num_vars = 0; } VAR declara_vars{
-               //Aloca todas as variáveis juntas
-               geraCodigo(NULL, buildString("AMEM %d", num_vars));
-               empilha(&pilha_vars, num_vars);
-               }
-            | { empilha(&pilha_vars, 0); }
+var         : { desloc = 0; num_vars_total = 0; } VAR declara_vars { empilha(&pilha_vars, num_vars_total); } | { empilha(&pilha_vars, 0); } //Sem vars
 ;
 
-declara_vars: declara_vars declara_var | declara_var
+declara_vars: declara_vars {num_vars = 0;} declara_var | {num_vars = 0;} declara_var
 ;
 
 declara_var : lista_id_var DOIS_PONTOS
-              tipo PONTO_E_VIRGULA
+              tipo PONTO_E_VIRGULA {
+                  geraCodigo(NULL, buildString("AMEM %d", num_vars));
+                  num_vars_total += num_vars;
+              }
 ;
 
 tipo        : IDENT {
             if( strcmp(token, "integer") == 0 ){
                atualizaTipos(&tabela, INTEIRO);
             }
-            // else if( strcmp(token, "boolean") == 0 ){
-            //    atualizaTipos(&tabela, BOOLEANO);
-            // }
          }
 ;
 
@@ -209,10 +204,10 @@ lista_read: lista_read VIRGULA IDENT {
             simb = buscaTabSimb(token, &tabela);
             if(simb){
                if( (simb->tipo == VS) || (simb->uni.parform.passagem == VALOR)){
-                  geraCodigo(NULL, buildString("ARMZ %d,%d", simb->nivel_lex, simb->deslocamento));
+                  geraCodigo(NULL, buildString("ARMZ %d, %d", simb->nivel_lex, simb->deslocamento));
                }
                else{
-                  geraCodigo(NULL, buildString("ARMI %d,%d", simb->nivel_lex, simb->deslocamento));
+                  geraCodigo(NULL, buildString("ARMI %d, %d", simb->nivel_lex, simb->deslocamento));
                }
             }
             else{
@@ -224,10 +219,10 @@ lista_read: lista_read VIRGULA IDENT {
             simb = buscaTabSimb(token, &tabela);
             if(simb){
                if( (simb->tipo == VS) || (simb->uni.parform.passagem == VALOR)){
-                  geraCodigo(NULL, buildString("ARMZ %d,%d", simb->nivel_lex, simb->deslocamento));
+                  geraCodigo(NULL, buildString("ARMZ %d, %d", simb->nivel_lex, simb->deslocamento));
                }
                else{
-                  geraCodigo(NULL, buildString("ARMI %d,%d", simb->nivel_lex, simb->deslocamento));
+                  geraCodigo(NULL, buildString("ARMI %d, %d", simb->nivel_lex, simb->deslocamento));
                }
             }
             else{
@@ -243,10 +238,10 @@ lista_write: lista_write VIRGULA IDENT {
             simb = buscaTabSimb(token, &tabela);
             if(simb){
                if( (simb->tipo == VS) || (simb->uni.parform.passagem == VALOR)){
-                  geraCodigo(NULL, buildString("CRVL %d,%d", simb->nivel_lex, simb->deslocamento));
+                  geraCodigo(NULL, buildString("CRVL %d, %d", simb->nivel_lex, simb->deslocamento));
                }
                else{
-                  geraCodigo(NULL, buildString("CRVI %d,%d", simb->nivel_lex, simb->deslocamento));
+                  geraCodigo(NULL, buildString("CRVI %d, %d", simb->nivel_lex, simb->deslocamento));
                }
                geraCodigo(NULL, "IMPR");
             }
@@ -258,10 +253,10 @@ lista_write: lista_write VIRGULA IDENT {
             simb = buscaTabSimb(token, &tabela);
             if(simb){
                if( (simb->tipo == VS) || (simb->uni.parform.passagem == VALOR)){
-                  geraCodigo(NULL, buildString("CRVL %d,%d", simb->nivel_lex, simb->deslocamento));
+                  geraCodigo(NULL, buildString("CRVL %d, %d", simb->nivel_lex, simb->deslocamento));
                }
                else{
-                  geraCodigo(NULL, buildString("CRVI %d,%d", simb->nivel_lex, simb->deslocamento));
+                  geraCodigo(NULL, buildString("CRVI %d, %d", simb->nivel_lex, simb->deslocamento));
                }
                geraCodigo(NULL, "IMPR");
             }
@@ -354,16 +349,16 @@ fator:   NUM {
                if(!entra_proc && simb_aux){
                   switch(simb_aux->tipo){
                      case VS:
-                        geraCodigo(NULL, buildString("CRVL %d,%d", simb_aux->nivel_lex, simb_aux->deslocamento));
+                        geraCodigo(NULL, buildString("CRVL %d, %d", simb_aux->nivel_lex, simb_aux->deslocamento));
                         empilha(&pilha_tipos, simb_aux->uni.vs.tipo);
                         break;
 
                      case PFORM:
                         if(simb_aux->uni.parform.passagem == VALOR){
-                           geraCodigo(NULL, buildString("CRVL %d,%d", simb_aux->nivel_lex, simb_aux->deslocamento));
+                           geraCodigo(NULL, buildString("CRVL %d, %d", simb_aux->nivel_lex, simb_aux->deslocamento));
                         }
                         else{
-                           geraCodigo(NULL, buildString("CRVI %d,%d", simb_aux->nivel_lex, simb_aux->deslocamento));
+                           geraCodigo(NULL, buildString("CRVI %d, %d", simb_aux->nivel_lex, simb_aux->deslocamento));
                         }
                         empilha(&pilha_tipos, simb_aux->uni.parform.tipo);
                         break;
@@ -375,10 +370,10 @@ fator:   NUM {
                // Caso esteja declarando procedimento, checa tipos de passagem dos parametros
                else if(entra_proc){
                   if(proc->uni.proc.passagem[paramPassados] == VALOR  || simb_aux->uni.parform.passagem == REF){
-                     geraCodigo(NULL, buildString("CRVL %d,%d", simb_aux->nivel_lex, simb_aux->deslocamento));
+                     geraCodigo(NULL, buildString("CRVL %d, %d", simb_aux->nivel_lex, simb_aux->deslocamento));
                   }
                   else{
-                     geraCodigo(NULL, buildString("CREN %d,%d", simb_aux->nivel_lex, simb_aux->deslocamento));
+                     geraCodigo(NULL, buildString("CREN %d, %d", simb_aux->nivel_lex, simb_aux->deslocamento));
                   }
                   empilha(&pilha_tipos, simb_aux->uni.parform.tipo);
                }
@@ -412,7 +407,7 @@ fator:   NUM {
 
 //---------------------------------------------------------------- Comandos repetitivos (while) -------------------------------------------------------------------------------------//
 
-repeticao: WHILE {               
+repeticao: WHILE {
                empilha(&pilha_rotulos, rot_atual);
                geraRotulo(rot_atual);
          } expressao DO{
@@ -434,15 +429,18 @@ repeticao: WHILE {
 //---------------------------------------------------------------- Comandos condicionais (if) -------------------------------------------------------------------------------------//
 
 condicional: if_then %prec LOWER_THAN_ELSE {
-               geraRotulo(rot_atual);
+               int rot_desvio = desempilha(&pilha_rotulos);
+               geraCodigo(buildString("R%.2d", rot_desvio), "NADA");
          }
          | if_then ELSE comando_sem_rotulo {
-               geraRotulo(rot_atual);
+               int rot_desvio = desempilha(&pilha_rotulos);
+               geraCodigo(buildString("R%.2d", rot_desvio), "NADA");
          }
 ;
 
 if_then: IF {
-               empilha(&pilha_rotulos, rot_atual);
+               rot_atual++;
+               empilha(&pilha_rotulos, rot_atual+1);
          }
          expressao {
                int tipo_exp = desempilha(&pilha_tipos);
@@ -451,35 +449,24 @@ if_then: IF {
                }
                int rot_desvio = desempilha(&pilha_rotulos);
                geraCodigo(NULL, buildString("DSVF R%.2d", rot_desvio));
-               empilha(&pilha_rotulos, rot_desvio+1);
+               empilha(&pilha_rotulos, rot_atual);
          }
          THEN comando_sem_rotulo {
                int rot_desvio = desempilha(&pilha_rotulos);
                geraCodigo(NULL, buildString("DSVS R%.2d", rot_desvio));
-               geraRotulo(rot_atual);
+               empilha(&pilha_rotulos, rot_atual);
+               geraRotulo(rot_atual+1);
          }
 ;
 
 //---------------------------------------------------------------- Procedimentos (Procedures) -------------------------------------------------------------------------------------//
 
 // Parte de declaracao de todas as procs
-parte_declara_procs: declara_procs {
-               int rot_desvio = desempilha(&pilha_rotulos);
-               geraCodigo(buildString("R%.2d", rot_desvio), "NADA");
-         }
-         | declara_funcs {
-               int rot_desvio = desempilha(&pilha_rotulos);
-               geraCodigo(buildString("R%.2d", rot_desvio), "NADA");
-         }
-         | comando_vazio
+parte_declara_procs: declara_procs | declara_funcs | comando_vazio
 
 
 // Declaracao das procs do programa
-declara_procs: declara_procs declara_proc | {
-               empilha(&pilha_rotulos, rot_atual);
-               geraCodigo(NULL, buildString("DSVS R%.2d", rot_atual));
-               rot_atual++;
-         } declara_proc
+declara_procs: declara_procs declara_proc | declara_proc
 
 
 // Declaracao da procedure => PROCEDURE IDENT paramsFormais ; blocoPF
@@ -487,12 +474,12 @@ declara_proc: PROCEDURE {
                nivel_lex++;
          }
            IDENT {
+               rot_atual++;
                insereTabSimbProc(token, &tabela, rot_atual, nivel_lex);
                proc = buscaTabSimb(token, &tabela);
                strcpy(strAux, buildString("R%.2d", rot_atual));
                geraCodigo(strAux, buildString("ENPR %d", nivel_lex));
-               rot_atual++;
-         } paramsFormais PONTO_E_VIRGULA blocoPF { removeTabSimb(proc->uni.proc.num_params, &tabela); }
+         } paramsFormais PONTO_E_VIRGULA blocoPF { removeNL(nivel_lex, &tabela);}
 
 
 // Parametros formais do proc => (listaParamsForms)
@@ -528,12 +515,14 @@ tipoParam: IDENT {
 
 
 // Begin e end de dentro do proc
-blocoPF: parte_declara_vars parte_declara_procs comando_composto { 
+blocoPF: parte_declara_vars { rot_atual++; geraCodigo(NULL, buildString("DSVS R%02d", rot_atual)); empilha(&pilha_rotulos, rot_atual); }  
+         parte_declara_procs {int rot_desvio = desempilha(&pilha_rotulos); geraCodigo(buildString("R%.2d", rot_desvio), "NADA");}
+         comando_composto { 
                int vars = desempilha(&pilha_vars);
                if(vars > 0){
                   geraCodigo(NULL, buildString("DMEM %d", vars));
                }
-               geraCodigo(NULL, buildString("RTPR %d,%d", nivel_lex, proc->uni.proc.num_params));
+               geraCodigo(NULL, buildString("RTPR %d, %d", nivel_lex, proc->uni.proc.num_params));
                nivel_lex--;
          } PONTO_E_VIRGULA
 
@@ -542,7 +531,7 @@ blocoPF: parte_declara_vars parte_declara_procs comando_composto {
 chamaProc: paramsProc {
                simb = buscaTabSimb(l_elem, &tabela);
                if(simb && simb->tipo == PROC){
-                  geraCodigo(NULL, buildString("CHPR R%.2d,%d", simb->uni.proc.rotulo, nivel_lex));
+                  geraCodigo(NULL, buildString("CHPR R%.2d, %d", simb->uni.proc.rotulo, nivel_lex));
                   n_params = simb->uni.proc.num_params;
                }
                else{
@@ -582,7 +571,7 @@ declara_func: FUNCTION {
                strcpy(strAux, buildString("R%.2d", rot_atual));
                geraCodigo(strAux, buildString("ENPR %d", nivel_lex));
                rot_atual++;
-         } paramsFormais DOIS_PONTOS tipoFunc PONTO_E_VIRGULA blocoPF { removeTabSimb(proc->uni.proc.num_params, &tabela); }
+         } paramsFormais DOIS_PONTOS tipoFunc PONTO_E_VIRGULA blocoPF { removeNTabSimb(proc->uni.proc.num_params, &tabela); }
 
 tipoFunc: IDENT {
                if( strcmp(token, "integer") == 0 ){
@@ -596,7 +585,7 @@ tipoFunc: IDENT {
 chamaFunc: PONTO_E_VIRGULA IDENT {strcpy(func_i, token); geraCodigo(NULL, "AMEM 1"); } ABRE_PARENTESES listaParams FECHA_PARENTESES{
                simb = buscaTabSimb(func_i, &tabela);
                if(simb && simb->tipo == PROC){
-                  geraCodigo(NULL, buildString("CHPR R%.2d,%d", simb->uni.proc.rotulo, nivel_lex));
+                  geraCodigo(NULL, buildString("CHPR R%.2d, %d", simb->uni.proc.rotulo, nivel_lex));
                   n_params = simb->uni.proc.num_params;
                }
                else{
