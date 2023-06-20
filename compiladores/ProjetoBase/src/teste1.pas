@@ -2,9 +2,9 @@ program exemplo75 (input, output);
 var m,n :  integer;
 function f ( n : integer; var k:integer ) : integer;
 var p, q : integer;
-begin    
+begin
    if n<2 then
-      begin 
+      begin
          f:=n; k:=0
       end
    else

@@ -455,7 +455,7 @@ blocoPF: parte_declara_vars { rot_atual++; geraCodigo(NULL, buildString("DSVS R%
 
 
 // Chamada de procedimento => p(x)
-chamaProc: paramsProc {
+chamaProc: chamaProcParams {
                simb = buscaTabSimb(l_elem, &tabela);
                if(simb && simb->tipo == PROC){
                   geraCodigo(NULL, buildString("CHPR R%.2d, %d", simb->uni.proc.rotulo, nivel_lex));
@@ -467,12 +467,15 @@ chamaProc: paramsProc {
          }
 
 
+chamaProcParams: paramsProc | %empty
+
+
 // Parenteses e checagem de paramatros de um proc => ( listaParams )
 paramsProc: ABRE_PARENTESES { paramPassados = 0;} listaParams FECHA_PARENTESES {
                if(paramPassados != proc->uni.proc.num_params){
                   imprimeErro("N° de parametros invalido para esse procedimento\n");
                }
-         } | %empty  
+         } 
 
 
 // Lista de params de um proc => a,b,c
@@ -504,7 +507,7 @@ tipoFunc: IDENT {
          }
 
 
-atribui:  {geraCodigo(NULL, "AMEM 1"); strcpy(func_i, atrib); } ABRE_PARENTESES listaParams FECHA_PARENTESES {
+atribui:  {geraCodigo(NULL, "AMEM 1"); strcpy(func_i, atrib); } paramsProc {
                simb = buscaTabSimbTipo(func_i, &tabela, PROC);
                if(simb && simb->tipo == PROC){
                   geraCodigo(NULL, buildString("CHPR R%.2d, %d", simb->uni.proc.rotulo, simb->nivel_lex));
