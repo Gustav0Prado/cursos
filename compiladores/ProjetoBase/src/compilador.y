@@ -274,7 +274,7 @@ lista_write: lista_write VIRGULA IDENT {
          }
 ;
 
-atribuicao_ou_proc: ATRIBUICAO expressao { confereAtribuicao(l_elem); } | chamaProc { strcpy(l_elem, token); }
+atribuicao_ou_proc: ATRIBUICAO expressao { confereAtribuicao(l_elem); } | chamaProc { strcpy(l_elem, token); } 
 ;
 
 //---------------------------------------------------------------- Expressões Matemáticas -------------------------------------------------------------------------------------//
@@ -361,6 +361,12 @@ fator:   NUM {
                            geraCodigo(NULL, buildString("CRVI %d, %d", simb_aux->nivel_lex, simb_aux->deslocamento));
                         }
                         empilha(&pilha_tipos, simb_aux->uni.parform.tipo);
+                        break;
+
+                     case PROC:
+                        geraCodigo(NULL, "AMEM 1");
+                        geraCodigo(NULL, buildString("CHPR R%.2d, %d", simb_aux->uni.proc.rotulo, simb_aux->nivel_lex));
+                        empilha(&pilha_tipos, simb_aux->uni.proc.retorno);
                         break;
 
                      default:
@@ -554,11 +560,7 @@ listaParams: listaParams VIRGULA { entra_proc = 1; } expressao { paramPassados++
 
 //---------------------------------------------------------------- Funções -------------------------------------------------------------------------------------//
 // Declaracao das procs do programa
-declara_funcs: declara_funcs declara_func | {
-               empilha(&pilha_rotulos, rot_atual);
-               geraCodigo(NULL, buildString("DSVS R%.2d", rot_atual));
-               rot_atual++;
-         } declara_func
+declara_funcs: declara_funcs declara_func | declara_func
 
 
 // Declaracao da procedure => PROCEDURE IDENT paramsFormais ; blocoPF
@@ -566,12 +568,12 @@ declara_func: FUNCTION {
                nivel_lex++;
          }
            IDENT {
-               insereTabSimbFunc(token, &tabela, rot_atual, nivel_lex);
+               rot_atual++;
+               insereTabSimbProc(token, &tabela, rot_atual, nivel_lex);
                proc = buscaTabSimb(token, &tabela);
                strcpy(strAux, buildString("R%.2d", rot_atual));
                geraCodigo(strAux, buildString("ENPR %d", nivel_lex));
-               rot_atual++;
-         } paramsFormais DOIS_PONTOS tipoFunc PONTO_E_VIRGULA blocoPF { removeNTabSimb(proc->uni.proc.num_params, &tabela); }
+         } paramsFormais DOIS_PONTOS tipoFunc PONTO_E_VIRGULA blocoPF { removeNL(nivel_lex, &tabela);}
 
 tipoFunc: IDENT {
                if( strcmp(token, "integer") == 0 ){
@@ -582,16 +584,17 @@ tipoFunc: IDENT {
 
 
 // Chamada de funcao => p(x)
-chamaFunc: PONTO_E_VIRGULA IDENT {strcpy(func_i, token); geraCodigo(NULL, "AMEM 1"); } ABRE_PARENTESES listaParams FECHA_PARENTESES{
-               simb = buscaTabSimb(func_i, &tabela);
-               if(simb && simb->tipo == PROC){
-                  geraCodigo(NULL, buildString("CHPR R%.2d, %d", simb->uni.proc.rotulo, nivel_lex));
-                  n_params = simb->uni.proc.num_params;
-               }
-               else{
-                  imprimeErro(buildString("Procedimento %s não declarado", func_i));
-               }
-               empilha(&pilha_tipos, simb->uni.proc.retorno);
+chamaFunc: ATRIBUICAO IDENT listaParams{
+               printf("\n\tFuncao %s\n", func_i);
+               // simb = buscaTabSimb(func_i, &tabela);
+               // if(simb && simb->tipo == PROC){
+               //    geraCodigo(NULL, buildString("CHPR R%.2d, %d", simb->uni.proc.rotulo, nivel_lex));
+               //    n_params = simb->uni.proc.num_params;
+               // }
+               // else{
+               //    imprimeErro(buildString("Funcao %s não declarada", func_i));
+               // }
+               // empilha(&pilha_tipos, simb->uni.proc.retorno);
          }
 
 %%
