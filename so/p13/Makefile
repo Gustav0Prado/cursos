@@ -1,6 +1,6 @@
 all: ppos
 
-CFLAGS = -Wall -g -lm
+CFLAGS = -Wall -g -lm -lrt
 OBJECTS = queue.o disk.o
 
 debug: CFLAGS+= -DDEBUG
@@ -10,7 +10,7 @@ debug: ppos
 	gcc -c $(CFLAGS) $<
 
 ppos: $(OBJECTS) ppos_core.c
-	gcc ppos_core.c $(OBJECTS) $(task) $(CFLAGS) -lrt
+	gcc ppos_core.c $(OBJECTS) $(task) $(CFLAGS)
 
 clean:
 	rm -rf a.out *.o saida.txt

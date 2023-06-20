@@ -52,6 +52,7 @@ typedef struct task_t
   unsigned int creationTime;    //Marca de quando a tarefa foi criada
   struct task_t *waiting;       //Fila de tarefas esperando a tarefa atual terminar
   int wakeTime;                 //Instante de tempo em que a tarefa atual deve acordar
+  int diskOP;                   // Operacao no disco
   // ... (outros campos serão adicionados mais tarde)
 } task_t ;
 

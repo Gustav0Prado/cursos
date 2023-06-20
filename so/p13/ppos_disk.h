@@ -18,7 +18,6 @@ typedef struct
   short wake_signal;
   short sleeping;
   task_t *queue;
-  int operation;
   int block;
   void *buffer;
 } disk_t ;

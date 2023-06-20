@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <signal.h>
+#include <unistd.h>
 #include <sys/time.h>
 #include <string.h>
 #include "ppos_data.h"
@@ -20,7 +21,8 @@ task_t disk_mgr;
 
 //Fila de prontos
 queue_t *readyTasks;
-queue_t *sleepingTaks;
+queue_t *sleepingTasks;
+queue_t *suspended_tasks;
 
 //Ints para controle
 int curr_id = 0;
@@ -28,6 +30,7 @@ int user_tasks = 0;
 
 // Estruturas para os alarmes dos "ticks do relogio"
 struct sigaction action ;
+struct sigaction d_action ;
 struct itimerval timer;
 
 unsigned int sysClock;
@@ -35,6 +38,15 @@ unsigned int sysClock;
 disk_t disk;
 
 //------------------------//------------------------//------------------------//------------------------//------------------------//
+
+/*
+  Trata sinais do disco
+*/
+void wake_diskmgr(){
+  disk.wake_signal = 1;
+  task_resume(&disk_mgr, (task_t**)&suspended_tasks);
+}
+
 
 /*
   Diminui contador de tempo de uma tarefa caso ela seja de usuario
@@ -173,9 +185,9 @@ void dispatcher(){
     #endif
 
     // Checa se há alguma tarefa dormindo que pode ser acordada
-    if(sleepingTaks != NULL){
+    if(sleepingTasks != NULL){
       int time = systime();
-      task_t *aux = (task_t *)sleepingTaks;
+      task_t *aux = (task_t *)sleepingTasks;
       task_t *prox;
 
       // Acorda tarefas que tem limite nesse instante ou anterior
@@ -186,12 +198,12 @@ void dispatcher(){
           printf (BLU "PPOS: dispatcher   -  Waking up task %d on %dms\n" RESET, aux->id, systime()) ;
           #endif
 
-          //if( sleepingTaks != NULL )queue_print("Dormindo: ", sleepingTaks, print_sleep);
+          //if( sleepingTasks != NULL )queue_print("Dormindo: ", sleepingTasks, print_sleep);
 
-          task_resume(aux, (task_t **)&sleepingTaks);
+          task_resume(aux, (task_t **)&sleepingTasks);
         }
         aux = prox;
-      } while(aux != (task_t *)sleepingTaks && sleepingTaks != NULL);
+      } while(aux != (task_t *)sleepingTasks && sleepingTasks != NULL);
     }
 
     task_t *prox = scheduler();
@@ -220,7 +232,7 @@ void dispatcher(){
     }
     //Coloca dispatcher pra dormir pra economizar cpu
     else{
-
+      sleep(1000);
     }
   }
   #ifdef DEBUG
@@ -493,7 +505,7 @@ void task_sleep (int t){
   #endif
 
   if(t > 0){
-    task_suspend((task_t **)&sleepingTaks);
+    task_suspend((task_t **)&sleepingTasks);
   }
 }
 
@@ -731,7 +743,7 @@ int mqueue_msgs (mqueue_t *queue){
 
 //------------------------------------------------------------------------------------------ P13 ------------------------------------------------------------------------------------//
 void disk_manager(){
-  while (true) {
+  while (1) {
     disk.sleeping = 0;
     sem_down(&(disk.sem_disk));
 
@@ -749,7 +761,7 @@ void disk_manager(){
       task_t* next = disk.queue;
       // solicita ao disco a operação de E/S, usando disk_cmd()
       if(disk.buffer){
-        disk_cmd(disk.operation, disk.block, disk.buffer);
+        disk_cmd(next->diskOP, disk.block, disk.buffer);
       }
     }
 
@@ -757,7 +769,7 @@ void disk_manager(){
 
     // suspende a tarefa corrente (retorna ao dispatcher)
     disk.sleeping = 1;
-    task_suspend((queue_t **)&(sleepingTaks));
+    task_suspend((task_t **)&(suspended_tasks));
   }
 }
 
@@ -766,28 +778,33 @@ void disk_manager(){
   Inicia gerente de disco
 */
 int disk_mgr_init (int *num_blocks, int *block_size){
-  // Cria task do gerente de disco
-  disk_mgr.id = curr_id;
-  makecontext(&(disk_mgr->context), (void*)(*disk_manager), 1, arg);
-  disk_mgr.status = READY;
-  disk_mgr.quantum = DEFQUANTUM;
+  task_init(&disk_mgr, &disk_manager, NULL);
   disk_mgr.task_type = SYSTEM;
-  disk_mgr.activations = 0;
-  disk_mgr.cpuTime = 0;
-  user_tasks++;
-  curr_id++;
+  user_tasks--;
 
   // Inicia semaforo do disco e coloca disk_mgr pra dormir
   sem_init(&(disk.sem_disk), 1);
-  queue_append((queue_t **)&sleepingTaks, (queue_t*)&disk_mgr);
+  queue_append((queue_t **)&sleepingTasks, (queue_t*)&disk_mgr);
   disk.sleeping = 1;
 
-  // Busca infos do disco
-  num_blocks = disk_cmd(DISK_CMD_DISKSIZE, 0, 0);
-  block_size = disk_cmd(DISK_CMD_BLOCKSIZE, 0, 0);
+  int init = disk_cmd(DISK_CMD_INIT, 0, 0);
 
-  if(num_blocks > 0 && block_size > 0){
-    return 0
+  // Busca infos do disco
+  *num_blocks = disk_cmd(DISK_CMD_DISKSIZE, 0, 0);
+  *block_size = disk_cmd(DISK_CMD_BLOCKSIZE, 0, 0);
+
+  // registra a ação para o sinal de timer SIGUSR1 (sinal do timer)
+  d_action.sa_handler = wake_diskmgr;
+  sigemptyset (&d_action.sa_mask);
+  d_action.sa_flags = 0 ;
+  if (sigaction (SIGUSR1, &d_action, 0) < 0)
+  {
+    perror ("Erro em sigaction: ") ;
+    exit (1) ;
+  }
+
+  if((*num_blocks) > 0 && (*block_size) > 0 && !init){
+    return 0;
   }
   else{
     return -1;
@@ -803,28 +820,43 @@ int disk_block_read  (int block, void* buffer){
 
   if (disk.sleeping == 1)
   {
+    curr_task->diskOP = DISK_CMD_READ;
+    disk.buffer = buffer;
+    disk.block = block;
     // acorda o gerente de disco (põe ele na fila de prontas)
-    task_resume((queue_t *)disk_mgr, (queue_t **)&sleepingTaks);
+    task_resume(&disk_mgr, (task_t **)&suspended_tasks);
   }
 
   // libera semáforo de acesso ao disco
   sem_up(&(disk.sem_disk));
 
   // suspende a tarefa corrente (retorna ao dispatcher)
-  task_yield();
+  task_suspend((task_t **)&(disk.queue));
+
+  return 0;
 }
 
 int disk_block_write (int block, void* buffer){
   // obtém o semáforo de acesso ao disco
+  sem_down(&(disk.sem_disk));
 
   // inclui o pedido na fila_disco
+  queue_append((queue_t **)&(disk.queue), (queue_t *)curr_task);
 
-  if (gerente de disco está dormindo)
+  if (disk.sleeping == 1)
   {
+    curr_task->diskOP = DISK_CMD_WRITE;
+    disk.buffer = buffer;
+    disk.block = block;
     // acorda o gerente de disco (põe ele na fila de prontas)
+    task_resume(&disk_mgr, (task_t **)&suspended_tasks);
   }
 
   // libera semáforo de acesso ao disco
+  sem_up(&(disk.sem_disk));
 
   // suspende a tarefa corrente (retorna ao dispatcher)
+  task_suspend((task_t **)&(disk.queue));
+
+  return 0;
 }
