@@ -235,44 +235,7 @@ lista_read: lista_read VIRGULA IDENT {
 escrita: WRITE ABRE_PARENTESES lista_write FECHA_PARENTESES
 ;
 
-lista_write: lista_write VIRGULA IDENT {
-            simb = buscaTabSimb(token, &tabela);
-            if(simb){
-               if( (simb->tipo == VS) || (simb->uni.parform.passagem == VALOR)){
-                  geraCodigo(NULL, buildString("CRVL %d, %d", simb->nivel_lex, simb->deslocamento));
-               }
-               else{
-                  geraCodigo(NULL, buildString("CRVI %d, %d", simb->nivel_lex, simb->deslocamento));
-               }
-               geraCodigo(NULL, "IMPR");
-            }
-            else{
-               imprimeErro(buildString("VARIAVEL %s NAO DECLARADA", token));
-            }
-         }
-         | IDENT {
-            simb = buscaTabSimb(token, &tabela);
-            if(simb){
-               if( (simb->tipo == VS) || (simb->uni.parform.passagem == VALOR)){
-                  geraCodigo(NULL, buildString("CRVL %d, %d", simb->nivel_lex, simb->deslocamento));
-               }
-               else{
-                  geraCodigo(NULL, buildString("CRVI %d, %d", simb->nivel_lex, simb->deslocamento));
-               }
-               geraCodigo(NULL, "IMPR");
-            }
-            else{
-               imprimeErro(buildString("VARIAVEL %s NAO DECLARADA", token));
-            }
-         }
-         | lista_write VIRGULA NUM {
-            geraCodigo(NULL, buildString("CRCT %d", atoi(token)));
-            geraCodigo(NULL, "IMPR");
-         }
-         | NUM {
-            geraCodigo(NULL, buildString("CRCT %d", atoi(token)));
-            geraCodigo(NULL, "IMPR");
-         }
+lista_write: lista_write VIRGULA expressao {geraCodigo(NULL, "IMPR");} | expressao {geraCodigo(NULL, "IMPR");}
 ;
 
 atribuicao_ou_proc: ATRIBUICAO expressao { confereAtribuicao(l_elem); } | chamaProc { strcpy(l_elem, token); }
@@ -541,11 +504,19 @@ tipoFunc: IDENT {
          }
 
 
-atribui:  ABRE_PARENTESES NUM FECHA_PARENTESES {
-               printf("\n\tFUNCAO\n");
-            }
+atribui:  {geraCodigo(NULL, "AMEM 1"); strcpy(func_i, atrib); } ABRE_PARENTESES listaParams FECHA_PARENTESES {
+               simb = buscaTabSimbTipo(func_i, &tabela, PROC);
+               if(simb && simb->tipo == PROC){
+                  geraCodigo(NULL, buildString("CHPR R%.2d, %d", simb->uni.proc.rotulo, simb->nivel_lex));
+                  n_params = simb->uni.proc.num_params;
+               }
+               else{
+                  printTabSimb(&tabela);
+                  imprimeErro(buildString("Funcao '%s' não declarada", func_i));
+               }
+               empilha(&pilha_tipos, simb->uni.proc.retorno);
+         }
          | %empty {
-               printf("\n\t>>> Atribui simples: %s\n\n", atrib);
                // Carrega valor de outra variavel
                simb_aux = buscaTabSimb(atrib, &tabela);
                if(!entra_proc && simb_aux){

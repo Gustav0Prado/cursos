@@ -1,10 +1,20 @@
-program exemplo5 (input, output);
-var x, y : integer;
-   function a:integer;
-   begin
-      a := 10;
-   end;
-
+program exemplo75 (input, output);
+var m,n :  integer;
+function f ( n : integer; var k:integer ) : integer;
+var p, q : integer;
+begin    
+   if n<2 then
+      begin 
+         f:=n; k:=0
+      end
+   else
+      begin
+         f:=f(n-1,p) + f(n-2,q);
+         k:=p+q+1
+      end;
+   write (n, k)
+end;
 begin
-   x := a(10);
+   n:=f(3,m);
+   write(n, m)
 end.

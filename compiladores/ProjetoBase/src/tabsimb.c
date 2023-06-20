@@ -206,6 +206,22 @@ Simb_t *buscaTabSimb(char *ident, TabSimb_t *tab){
   return NULL;
 }
 
+
+Simb_t* buscaTabSimbTipo(char *ident, TabSimb_t *tab, int tipo){
+   if(tab && ident){
+      Simb_t *aux = tab->top;
+      while(aux != NULL){
+         if(strcmp(ident, aux->ident) == 0 && aux->tipo == tipo){
+            return aux;
+         }
+         else{
+            aux = aux->next;
+         }
+      }
+   }
+  return NULL;
+}
+
 /*
    Desaloca estruturas da TabSimb
 */

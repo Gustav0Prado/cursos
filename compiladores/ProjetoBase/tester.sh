@@ -5,6 +5,7 @@ files=$(find ../PgmasTomasz/ -name Exemplo*)
 cd ./src
 make clean > /dev/null
 make > /dev/null
+
 for f in $files; do
    ./compilador "../$f/pgma.pas" > /dev/null
    diff MEPA "../$f/MEPA" > /dev/null

@@ -65,6 +65,7 @@ int insereTabSimbVS(char *ident, TabSimb_t *tab, int desloc, int nv, int tipo);
 int insereTabSimbProc(char *ident, TabSimb_t *tab, int desloc, int nl);
 int removeNTabSimb(int n, TabSimb_t *tab);
 Simb_t *buscaTabSimb(char *ident, TabSimb_t *tab);
+Simb_t* buscaTabSimbTipo(char *ident, TabSimb_t *tab, int tipo);
 int finalizaTabSimb(TabSimb_t *tab);
 void printTabSimb(TabSimb_t *tab);
 int tamanhoTabSimb(TabSimb_t *tab);
