@@ -6,5 +6,5 @@ var x, y : integer;
    end;
 
 begin
-   x := a;
+   x := a(10);
 end.

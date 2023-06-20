@@ -8,8 +8,3 @@ R02: NADA
      ARMZ 1, -4
      RTPR 1, 0
 R00: NADA 
-     AMEM 1
-     CHPR R01, 1
-     ARMZ 0, 0
-     DMEM 2
-     PARA

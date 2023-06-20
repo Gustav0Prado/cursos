@@ -19,6 +19,7 @@ TabSimb_t tabela;
 Pilha_t pilha_tipos, pilha_rotulos, pilha_vars;
 Simb_t *simb, *simb_aux;
 char l_elem[1023];
+char atrib[1023];
 char func_i[1023];
 char str[1024];
 char strAux[1024];
@@ -140,7 +141,7 @@ parte_declara_vars:  var
 ;
 
 
-var         : { desloc = 0; num_vars_total = 0; } VAR declara_vars { empilha(&pilha_vars, num_vars_total); } | { empilha(&pilha_vars, 0); } //Sem vars
+var         : { desloc = 0; num_vars_total = 0; } VAR declara_vars { empilha(&pilha_vars, num_vars_total); } |  %empty { empilha(&pilha_vars, 0); } //Sem vars
 ;
 
 declara_vars: declara_vars {num_vars = 0;} declara_var | {num_vars = 0;} declara_var
@@ -184,7 +185,7 @@ comandos: comandos PONTO_E_VIRGULA comando | comando
 comando: comando_vazio | comando_sem_rotulo
 ;
 
-comando_vazio:;
+comando_vazio: %empty ;
 
 comando_sem_rotulo: IDENT { strcpy(l_elem, token); } atribuicao_ou_proc
                   | leitura
@@ -274,7 +275,7 @@ lista_write: lista_write VIRGULA IDENT {
          }
 ;
 
-atribuicao_ou_proc: ATRIBUICAO expressao { confereAtribuicao(l_elem); } | chamaProc { strcpy(l_elem, token); } 
+atribuicao_ou_proc: ATRIBUICAO expressao { confereAtribuicao(l_elem); } | chamaProc { strcpy(l_elem, token); }
 ;
 
 //---------------------------------------------------------------- Expressões Matemáticas -------------------------------------------------------------------------------------//
@@ -343,50 +344,8 @@ fator:   NUM {
 
                empilha(&pilha_tipos, INTEIRO);
          }
-         | IDENT {
-               // Carrega valor de outra variavel
-               simb_aux = buscaTabSimb(token, &tabela);
-               if(!entra_proc && simb_aux){
-                  switch(simb_aux->tipo){
-                     case VS:
-                        geraCodigo(NULL, buildString("CRVL %d, %d", simb_aux->nivel_lex, simb_aux->deslocamento));
-                        empilha(&pilha_tipos, simb_aux->uni.vs.tipo);
-                        break;
+         | IDENT {strcpy(atrib, token); } atribui
 
-                     case PFORM:
-                        if(simb_aux->uni.parform.passagem == VALOR){
-                           geraCodigo(NULL, buildString("CRVL %d, %d", simb_aux->nivel_lex, simb_aux->deslocamento));
-                        }
-                        else{
-                           geraCodigo(NULL, buildString("CRVI %d, %d", simb_aux->nivel_lex, simb_aux->deslocamento));
-                        }
-                        empilha(&pilha_tipos, simb_aux->uni.parform.tipo);
-                        break;
-
-                     case PROC:
-                        geraCodigo(NULL, "AMEM 1");
-                        geraCodigo(NULL, buildString("CHPR R%.2d, %d", simb_aux->uni.proc.rotulo, simb_aux->nivel_lex));
-                        empilha(&pilha_tipos, simb_aux->uni.proc.retorno);
-                        break;
-
-                     default:
-                        break;
-                  }
-               }
-               // Caso esteja declarando procedimento, checa tipos de passagem dos parametros
-               else if(entra_proc){
-                  if(proc->uni.proc.passagem[paramPassados] == VALOR  || simb_aux->uni.parform.passagem == REF){
-                     geraCodigo(NULL, buildString("CRVL %d, %d", simb_aux->nivel_lex, simb_aux->deslocamento));
-                  }
-                  else{
-                     geraCodigo(NULL, buildString("CREN %d, %d", simb_aux->nivel_lex, simb_aux->deslocamento));
-                  }
-                  empilha(&pilha_tipos, simb_aux->uni.parform.tipo);
-               }
-               else{
-                  imprimeErro(buildString("VARIAVEL %s NAO DECLARADA", token));
-               }
-         }
          | TRUE {
                geraCodigo(NULL, buildString("CRCT %d", 1));
 
@@ -407,7 +366,6 @@ fator:   NUM {
                   imprimeErro("TIPOS INCOMPATIVEIS NA NEGACAO");
                }
          }
-         | chamaFunc
          | ABRE_PARENTESES expressao FECHA_PARENTESES
 
 
@@ -489,7 +447,7 @@ declara_proc: PROCEDURE {
 
 
 // Parametros formais do proc => (listaParamsForms)
-paramsFormais: ABRE_PARENTESES listaParamsForms FECHA_PARENTESES | 
+paramsFormais: ABRE_PARENTESES listaParamsForms FECHA_PARENTESES | %empty  
 
 
 // Declaracao dos params do proc =>  [listaParamsForms;] declaraParams
@@ -551,7 +509,7 @@ paramsProc: ABRE_PARENTESES { paramPassados = 0;} listaParams FECHA_PARENTESES {
                if(paramPassados != proc->uni.proc.num_params){
                   imprimeErro("N° de parametros invalido para esse procedimento\n");
                }
-         } | 
+         } | %empty  
 
 
 // Lista de params de um proc => a,b,c
@@ -583,19 +541,55 @@ tipoFunc: IDENT {
          }
 
 
-// Chamada de funcao => p(x)
-chamaFunc: ATRIBUICAO IDENT listaParams{
-               printf("\n\tFuncao %s\n", func_i);
-               // simb = buscaTabSimb(func_i, &tabela);
-               // if(simb && simb->tipo == PROC){
-               //    geraCodigo(NULL, buildString("CHPR R%.2d, %d", simb->uni.proc.rotulo, nivel_lex));
-               //    n_params = simb->uni.proc.num_params;
-               // }
-               // else{
-               //    imprimeErro(buildString("Funcao %s não declarada", func_i));
-               // }
-               // empilha(&pilha_tipos, simb->uni.proc.retorno);
+atribui:  ABRE_PARENTESES NUM FECHA_PARENTESES {
+               printf("\n\tFUNCAO\n");
+            }
+         | %empty {
+               printf("\n\t>>> Atribui simples: %s\n\n", atrib);
+               // Carrega valor de outra variavel
+               simb_aux = buscaTabSimb(atrib, &tabela);
+               if(!entra_proc && simb_aux){
+                  switch(simb_aux->tipo){
+                     case VS:
+                        geraCodigo(NULL, buildString("CRVL %d, %d", simb_aux->nivel_lex, simb_aux->deslocamento));
+                        empilha(&pilha_tipos, simb_aux->uni.vs.tipo);
+                        break;
+
+                     case PFORM:
+                        if(simb_aux->uni.parform.passagem == VALOR){
+                           geraCodigo(NULL, buildString("CRVL %d, %d", simb_aux->nivel_lex, simb_aux->deslocamento));
+                        }
+                        else{
+                           geraCodigo(NULL, buildString("CRVI %d, %d", simb_aux->nivel_lex, simb_aux->deslocamento));
+                        }
+                        empilha(&pilha_tipos, simb_aux->uni.parform.tipo);
+                        break;
+
+                     case PROC:
+                        geraCodigo(NULL, "AMEM 1");
+                        geraCodigo(NULL, buildString("CHPR R%.2d, %d", simb_aux->uni.proc.rotulo, simb_aux->nivel_lex));
+                        empilha(&pilha_tipos, simb_aux->uni.proc.retorno);
+                        break;
+
+                     default:
+                        break;
+                  }
+               }
+               // Caso esteja declarando procedimento, checa tipos de passagem dos parametros
+               else if(entra_proc){
+                  if(proc->uni.proc.passagem[paramPassados] == VALOR  || simb_aux->uni.parform.passagem == REF){
+                     geraCodigo(NULL, buildString("CRVL %d, %d", simb_aux->nivel_lex, simb_aux->deslocamento));
+                  }
+                  else{
+                     geraCodigo(NULL, buildString("CREN %d, %d", simb_aux->nivel_lex, simb_aux->deslocamento));
+                  }
+                  empilha(&pilha_tipos, simb_aux->uni.parform.tipo);
+               }
+               else{
+                  imprimeErro(buildString("VARIAVEL %s NAO DECLARADA", token));
+               }
          }
+
 
 %%
 
