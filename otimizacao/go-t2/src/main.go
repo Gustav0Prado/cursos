@@ -40,10 +40,10 @@ func main() {
 	if len(os.Args) > 1 {
 		switch os.Args[1] {
 		case "-f":
-			Enumerate(choices, left, right, 0, n)
+			Enumerate(choices, left, right, n)
 
 		case "-o":
-			Backtrack(choices, left, right, 0, n)
+			Backtrack(choices, left, right, n)
 
 		case "-a":
 			fmt.Println("Função dada")
