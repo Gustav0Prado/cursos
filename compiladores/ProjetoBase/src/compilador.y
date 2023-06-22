@@ -129,7 +129,7 @@ bloco :
          parte_declara_vars
          {geraCodigo(NULL, buildString("DSVS R%02d", rot_atual)); empilha(&pilha_rotulos, rot_atual);} 
 
-         
+         parte_declara_rotulos
 
          parte_declara_procs
 
@@ -566,6 +566,10 @@ atribui:  {geraCodigo(NULL, "AMEM 1"); strcpy(func_i, atrib); } paramsProc {
                }
          }
 
+
+//---------------------------------------------------------------- GOTO -------------------------------------------------------------------------------------//
+
+parte_declara_rotulos: 
 
 %%
 
