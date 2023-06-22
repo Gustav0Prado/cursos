@@ -127,7 +127,7 @@ programa :{
 
 bloco :
          parte_declara_vars
-         {geraCodigo(NULL, buildString("DSVS R%02d", rot_atual));} 
+         {geraCodigo(NULL, buildString("DSVS R%02d", rot_atual)); empilha(&pilha_rotulos, rot_atual);} 
 
          parte_declara_procs
 

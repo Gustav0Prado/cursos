@@ -27,6 +27,10 @@ int empilha(Pilha_t *pilha, int elem){
       else{
          pilha->tipos[pilha->topo] = elem;
          pilha->topo++;
+         
+         
+         printPilha(pilha);
+
          return 0;
       }
    }
@@ -38,6 +42,7 @@ int empilha(Pilha_t *pilha, int elem){
    Retorna o elemento do topo
 */
 int desempilha(Pilha_t *pilha){
+   printPilha(pilha);
    if(pilha){
       pilha->topo--; 
       return pilha->tipos[pilha->topo];
