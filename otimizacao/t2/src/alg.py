@@ -37,7 +37,7 @@ def Bdada(C:list, a:list, b:list) -> int:
 
 
 # Chamada recusriva de enumeração, cortando os ramos não viáveis
-def BranchAndBound(choices:list, left:list, right:list, n:int):
+def BranchAndBound(choices:list, left:list, right:list, n:int, B):
    """Processamento sem cortes de otimalidade
 
    Args:
@@ -61,7 +61,7 @@ def BranchAndBound(choices:list, left:list, right:list, n:int):
    else:
       nextChoice = choices[0]
 
-      if Bdada(choices, left, right) <= optConflict:
+      if B(choices, left, right) <= optConflict:
          if restriction(nextChoice, left, right, n) :
             Backtrack(choices[1:], left + [nextChoice], right, n-1)
 
