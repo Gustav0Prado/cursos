@@ -129,6 +129,8 @@ bloco :
          parte_declara_vars
          {geraCodigo(NULL, buildString("DSVS R%02d", rot_atual)); empilha(&pilha_rotulos, rot_atual);} 
 
+         
+
          parte_declara_procs
 
          {int rot_desvio = desempilha(&pilha_rotulos); geraCodigo(buildString("R%.2d", rot_desvio), "NADA"); rot_atual++;}
