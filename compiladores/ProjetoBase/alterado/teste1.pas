@@ -1,10 +1,16 @@
-program testegoto (input, output);
-label 1;
-var a:  integer;
-
+program goto1 (input, output);
+label 100, 200;
+var x  : integer;
 begin
-   a := 10;
-   1: a := a-1;
-   if(a > 0) then
-      goto 1;
+
+  read (x);
+  100:
+  if x < 1
+    then goto 200;
+  write(x);
+  x:=x-1;
+  goto 100;
+
+  200: write(0);
+
 end.

@@ -17,8 +17,14 @@ typedef enum{
 typedef enum{
    VS,
    PFORM,
-   PROC
+   PROC,
+   LABEL_
 } tipoSimb_e;
+
+// Informacoes usadas nos parametros formais
+typedef struct Label_t{
+   int rotulo;
+} Label_t;
 
 // Informacoes usadas nos parametros formais
 typedef struct ParamF_t{
@@ -52,6 +58,7 @@ typedef struct Simb_t{
       VarS_t vs;
       Proc_t proc;
       ParamF_t parform;
+      Label_t label;
    } uni;
    
 } Simb_t;
@@ -75,3 +82,4 @@ void atualizaParams(TabSimb_t *tab, Simb_t *procm, int tipo);
 int insereTabSimbFunc(char *ident, TabSimb_t *tab, int rot, int nl);
 void atualizaFunc(TabSimb_t *tab, Simb_t *func, int tipo);
 int removeNL(int nl, TabSimb_t *tab);
+int insereTabSimbLabel(char *ident, TabSimb_t *tab, int nl, int rot);

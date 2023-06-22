@@ -112,6 +112,29 @@ int insereTabSimbParam(char *ident, TabSimb_t *tab, int pass, int nl, int desloc
 
 
 /*
+   Tenta label na tabela de simbolos
+*/
+int insereTabSimbLabel(char *ident, TabSimb_t *tab, int nl, int rot){
+   if(tab){
+      Simb_t *newVar = malloc(sizeof(Simb_t));
+      
+      newVar->ident = malloc(sizeof(ident));
+      strncpy(newVar->ident, ident, (int)sizeof(ident));
+
+      newVar->next = tab->top;
+      tab->top = newVar;
+
+      newVar->tipo = LABEL_;
+      newVar->nivel_lex = nl;
+      newVar->uni.label.rotulo = rot;
+
+      return 0;
+   }
+   perror("Erro: TabSimb Nula");
+   return -1;
+}
+
+/*
    Remove últimos n elementos da TabSimb e retorna 0 em caso de sucesso e -1 em caso de falha
 */
 int removeNTabSimb(int n, TabSimb_t *tab){
@@ -177,7 +200,7 @@ int removeNL(int nl, TabSimb_t *tab){
       
       while(aux != NULL && aux->nivel_lex > nl){
          prox = aux->next;
-         if(aux->tipo != PROC){
+         if(aux->tipo != PROC && aux->tipo != LABEL_){
             removeTabSimb(aux, tab);
          }
          aux = prox;
@@ -280,6 +303,10 @@ void printTabSimb(TabSimb_t *tab){
                default:
                   break;
             }
+            break;
+
+         case LABEL_:
+            printf("%s - LABEL - nl: %d, ROT: %02d\n", aux->ident, aux->nivel_lex, aux->uni.label.rotulo);
             break;
          
          default:

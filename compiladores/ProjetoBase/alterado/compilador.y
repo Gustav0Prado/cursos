@@ -183,7 +183,13 @@ comando_composto: T_BEGIN comandos T_END
 comandos: comandos PONTO_E_VIRGULA comando | comando
 ;
 
-comando: comando_vazio | comando_sem_rotulo | NUM DOIS_PONTOS comando_sem_rotulo
+comando: comando_vazio | comando_sem_rotulo | NUM {
+            simb_aux = buscaTabSimb(token, &tabela);
+            if(simb_aux){
+               strcpy(strAux, buildString("R%.2d", simb_aux->uni.label.rotulo));
+               geraCodigo(strAux, buildString("ENRT %d, %d", nivel_lex, num_vars_total));
+            }
+         } DOIS_PONTOS comando_sem_rotulo
 ;
 
 comando_vazio: %empty ;
@@ -571,9 +577,21 @@ atribui:  {geraCodigo(NULL, "AMEM 1"); strcpy(func_i, atrib); } paramsProc {
 
 parte_declara_rotulos: LABEL listanums PONTO_E_VIRGULA | %empty
 
-listanums: listanums VIRGULA NUM | NUM
+listanums: listanums VIRGULA NUM {
+            insereTabSimbLabel(token, &tabela, nivel_lex, rot_atual);
+            rot_atual++;
+         }
+         | NUM {
+            insereTabSimbLabel(token, &tabela, nivel_lex, rot_atual);
+            rot_atual++;
+         }
 
-desvio: GOTO NUM
+desvio: GOTO NUM {
+            simb_aux = buscaTabSimb(token, &tabela);
+            if(simb_aux){
+               geraCodigo(NULL, buildString("DSVR R%02d, %d, %d", simb_aux->uni.label.rotulo, simb_aux->nivel_lex, nivel_lex));
+            }
+         }
 
 %%
 
