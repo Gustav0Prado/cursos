@@ -287,7 +287,7 @@ void printTabSimb(TabSimb_t *tab){
             break;
          
          case PROC:
-            printf("%s - PROC - nl: %d\n", aux->ident, aux->nivel_lex);
+            printf("%s - PROC - nl: %d - %d params\n", aux->ident, aux->nivel_lex, aux->uni.proc.num_params);
             break;
          
          case PFORM:

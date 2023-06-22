@@ -246,7 +246,7 @@ escrita: WRITE ABRE_PARENTESES lista_write FECHA_PARENTESES
 lista_write: lista_write VIRGULA expressao {geraCodigo(NULL, "IMPR");} | expressao {geraCodigo(NULL, "IMPR");}
 ;
 
-atribuicao_ou_proc: ATRIBUICAO expressao { confereAtribuicao(l_elem); } | chamaProc { strcpy(l_elem, token); }
+atribuicao_ou_proc: ATRIBUICAO expressao { confereAtribuicao(l_elem); } | {proc = buscaTabSimb(l_elem, &tabela);} chamaProc { strcpy(l_elem, token);}
 ;
 
 //---------------------------------------------------------------- Expressões Matemáticas -------------------------------------------------------------------------------------//
@@ -312,6 +312,13 @@ fator:   NUM {
                // Atribui valor inteiro
                simb = buscaTabSimb(l_elem, &tabela);
                geraCodigo(NULL, buildString("CRCT %d", atoi(token)));
+
+               empilha(&pilha_tipos, INTEIRO);
+         }
+         | SUB NUM {
+               // Atribui valor inteiro
+               simb = buscaTabSimb(l_elem, &tabela);
+               geraCodigo(NULL, buildString("CRCT %d", -atoi(token)));
 
                empilha(&pilha_tipos, INTEIRO);
          }
@@ -450,7 +457,8 @@ tipoParam: IDENT {
 
 
 // Begin e end de dentro do proc
-blocoPF: parte_declara_vars { rot_atual++; geraCodigo(NULL, buildString("DSVS R%02d", rot_atual)); empilha(&pilha_rotulos, rot_atual); }  
+blocoPF: parte_declara_rotulos
+         parte_declara_vars { rot_atual++; geraCodigo(NULL, buildString("DSVS R%02d", rot_atual)); empilha(&pilha_rotulos, rot_atual); }  
          parte_declara_procs {int rot_desvio = desempilha(&pilha_rotulos); geraCodigo(buildString("R%.2d", rot_desvio), "NADA");}
          comando_composto { 
                int vars = desempilha(&pilha_vars);
@@ -481,13 +489,15 @@ chamaProcParams: paramsProc | %empty
 // Parenteses e checagem de paramatros de um proc => ( listaParams )
 paramsProc: ABRE_PARENTESES { paramPassados = 0;} listaParams FECHA_PARENTESES {
                if(paramPassados != proc->uni.proc.num_params){
+                  printf("\n%s\n", proc->ident);
+                  printTabSimb(&tabela);
                   imprimeErro("N° de parametros invalido para esse procedimento\n");
                }
          } 
 
 
 // Lista de params de um proc => a,b,c
-listaParams: listaParams VIRGULA { entra_proc = 1; } expressao { paramPassados++; entra_proc = 0; } | { entra_proc = 1; } expressao { paramPassados++; entra_proc = 0; }
+listaParams: listaParams VIRGULA { entra_proc = 1; } expressao { paramPassados++; entra_proc = 0; } | { entra_proc = 1; } expressao {paramPassados++; entra_proc = 0; }
 
 
 //---------------------------------------------------------------- Funções -------------------------------------------------------------------------------------//
@@ -589,7 +599,15 @@ listanums: listanums VIRGULA NUM {
 desvio: GOTO NUM {
             simb_aux = buscaTabSimb(token, &tabela);
             if(simb_aux){
-               geraCodigo(NULL, buildString("DSVR R%02d, %d, %d", simb_aux->uni.label.rotulo, simb_aux->nivel_lex, nivel_lex));
+               if(simb_aux->nivel_lex <= nivel_lex){
+                  geraCodigo(NULL, buildString("DSVR R%02d, %d, %d", simb_aux->uni.label.rotulo, simb_aux->nivel_lex, nivel_lex));
+               }
+               else{
+                  imprimeErro(buildString("LABEL %s - LABEL INCORRETA", token));
+               }
+            }
+            else{
+               imprimeErro(buildString("LABEL %s NAO DECLARADA", token));
             }
          }
 
