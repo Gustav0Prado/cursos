@@ -126,10 +126,9 @@ programa :{
 ;
 
 bloco :
+         parte_declara_rotulos
          parte_declara_vars
          {geraCodigo(NULL, buildString("DSVS R%02d", rot_atual)); empilha(&pilha_rotulos, rot_atual);} 
-
-         parte_declara_rotulos
 
          parte_declara_procs
 
@@ -184,7 +183,7 @@ comando_composto: T_BEGIN comandos T_END
 comandos: comandos PONTO_E_VIRGULA comando | comando
 ;
 
-comando: comando_vazio | comando_sem_rotulo | NUM comando_sem_rotulo
+comando: comando_vazio | comando_sem_rotulo | NUM DOIS_PONTOS comando_sem_rotulo
 ;
 
 comando_vazio: %empty ;
@@ -570,7 +569,7 @@ atribui:  {geraCodigo(NULL, "AMEM 1"); strcpy(func_i, atrib); } paramsProc {
 
 //---------------------------------------------------------------- GOTO -------------------------------------------------------------------------------------//
 
-parte_declara_rotulos: LABEL listanums
+parte_declara_rotulos: LABEL listanums PONTO_E_VIRGULA | %empty
 
 listanums: listanums VIRGULA NUM | NUM
 

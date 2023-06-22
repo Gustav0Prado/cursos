@@ -1,20 +1,10 @@
-program exemplo75 (input, output);
-var m,n :  integer;
-function f ( n : integer; var k:integer ) : integer;
-var p, q : integer;
+program testegoto (input, output);
+label 1;
+var a:  integer;
+
 begin
-   if n<2 then
-      begin
-         f:=n; k:=0
-      end
-   else
-      begin
-         f:=f(n-1,p) + f(n-2,q);
-         k:=p+q+1
-      end;
-   write (n, k)
-end;
-begin
-   n:=f(3,m);
-   write(n, m)
+   a := 10;
+   1: a := a-1;
+   if(a > 0) then
+      goto 1;
 end.
