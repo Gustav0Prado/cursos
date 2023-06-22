@@ -184,7 +184,7 @@ comando_composto: T_BEGIN comandos T_END
 comandos: comandos PONTO_E_VIRGULA comando | comando
 ;
 
-comando: comando_vazio | comando_sem_rotulo
+comando: comando_vazio | comando_sem_rotulo | NUM comando_sem_rotulo
 ;
 
 comando_vazio: %empty ;
@@ -195,6 +195,7 @@ comando_sem_rotulo: IDENT { strcpy(l_elem, token); } atribuicao_ou_proc
                   | repeticao
                   | condicional
                   | comando_composto
+                  | desvio
 ;
 
 //---------------------------------------------------------------- Leitura, Escrita, Atribuição -------------------------------------------------------------------------------------//
@@ -569,7 +570,11 @@ atribui:  {geraCodigo(NULL, "AMEM 1"); strcpy(func_i, atrib); } paramsProc {
 
 //---------------------------------------------------------------- GOTO -------------------------------------------------------------------------------------//
 
-parte_declara_rotulos: 
+parte_declara_rotulos: LABEL listanums
+
+listanums: listanums VIRGULA NUM | NUM
+
+desvio: GOTO NUM
 
 %%
 
