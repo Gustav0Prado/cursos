@@ -53,3 +53,26 @@ def has_affinity(team:list, subject:Hero) -> bool:
             return True
    
    return False
+
+def num_triangles(team:list):
+   """Calcula número de triângulos de conflitos em uma lista de herois
+
+   Args:
+       team (list): Lista de herois a procurar triângulos
+   """
+
+   t = 0
+
+   for hero in team:
+      for i in range(len(hero.conflicts)-1):
+         
+         conf = hero.conflicts[i]
+         
+         # Para cada conflito de um heroi h, checa se ele tem conflito com algum outro
+         # elemento da lista de conflitos de h
+         for j in range(len(hero.conflicts)-i):
+            nextconf = hero.conflicts[j]
+            if nextconf in conf.conflicts:
+               t += 1
+   
+   return t
