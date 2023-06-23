@@ -1,0 +1,9 @@
+Ao rodar o script de avaliação detectei duas diferenças:
+	1. No exemplo 7.05, o arquivo MEPA de exemplo está chamando uma função com nivel léxico 0,
+	e no meu resultado ele chama ela com nível léxico igual a 1. Isso me confundiu um pouco e não tenho
+	certeza se está realmente correto, afinal os procedimentos todos começam com nivel lexico = 1.
+
+	2. No segundo exemplo errado, são feitas algumas operações de comparação na MEPA que não estão no
+	arquivo Pascal de origem, então creio que seja algum erro no arquivo MEPA de exemplo
+
+Os outros resultados aparentemente estão todos iguais.

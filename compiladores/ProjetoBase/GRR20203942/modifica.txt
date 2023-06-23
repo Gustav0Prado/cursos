@@ -1,0 +1,31 @@
+Descreva a idéia original para abordar a alteração;
+	A ideia original era apenas gerar um rótulo + ENTR quando se achasse uma label, porém acabou não funcionando
+
+O que deu certo e o que teve de ser modificado no trajeto?
+	A regras sintáticas estavam certas de início, mas tive que alterar algumas coisas na geração
+	de rótulos para se adequar a nova função de goto.
+
+Quais foram os trechos do código que foram alterados?
+	Foram alterados as regras:
+		bloco e blocoPF -> Adicionar a parte_declara_label
+		comando -> Adicionar possibilidade de colocar uma label antes de um comando
+		comando_sem_rotulo -> Adicionar o comando goto
+		parte_declara_label, listanums e desvio -> novas regras para o goto
+
+Quais os maiores problemas para fazer funcionar?
+	Primeiramente entender totalmente como funciona o Goto (que pessoalmente nunca usei por recomendação
+	do professores) e como se traduziria isso para MEPA.
+	Após isso, entender como implementar isso usando rótulos. A primeira tentativa foi usando rótulos sequenciais,
+	mas rapidamente percebi que precisaria salvar esses rótulos para usar nos comandos MEPA e tive que mudar de
+	estratégia, então comecei a inserir as labels na tabela de símbolos e as coisas começaram a funcionar.
+
+
+Detalhes sobre a implementação: 
+	Implementei da seguinte maneira:
+	Na parte de declarar as labels (no início do programa), é gerado um rótulo próprio e único para cada label,
+	soma mais 1 em rot_atual para cada label. Cada label é inserida na tabela de símbolos, com o número dela como
+	identificador, e salvando também seu nível léxico.
+	Ao chamar um goto, é comparado se o nível léxico da label é menor ou igual ao atual, caso seja, permite a
+	operação, mas caso contrário acusa erro de "LABEL INCORRETA".
+
+Testes: Os exemplos obtem o comportamento desejado, com o exemplo 3 acusando um erro no uso da label

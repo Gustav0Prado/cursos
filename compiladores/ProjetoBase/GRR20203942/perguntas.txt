@@ -1,0 +1,36 @@
+Relate as principais dificuldades ao longo do desenvolvimento.
+	A dificuldade inicial foi pegar o jeito de como funcionava o Bison e como funcionavam as regras,
+	já fiz a matéria de ITC então já tinha familiaridade com gramáticas, mas não tão profundamente quanto o
+	desenvolvido programando efetivamente o compilador. Mas após algum tempo travado na parte de atribuição,
+	construi uma tabela de símbolos e pilhas para ajudar o processo, que então se tornou bem mais fácil e fluiu
+	bem até a parte de procedimentos.
+	Por ter algumas provas (incluindo a P1 de compiladores) acabei deixando o trabalho meio de lado, mas consegui
+	após um tempo e algumas alterações fazer as procedures e funcões.
+	
+Procure a descrição do comando record. Descreva (máximo 30 linhas) como incluí-lo no compilador.
+	Minha ideia seria a seguinte: ao achar uma declaração de uma variável do tipo record, ao invés de fazer 
+	"AMEM 1" para uma variável, alocar para cada membro do record e usar o primeiro dos membros como base para 
+	acessar os outros. Por exemplo:
+		type
+			esfera = record
+				raio   : integer;
+				volume : integer;	
+				area   : integer;
+			end; 
+		var s : esfera; 
+
+	Faríamos então "AMEM 3" após o var s : esfera, guardando na tabela de símbolos o "endereço" do primeiro membro
+	do registro (0,0) para acessar os outros (0,1 e 0,2), usando o identificador s. Guardariamos dentro do símbolo
+	's' algo como um vetor com três strings: 'raio', 'volume', 'area', assim podemos usar o índice de cada membro
+	+ o deslocamento do primeiro símbolo para acessar os outros, apenas comparando o token após o ponto (s.raio) com
+	as opções de campo no vetor.
+	A estrutura final de um record na tabela de símbolos seria algo como:
+		char *campos[3] = {"raio", "volume", "area"}
+		int tipo_campo[3] = {INTEIRO, INTEIRO, INTEIRO}
+		char *ident;
+		int deslocamento;
+		int nivel_lex;
+
+	Para identificar quantos, quais os nomes e tipos de cada campo do record, teríamos que criar outra tabela ou
+	estrutura para guardar todas as records ou criar um símbolo record "dummy" na tabela de símbolos, e todas as
+	variáveis record copiariam o padrão desse símbolo.
