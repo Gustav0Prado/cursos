@@ -59,5 +59,7 @@ if __name__ == "__main__":
          timer = time.time()
          BranchAndBound(choices, left, right, 0, n, Bdada)
          print_saida(choices[0], (time.time() - timer) )
-   #else:
-      # BB normal
+   else:
+      timer = time.time()
+      BranchAndBound(choices, left, right, 0, n, Bcriada)
+      print_saida(choices[0], (time.time() - timer) )

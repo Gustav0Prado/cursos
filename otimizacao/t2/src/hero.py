@@ -36,6 +36,29 @@ def num_conflicts(left:list, right:list) -> int:
    return conf
 
 
+def affinities_ok(teamA:list, teamB:list) -> bool:
+   """Retorna se todas as afinidades de um herói estão na mesma equipe que ele
+
+   Args:
+       teamA (list): Primeira equipe
+       teamB (list): Segunda  equipe
+
+   Returns:
+       bool: True caso estejam, False caso contrário
+   """
+   for hero in teamA:
+      for af in hero.affinities:
+         if af not in teamA:
+            return False
+         
+   for hero in teamB:
+      for af in hero.affinities:
+         if af not in teamB:
+            return False
+   
+   return True
+
+
 def has_affinity(team:list, subject:Hero) -> bool:
    """Retorna se um alguem do grupo team tem afinidade com subject
 
@@ -67,15 +90,10 @@ def num_triangles(team:list):
    t = 0
 
    for hero in team:
-      for i in range(len(hero.conflicts)-1):
-         
-         conf = hero.conflicts[i]
-         
-         # Para cada conflito de um heroi h, checa se ele tem conflito com algum outro
-         # elemento da lista de conflitos de h
-         for j in range(len(hero.conflicts)-i):
-            nextconf = hero.conflicts[j]
-            if nextconf in conf.conflicts:
-               t += 1
+      # Para cada conflito c de um heroi h, checa se os conflitos de c são os mesmos de h (tirando o proprio c)
+      # ou seja, checa se fecha um triângulo (A -> B,C e B -> C, onde -> indica conflito)
+      for c in hero.conflicts:
+         if c.conflicts == hero.conflicts[1:]:
+            t += 1
    
    return t

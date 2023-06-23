@@ -20,6 +20,19 @@ def restriction(nextChoice:Hero, a:list, b:list, n:int) -> bool:
    return len(a) < n-1 and (has_affinity(a, nextChoice) or not has_affinity(b, nextChoice))
 
 
+def Bcriada(C:list, a:list, b:list) -> int:
+   """Função Bdada dos professores
+
+   Args:
+       choices (list): Herois com groupo ainda não escolhido
+       a (list): 1° grupo com herois já escolhidos
+       b (list): 2° grupo com herois já escolhidos
+
+   Returns:
+       int: Número de triângulos de conflito com heróis ainda não escolhidos
+   """
+   return (num_conflicts(a, b) + num_triangles(C))
+
 
 def Bdada(C:list, a:list, b:list) -> int:
    """Função Bdada dos professores
@@ -63,10 +76,10 @@ def BranchAndBound(choices:list, left:list, right:list, l:int, n:int, B):
 
       if B(choices, left, right) <= optConflict:
          if restriction(nextChoice, left, right, n) :
-            Backtrack(choices[1:], left + [nextChoice], right, l+1, n)
+            BranchAndBound(choices[1:], left + [nextChoice], right, l+1, n, B)
 
          if restriction(nextChoice, right, left, n):
-            Backtrack(choices[1:], left, right + [nextChoice], l+1, n)
+            BranchAndBound(choices[1:], left, right + [nextChoice], l+1, n, B)
 
 
 # Chamada recusriva de enumeração, cortando os ramos não viáveis
@@ -117,7 +130,7 @@ def Enumerate(choices:list, left:list, right:list, l:int, n:int):
 
    if(l == n):
       c = num_conflicts(left, right)
-      if(c < optConflict):
+      if(c < optConflict and affinities_ok(left, right)):
          optL = left
          optR = right
          optConflict = c
