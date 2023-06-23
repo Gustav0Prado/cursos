@@ -53,6 +53,9 @@ typedef struct task_t
   struct task_t *waiting;       //Fila de tarefas esperando a tarefa atual terminar
   int wakeTime;                 //Instante de tempo em que a tarefa atual deve acordar
   int diskOP;                   // Operacao no disco
+  int diskRet;                  // Retorno da OP no disco
+  int diskBlock;                // Bloco a ser lido do disco
+  void *diskBuffer;             // Buffer onde guardar bloco
   // ... (outros campos serão adicionados mais tarde)
 } task_t ;
 

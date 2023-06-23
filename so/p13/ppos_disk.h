@@ -18,8 +18,6 @@ typedef struct
   short wake_signal;
   short sleeping;
   task_t *queue;
-  int block;
-  void *buffer;
 } disk_t ;
 
 // inicializacao do gerente de disco

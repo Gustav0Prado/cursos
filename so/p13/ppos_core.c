@@ -743,6 +743,8 @@ int mqueue_msgs (mqueue_t *queue){
 
 //------------------------------------------------------------------------------------------ P13 ------------------------------------------------------------------------------------//
 void disk_manager(){
+  int ret; 
+
   while (1) {
     disk.sleeping = 0;
     sem_down(&(disk.sem_disk));
@@ -750,6 +752,7 @@ void disk_manager(){
     // se foi acordado devido a um sinal do disco
     if (disk.wake_signal == 1)
     {
+      disk.queue->diskRet = ret;
       task_resume(disk.queue, &(disk.queue));
       disk.wake_signal = 0;
     }
@@ -760,8 +763,8 @@ void disk_manager(){
       // escolhe na fila o pedido a ser atendido, usando FCFS
       task_t* next = disk.queue;
       // solicita ao disco a operação de E/S, usando disk_cmd()
-      if(disk.buffer){
-        disk_cmd(next->diskOP, disk.block, disk.buffer);
+      if(next->diskBuffer){
+        ret = disk_cmd(next->diskOP, next->diskBlock, next->diskBuffer);
       }
     }
 
@@ -821,8 +824,8 @@ int disk_block_read  (int block, void* buffer){
   if (disk.sleeping == 1)
   {
     curr_task->diskOP = DISK_CMD_READ;
-    disk.buffer = buffer;
-    disk.block = block;
+    curr_task->diskBuffer = buffer;
+    curr_task->diskBlock = block;
     // acorda o gerente de disco (põe ele na fila de prontas)
     task_resume(&disk_mgr, (task_t **)&suspended_tasks);
   }
@@ -833,7 +836,7 @@ int disk_block_read  (int block, void* buffer){
   // suspende a tarefa corrente (retorna ao dispatcher)
   task_suspend((task_t **)&(disk.queue));
 
-  return 0;
+  return curr_task->diskRet;
 }
 
 int disk_block_write (int block, void* buffer){
@@ -846,8 +849,8 @@ int disk_block_write (int block, void* buffer){
   if (disk.sleeping == 1)
   {
     curr_task->diskOP = DISK_CMD_WRITE;
-    disk.buffer = buffer;
-    disk.block = block;
+    curr_task->diskBuffer = buffer;
+    curr_task->diskBlock = block;
     // acorda o gerente de disco (põe ele na fila de prontas)
     task_resume(&disk_mgr, (task_t **)&suspended_tasks);
   }
@@ -858,5 +861,5 @@ int disk_block_write (int block, void* buffer){
   // suspende a tarefa corrente (retorna ao dispatcher)
   task_suspend((task_t **)&(disk.queue));
 
-  return 0;
+  return curr_task->diskRet;
 }
