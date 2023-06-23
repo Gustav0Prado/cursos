@@ -17,7 +17,7 @@ def restriction(nextChoice:Hero, a:list, b:list, n:int) -> bool:
    Returns:
        bool: Retorna se a restrição é verdadeira ou falsa
    """
-   return len(a) <= n and (has_affinity(a, nextChoice) or not has_affinity(b, nextChoice))
+   return len(b) >= 0 and (has_affinity(a, nextChoice) or (not has_affinity(b, nextChoice) and not has_conflict(a, nextChoice)))
 
 
 
