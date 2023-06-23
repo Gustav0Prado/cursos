@@ -17,7 +17,7 @@ def restriction(nextChoice:Hero, a:list, b:list, n:int) -> bool:
    Returns:
        bool: Retorna se a restrição é verdadeira ou falsa
    """
-   return len(b) >= 0 and (has_affinity(a, nextChoice) or (not has_affinity(b, nextChoice) and not has_conflict(a, nextChoice)))
+   return len(a) < n-1 and (has_affinity(a, nextChoice) or not has_affinity(b, nextChoice))
 
 
 
@@ -37,7 +37,7 @@ def Bdada(C:list, a:list, b:list) -> int:
 
 
 # Chamada recusriva de enumeração, cortando os ramos não viáveis
-def BranchAndBound(choices:list, left:list, right:list, n:int, B):
+def BranchAndBound(choices:list, left:list, right:list, l:int, n:int, B):
    """Processamento sem cortes de otimalidade
 
    Args:
@@ -51,7 +51,7 @@ def BranchAndBound(choices:list, left:list, right:list, n:int, B):
    global nodes, optL, optR, optConflict
    nodes += 1
 
-   if(n == 0):
+   if(l == n):
       c = num_conflicts(left, right)
       if(c < optConflict):
          optL = left
@@ -63,14 +63,14 @@ def BranchAndBound(choices:list, left:list, right:list, n:int, B):
 
       if B(choices, left, right) <= optConflict:
          if restriction(nextChoice, left, right, n) :
-            Backtrack(choices[1:], left + [nextChoice], right, n-1)
+            Backtrack(choices[1:], left + [nextChoice], right, l+1, n)
 
          if restriction(nextChoice, right, left, n):
-            Backtrack(choices[1:], left, right + [nextChoice], n-1)
+            Backtrack(choices[1:], left, right + [nextChoice], l+1, n)
 
 
 # Chamada recusriva de enumeração, cortando os ramos não viáveis
-def Backtrack(choices:list, left:list, right:list, n:int):
+def Backtrack(choices:list, left:list, right:list, l:int, n:int):
    """Processamento sem cortes de otimalidade
 
    Args:
@@ -84,7 +84,7 @@ def Backtrack(choices:list, left:list, right:list, n:int):
    global nodes, optL, optR, optConflict
    nodes += 1
 
-   if(n == 0):
+   if(l == n):
       c = num_conflicts(left, right)
       if(c < optConflict):
          optL = left
@@ -95,14 +95,14 @@ def Backtrack(choices:list, left:list, right:list, n:int):
       nextChoice = choices[0]
 
       if restriction(nextChoice, left, right, n) :
-         Backtrack(choices[1:], left + [nextChoice], right, n-1)
+         Backtrack(choices[1:], left + [nextChoice], right, l+1, n)
 
       if restriction(nextChoice, right, left, n):
-         Backtrack(choices[1:], left, right + [nextChoice], n-1)
+         Backtrack(choices[1:], left, right + [nextChoice], l+1, n)
 
 
 # Chamada recusriva de enumeração (Sem optimalidade e viabilidade)
-def Enumerate(choices:list, left:list, right:list, n:int):
+def Enumerate(choices:list, left:list, right:list, l:int, n:int):
    """Processamento sem cortes de viabilidade
 
    Args:
@@ -115,7 +115,7 @@ def Enumerate(choices:list, left:list, right:list, n:int):
    global nodes, optL, optR, optConflict
    nodes += 1
 
-   if(n == 0):
+   if(l == n):
       c = num_conflicts(left, right)
       if(c < optConflict):
          optL = left
@@ -125,8 +125,8 @@ def Enumerate(choices:list, left:list, right:list, n:int):
    else:
       next = choices[0]
       # enumera escolhas do próximos elementos (sem a última escolha)
-      Enumerate(choices[1:], left + [next], right, n-1)
-      Enumerate(choices[1:], left, right + [next], n-1)
+      Enumerate(choices[1:], left + [next], right, l+1, n)
+      Enumerate(choices[1:], left, right + [next], l+1, n)
 
 
 def print_saida(first:Hero, time:float):

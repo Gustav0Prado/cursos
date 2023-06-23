@@ -36,26 +36,6 @@ def num_conflicts(left:list, right:list) -> int:
    return conf
 
 
-
-def has_conflict(team:list, subject:Hero) -> bool:
-   """Retorna se um alguem do grupo team tem conflito com subject
-
-   Args:
-       subject (Hero): Herói que será comparado
-       team (list): Time de heróis em que a conflito será buscada
-
-   Returns:
-       bool: True caso alguém tenha conflito e False caso contrário
-   """
-
-   for h in team:
-      for af in h.conflicts:
-         if af.id == subject.id:
-            return True
-   
-   return False
-
-
 def has_affinity(team:list, subject:Hero) -> bool:
    """Retorna se um alguem do grupo team tem afinidade com subject
 
@@ -66,6 +46,9 @@ def has_affinity(team:list, subject:Hero) -> bool:
    Returns:
        bool: True caso alguém tenha afinidade e False caso contrário
    """
+
+   if len(team) == 0:
+      return False
 
    for h in team:
       for af in h.affinities:

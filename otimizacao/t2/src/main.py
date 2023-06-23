@@ -46,18 +46,18 @@ if __name__ == "__main__":
       #sem otimalidade
       if(sys.argv[1] == "-o"):
          timer = time.time()
-         Backtrack(choices, left, right, n)
+         Backtrack(choices, left, right, 0, n)
          print_saida(choices[0], (time.time() - timer) )
 
       # sem viabilidade
       elif(sys.argv[1] == "-f"):
          timer = time.time()
-         Enumerate(choices, left, right, n)
+         Enumerate(choices, left, right, 0, n)
          print_saida(choices[0], (time.time() - timer) )
          
       elif(sys.argv[1] == "-a"):
          timer = time.time()
-         BranchAndBound(choices, left, right, n, Bdada)
+         BranchAndBound(choices, left, right, 0, n, Bdada)
          print_saida(choices[0], (time.time() - timer) )
    #else:
       # BB normal
