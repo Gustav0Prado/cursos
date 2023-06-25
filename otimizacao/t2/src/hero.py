@@ -93,7 +93,7 @@ def num_triangles(team:list):
       # Para cada conflito c de um heroi h, checa se os conflitos de c são os mesmos de h (tirando o proprio c)
       # ou seja, checa se fecha um triângulo (A -> B,C e B -> C, onde -> indica conflito)
       for c in hero.conflicts:
-         if c.conflicts == hero.conflicts[1:]:
+         if (c.conflicts == hero.conflicts[1:]) and (len(c.conflicts) > 0 and len(hero.conflicts[1:]) > 0):
             t += 1
    
    return t

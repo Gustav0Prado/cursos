@@ -38,7 +38,11 @@ if __name__ == "__main__":
       index1 = int(inp[1]) - 1
 
       # Inclui afinidades na lista do primeiro heroi citado
-      choices[index0].affinities.append(choices[index1])
+      # guarda sempre no de menor indice
+      if(index0 < index1):
+         choices[index0].affinities.append(choices[index1])
+      else:
+         choices[index1].affinities.append(choices[index0])
 
    # Caso a linha de comando tenha alguma opção
    if len(sys.argv) == 2:

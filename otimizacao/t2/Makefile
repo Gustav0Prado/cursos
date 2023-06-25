@@ -5,4 +5,4 @@ all: clean
 	@chmod +x ./separa
 
 clean:
-	@rm -f ./separa
+	@rm -rf ./separa ./src/__pycache__
