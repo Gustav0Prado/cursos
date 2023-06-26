@@ -64,6 +64,7 @@ if __name__ == "__main__":
          BranchAndBound(choices, left, right, 0, n, Bdada)
          print_saida(choices[0], (time.time() - timer) )
    else:
+      print(f"\t{num_triangles(choices)} triângulo(s)")
       timer = time.time()
       BranchAndBound(choices, left, right, 0, n, Bcriada)
       print_saida(choices[0], (time.time() - timer) )

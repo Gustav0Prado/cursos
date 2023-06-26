@@ -96,6 +96,5 @@ def num_triangles(team:list):
          for k in c.conflicts:
             if k in hero.conflicts:
                t += 1
-               break
    
    return t
