@@ -157,4 +157,4 @@ def print_saida(first:Hero, time:float):
       print(' '.join(map(str, optL)))
    else:
       print(optR)
-   print(f"{nodes} Nós na árvore e { time * 1000 } milissegundos de execução", file=sys.stderr)
+   print(f"{nodes} Nós na árvore e { time * 1000 } segundo(s) de execução", file=sys.stderr)
