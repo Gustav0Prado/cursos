@@ -1,0 +1,20 @@
+#!/bin/bash
+
+echo "Sem cortes de otimalidade/viabilidade"
+printf "\n"
+./separa -of < $1
+
+printf "\n"
+echo "========================================="
+
+printf "\n"
+echo "Sem cortes de otimalidade"
+./separa -o < $1
+
+printf "\n"
+echo "========================================="
+
+
+printf "\n"
+echo "Branch and Bound completo"
+./separa < $1
