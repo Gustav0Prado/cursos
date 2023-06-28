@@ -97,18 +97,24 @@ def compl(a:tuple, b:tuple) -> tuple:
    return tuple(d)
 
 
-def num_triangles(team:set):
+def num_triangles(C:list, team:set):
    """Calcula número de triângulos de conflitos em uma lista de herois
 
    Args:
-       team (list): Lista de herois a procurar triângulos
+       team (list): Lista de conflitos a procurar triângulos
    """
 
-   p = list(team)
+   if(len(team) < 3):
+      return 0
+
+   p = sorted(list(team))
+   for i in p:
+      if i[0] in C or i[1] in C:
+         p.remove(i)
 
    t = 0
    for i in p:
-      for j in p[p.index(i):]:
+      for j in p[p.index(i)+1:]:
          # Se algum de membro de p[j] está em p[i], verifica se o complemento dos dois
          # também está na lista
          if any(x in j for x in i):
@@ -123,3 +129,37 @@ def num_triangles(team:set):
                break
 
    return t
+
+def num_pentagon(C:list, team:set):
+   """Calcula número de triângulos de conflitos em uma lista de herois
+
+   Args:
+       team (list): Lista de conflitos a procurar triângulos
+   """
+
+   if(len(team) < 5):
+      return 0
+
+   p = sorted(list(team))
+   for i in p:
+      if i[0] in C or i[1] in C:
+         p.remove(i)
+
+   q_pent = 0
+   for i in p:
+      for j in p:
+         # Procura um caminho entre i e j
+         if i != j and i[0] == j[0]:
+            way = 0
+            nextI = i[1]
+            for elem in p:
+               # Compara elementos diferentes de i e j buscando um caminho para o próximo I
+               if elem != i and elem != j and elem[0] == nextI:
+                  nextI = elem[1]
+                  way += 1
+            # Se possui três elementos ligando o caminho é um pentágono (5 elementos)
+            if way == 3:
+               q_pent += 1
+
+
+   return q_pent

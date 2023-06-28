@@ -18,5 +18,13 @@ echo "========================================="
 
 
 printf "\n"
-echo "Branch and Bound completo"
+echo "Branch and Bound com Bdada"
+./separa -a < $1
+
+printf "\n"
+echo "========================================="
+
+
+printf "\n"
+echo "Branch and Bound com Bcriada"
 ./separa < $1

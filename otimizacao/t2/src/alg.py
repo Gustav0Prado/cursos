@@ -20,7 +20,18 @@ def restriction(flag:bool, nextChoice:int, a:list, b:list, af:set, n:int) -> boo
    """
    if(not flag):
       return True
-   return len(a) < n-1 and (has_affinity(a, nextChoice, af) or not has_affinity(b, nextChoice, af))
+   # Caso o outro time nâo vá ficar vazio e as afinidades estejam corretas
+   # (Vai obrigatoriamente para um lado caso tenha afinidade ou pode ir pros dois caso nâo tenha com ninguém)
+   if len(a) < n-1:
+      # Se tem afinidade com os dois lados, árvore não é viável
+      if (has_affinity(a, nextChoice, af) and has_affinity(b, nextChoice, af)):
+         return False
+      elif (has_affinity(a, nextChoice, af)):
+         return True
+      # Não tem afinidade com nenhum dos dois lados
+      elif(not has_affinity(b, nextChoice, af)):
+         return True
+   return False
 
 
 def Bcriada(flags:Flags, C:list, a:list, b:list) -> int:
@@ -36,7 +47,7 @@ def Bcriada(flags:Flags, C:list, a:list, b:list) -> int:
    """
    if (not flags.o):
       return True
-   return (num_conflicts(a, b, C) + num_triangles(C))
+   return (num_conflicts(a, b, C) + num_pentagon(a+b, C))
 
 
 def Bdada(flags:Flags, C:list, a:list, b:list) -> int:
@@ -52,7 +63,7 @@ def Bdada(flags:Flags, C:list, a:list, b:list) -> int:
    """
    if (not flags.o):
       return True
-   return (num_conflicts(a, b, C) + num_triangles(C))
+   return (num_conflicts(a, b, C) + num_triangles(a+b, C))
 
 
 def Recursion(heroes:list, af:set, conf:set,  left:list, right:list, l:int, n:int, B, flags:Flags):
@@ -61,10 +72,17 @@ def Recursion(heroes:list, af:set, conf:set,  left:list, right:list, l:int, n:in
 
    if(l == n):
       c = num_conflicts(left, right, conf)
-      if(c < optConflict and affinities_ok(left, right, af)):
-         optL = left
-         optR = right
-         optConflict = c
+      if(c < optConflict):
+         # Sem viabilidade, checa se é viável
+         if(not flags.f and affinities_ok(left, right, af)):
+            optL = left
+            optR = right
+            optConflict = c
+         # Com cortes de viabilidade, apenas salva solução
+         elif(flags.f):
+            optL = left
+            optR = right
+            optConflict = c
       return
    else:
       nextChoice = heroes[0]
@@ -185,4 +203,4 @@ def print_saida(first:int, time:float):
       print(' '.join(map(str, optL)))
    else:
       print(optR)
-   print(f"{nodes} Nós na árvore e { time * 1000 } segundo(s) de execução", file=sys.stderr)
+   print(f"{nodes} Nós na árvore e { (time * 1000) } milisegundo(s) de execução", file=sys.stderr)
