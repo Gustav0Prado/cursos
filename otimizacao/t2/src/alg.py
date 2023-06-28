@@ -6,7 +6,7 @@ optL = []
 optR = []
 optConflict = 1000000;
 
-def restriction(nextChoice:Hero, a:list, b:list, n:int) -> bool:
+def restriction(nextChoice:int, a:list, b:list, af:set, n:int) -> bool:
    """Checa se restrição do Backtracking é verdadeira
 
    Args:
@@ -17,44 +17,44 @@ def restriction(nextChoice:Hero, a:list, b:list, n:int) -> bool:
    Returns:
        bool: Retorna se a restrição é verdadeira ou falsa
    """
-   return len(a) < n-1 and (has_affinity(a, nextChoice) or not has_affinity(b, nextChoice))
+   return len(a) < n-1 and (has_affinity(a, nextChoice, af) or not has_affinity(b, nextChoice, af))
 
 
 def Bcriada(C:list, a:list, b:list) -> int:
    """Função Bdada dos professores
 
    Args:
-       choices (list): Herois com groupo ainda não escolhido
+       heroes (list): Herois com groupo ainda não escolhido
        a (list): 1° grupo com herois já escolhidos
        b (list): 2° grupo com herois já escolhidos
 
    Returns:
        int: Número de triângulos de conflito com heróis ainda não escolhidos
    """
-   return (num_conflicts(a, b) + num_triangles(C))
+   return (num_conflicts(a, b, C) + num_triangles(C))
 
 
 def Bdada(C:list, a:list, b:list) -> int:
    """Função Bdada dos professores
 
    Args:
-       choices (list): Herois com groupo ainda não escolhido
+       C (list): Lista de conflitos
        a (list): 1° grupo com herois já escolhidos
        b (list): 2° grupo com herois já escolhidos
 
    Returns:
        int: Número de triângulos de conflito com heróis ainda não escolhidos
    """
-   return (num_conflicts(a, b) + num_triangles(C))
+   return (num_conflicts(a, b, C) + num_triangles(C))
 
 
 
 # Chamada recusriva de enumeração, cortando os ramos não viáveis
-def BranchAndBound(choices:list, left:list, right:list, l:int, n:int, B):
+def BranchAndBound(heroes:list, af:set, conf:set,  left:list, right:list, l:int, n:int, B):
    """Processamento sem cortes de otimalidade
 
    Args:
-       choices (list): Lista com todos os heróis que ainda não foram escolhidos para um grupo
+       heroes (list): Lista com todos os heróis que ainda não foram escolhidos para um grupo
        left (list): Grupo do "lado esquerdo"
        right (list): Grupo do "lado direito"
        n (int): número de heróis ainda não escolhidos
@@ -65,29 +65,29 @@ def BranchAndBound(choices:list, left:list, right:list, l:int, n:int, B):
    nodes += 1
 
    if(l == n):
-      c = num_conflicts(left, right)
+      c = num_conflicts(left, right, conf)
       if(c < optConflict):
          optL = left
          optR = right
          optConflict = c
       return
    else:
-      nextChoice = choices[0]
+      nextChoice = heroes[0]
 
-      if B(choices, left, right) <= optConflict:
-         if restriction(nextChoice, left, right, n) :
-            BranchAndBound(choices[1:], left + [nextChoice], right, l+1, n, B)
+      if B(conf, left, right) <= optConflict:
+         if restriction(nextChoice, left, right, af, n) :
+            BranchAndBound(heroes[1:], af, conf, left + [nextChoice], right, l+1, n, B)
 
-         if restriction(nextChoice, right, left, n):
-            BranchAndBound(choices[1:], left, right + [nextChoice], l+1, n, B)
+         if restriction(nextChoice, right, left, af, n):
+            BranchAndBound(heroes[1:], af, conf, left, right + [nextChoice], l+1, n, B)
 
 
 # Chamada recusriva de enumeração, cortando os ramos não viáveis
-def Backtrack(choices:list, left:list, right:list, l:int, n:int):
+def Backtrack(heroes:list, af:set, conf:set,  left:list, right:list, l:int, n:int):
    """Processamento sem cortes de otimalidade
 
    Args:
-       choices (list): Lista com todos os heróis que ainda não foram escolhidos para um grupo
+       heroes (list): Lista com todos os heróis que ainda não foram escolhidos para um grupo
        left (list): Grupo do "lado esquerdo"
        right (list): Grupo do "lado direito"
        n (int): número de heróis ainda não escolhidos
@@ -98,28 +98,28 @@ def Backtrack(choices:list, left:list, right:list, l:int, n:int):
    nodes += 1
 
    if(l == n):
-      c = num_conflicts(left, right)
+      c = num_conflicts(left, right, conf)
       if(c < optConflict):
          optL = left
          optR = right
          optConflict = c
       return
    else:
-      nextChoice = choices[0]
+      nextChoice = heroes[0]
 
-      if restriction(nextChoice, left, right, n) :
-         Backtrack(choices[1:], left + [nextChoice], right, l+1, n)
+      if restriction(nextChoice, left, right, af, n) :
+         Backtrack(heroes[1:], af, conf, left + [nextChoice], right, l+1, n)
 
-      if restriction(nextChoice, right, left, n):
-         Backtrack(choices[1:], left, right + [nextChoice], l+1, n)
+      if restriction(nextChoice, right, left, af, n):
+         Backtrack(heroes[1:], af, conf, left, right + [nextChoice], l+1, n)
 
 
 # Chamada recusriva de enumeração (Sem optimalidade e viabilidade)
-def Enumerate(choices:list, left:list, right:list, l:int, n:int):
+def Enumerate(heroes:list, af:set, conf:set, left:list, right:list, l:int, n:int):
    """Processamento sem cortes de viabilidade
 
    Args:
-       choices (list): Lista com todos os heróis que ainda não foram escolhidos para um grupo
+       heroes (list): Lista com todos os heróis que ainda não foram escolhidos para um grupo
        left (list): Grupo do "lado esquerdo"
        right (list): Grupo do "lado direito"
        l (int): nú mero de heróis já escolhidos
@@ -129,24 +129,24 @@ def Enumerate(choices:list, left:list, right:list, l:int, n:int):
    nodes += 1
 
    if(l == n):
-      c = num_conflicts(left, right)
-      if(c < optConflict and affinities_ok(left, right)):
+      c = num_conflicts(left, right, conf)
+      if(c < optConflict and affinities_ok(left, right, af)):
          optL = left
          optR = right
          optConflict = c
       return
    else:
-      next = choices[0]
+      next = heroes[0]
       # enumera escolhas do próximos elementos (sem a última escolha)
-      Enumerate(choices[1:], left + [next], right, l+1, n)
-      Enumerate(choices[1:], left, right + [next], l+1, n)
+      Enumerate(heroes[1:], af, conf ,left + [next], right, l+1, n)
+      Enumerate(heroes[1:], af, conf, left, right + [next], l+1, n)
 
 
-def print_saida(first:Hero, time:float):
+def print_saida(first:int, time:float):
    """Gera saida do programa na stdout e stderr
 
    Args:
-       first (Hero): Primeiro heroi
+       first (int): Primeiro heroi
        time (float): Tempo gasto no processamento
    """
    

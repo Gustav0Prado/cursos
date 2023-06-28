@@ -1,17 +1,4 @@
-class Hero:
-   def __init__(self, id):
-      self.conflicts = []
-      self.affinities = []
-      self.id = id
-
-   def __str__(self):
-      return str(self.id)
-   
-   def __repr__(self):
-      return str(self.id)
-
-
-def num_conflicts(left:list, right:list) -> int:
+def num_conflicts(left:list, right:list, conflicts:set) -> int:
    """Calcula o número total de conflitos nos dois grupos de heróis
 
    Args:
@@ -24,19 +11,19 @@ def num_conflicts(left:list, right:list) -> int:
    conf = 0
 
    for hero in left:
-      for conflict in hero.conflicts:
-         if conflict in left:
+      for (l, r) in conflicts:
+         if hero == l and r in left:
             conf += 1
    
    for hero in right:
-      for conflict in hero.conflicts:
-         if conflict in right:
+      for (l, r) in conflicts:
+         if hero == l and r in right:
             conf += 1
 
    return conf
 
 
-def affinities_ok(teamA:list, teamB:list) -> bool:
+def affinities_ok(teamA:list, teamB:list, affinities:set) -> bool:
    """Retorna se todas as afinidades de um herói estão na mesma equipe que ele
 
    Args:
@@ -47,23 +34,23 @@ def affinities_ok(teamA:list, teamB:list) -> bool:
        bool: True caso estejam, False caso contrário
    """
    for hero in teamA:
-      for af in hero.affinities:
-         if af not in teamA:
+      for (l, r) in affinities:
+         if hero == l and r not in teamA:
             return False
          
    for hero in teamB:
-      for af in hero.affinities:
-         if af not in teamB:
+      for (l, r) in affinities:
+         if hero == l and r not in teamB:
             return False
    
    return True
 
 
-def has_affinity(team:list, subject:Hero) -> bool:
+def has_affinity(team:list, subject:int, affinities:set) -> bool:
    """Retorna se um alguem do grupo team tem afinidade com subject
 
    Args:
-       subject (Hero): Herói que será comparado
+       subject (int): Herói que será comparado
        team (list): Time de heróis em que a afinidade será buscada
 
    Returns:
@@ -74,27 +61,59 @@ def has_affinity(team:list, subject:Hero) -> bool:
       return False
 
    for h in team:
-      for af in h.affinities:
-         if af.id == subject.id:
+      for af in affinities:
+         if (h in af and subject in af):
             return True
    
    return False
 
-def num_triangles(team:list):
+
+def compl(a:tuple, b:tuple) -> tuple:
+   """Devolve o complemento da interseção de um conjunto 
+
+   Args:
+       a (tuple): conjunto a
+       b (tuple): conjunto b
+
+   Returns:
+       tuple: Conjunto com {elementos de a que não estão em b} U {elementos de b que não estão em a}
+   """
+   d = list(b).copy()
+
+   if a[0] in b:
+      d.remove(a[0])
+      d.append(a[1])
+   
+   else:
+      d.remove(a[1])
+      d.append(a[0])
+   
+   return tuple(d)
+
+
+def num_triangles(team:set):
    """Calcula número de triângulos de conflitos em uma lista de herois
 
    Args:
        team (list): Lista de herois a procurar triângulos
    """
 
-   t = 0
+   p = list(team)
 
-   for hero in team:
-      # Para cada conflito c de um heroi h, checa se os conflitos de c estão em h (tirando o proprio c)
-      # ou seja, checa se fecha um triângulo (A -> B,C e B -> C, onde -> indica conflito)
-      for c in hero.conflicts:
-         for k in c.conflicts:
-            if k in hero.conflicts:
+   t = 0
+   for i in p:
+      for j in p[p.index(i):]:
+         # Se algum de membro de p[j] está em p[i], verifica se o complemento dos dois
+         # também está na lista
+         if any(x in j for x in i):
+            c = compl(i, j)
+            if c in p:
                t += 1
-   
+
+               p.remove(i)
+               p.remove(j)
+               p.remove(c)
+
+               break
+
    return t
