@@ -1,3 +1,9 @@
+class Flags:
+   def __init__(self, o, f, a):
+      self.o = o
+      self.f = f
+      self.a = a
+
 def num_conflicts(left:list, right:list, conflicts:set) -> int:
    """Calcula o número total de conflitos nos dois grupos de heróis
 

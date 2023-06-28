@@ -6,10 +6,11 @@ optL = []
 optR = []
 optConflict = 1000000;
 
-def restriction(nextChoice:int, a:list, b:list, af:set, n:int) -> bool:
+def restriction(flag:bool, nextChoice:int, a:list, b:list, af:set, n:int) -> bool:
    """Checa se restrição do Backtracking é verdadeira
 
    Args:
+       flag(bool): Flag de corte de viabilidade
        a (list): Grupo em que elemento sera inserido
        b (list): O outro grupo
        n (int): Quantidade de herois já escolhidos
@@ -17,10 +18,12 @@ def restriction(nextChoice:int, a:list, b:list, af:set, n:int) -> bool:
    Returns:
        bool: Retorna se a restrição é verdadeira ou falsa
    """
+   if(not flag):
+      return True
    return len(a) < n-1 and (has_affinity(a, nextChoice, af) or not has_affinity(b, nextChoice, af))
 
 
-def Bcriada(C:list, a:list, b:list) -> int:
+def Bcriada(flags:Flags, C:list, a:list, b:list) -> int:
    """Função Bdada dos professores
 
    Args:
@@ -31,10 +34,12 @@ def Bcriada(C:list, a:list, b:list) -> int:
    Returns:
        int: Número de triângulos de conflito com heróis ainda não escolhidos
    """
+   if (not flags.o):
+      return True
    return (num_conflicts(a, b, C) + num_triangles(C))
 
 
-def Bdada(C:list, a:list, b:list) -> int:
+def Bdada(flags:Flags, C:list, a:list, b:list) -> int:
    """Função Bdada dos professores
 
    Args:
@@ -45,8 +50,38 @@ def Bdada(C:list, a:list, b:list) -> int:
    Returns:
        int: Número de triângulos de conflito com heróis ainda não escolhidos
    """
+   if (not flags.o):
+      return True
    return (num_conflicts(a, b, C) + num_triangles(C))
 
+
+def Recursion(heroes:list, af:set, conf:set,  left:list, right:list, l:int, n:int, B, flags:Flags):
+   global nodes, optL, optR, optConflict
+   nodes += 1
+
+   if(l == n):
+      c = num_conflicts(left, right, conf)
+      if(c < optConflict):
+         if(flags.f):
+            optL = left
+            optR = right
+            optConflict = c
+         #viabilidade desligada
+         elif(affinities_ok(left, right, af)):
+            optL = left
+            optR = right
+            optConflict = c
+         
+      return
+   else:
+      nextChoice = heroes[0]
+
+      if B(flags, conf, left, right) <= optConflict:
+         if restriction(flags.f, nextChoice, left, right, af, n) :
+            Recursion(heroes[1:], af, conf, left + [nextChoice], right, l+1, n, B, flags)
+
+         if restriction(flags.f, nextChoice, right, left, af, n):
+            Recursion(heroes[1:], af, conf, left, right + [nextChoice], l+1, n, B, flags)
 
 
 # Chamada recusriva de enumeração, cortando os ramos não viáveis
