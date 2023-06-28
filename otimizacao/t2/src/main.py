@@ -68,7 +68,6 @@ if __name__ == "__main__":
          BranchAndBound(heroes, affinities, conflicts,  left, right, 0, n, Bdada)
          print_saida(heroes[0], (time.time() - timer) )
    else:
-      print(f"\t{num_triangles(heroes)} triângulo(s)")
       timer = time.time()
       BranchAndBound(heroes, affinities, conflicts,  left, right, 0, n, Bcriada)
       print_saida(heroes[0], (time.time() - timer) )
