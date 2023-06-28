@@ -61,17 +61,10 @@ def Recursion(heroes:list, af:set, conf:set,  left:list, right:list, l:int, n:in
 
    if(l == n):
       c = num_conflicts(left, right, conf)
-      if(c < optConflict):
-         if(flags.f):
-            optL = left
-            optR = right
-            optConflict = c
-         #viabilidade desligada
-         elif(affinities_ok(left, right, af)):
-            optL = left
-            optR = right
-            optConflict = c
-         
+      if(c < optConflict and affinities_ok(left, right, af)):
+         optL = left
+         optR = right
+         optConflict = c
       return
    else:
       nextChoice = heroes[0]

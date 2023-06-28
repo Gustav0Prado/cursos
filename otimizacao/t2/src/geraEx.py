@@ -1,14 +1,22 @@
 #!/usr/bin/python3
 
-import random
+import random, sys
 
 with open('exemplos/exRand.in', 'w+') as file:
-   file.write("20 10 5\n")
-   for i in range(15):
+   h = int(sys.argv[1])
+   c = int(sys.argv[2])
+   a = int(sys.argv[3])
+   
+   chosen = []
+
+   file.write(f"{h} {c} {a}\n")
+   for i in range(c+a):
       while True:
-         a = random.randint(1, 20)
-         b = random.randint(1, 20)
-         if a != b:
+         x = random.randint(1, h)
+         y = random.randint(1, h)
+         if (x != y) and ((x,y) not in chosen):
             break
+      chosen.append((x, y))
       
-      file.write(f"{a} {b}\n")
+   for (x, y) in chosen:
+      file.write(f"{x} {y}\n")

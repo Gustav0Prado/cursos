@@ -1,5 +1,7 @@
 #!/bin/bash
 
+clear;
+
 echo "Sem cortes de otimalidade/viabilidade"
 printf "\n"
 ./separa -of < $1
