@@ -95,99 +95,6 @@ def Recursion(heroes:list, af:set, conf:set,  left:list, right:list, l:int, n:in
             Recursion(heroes[1:], af, conf, left, right + [nextChoice], l+1, n, B, flags)
 
 
-# Chamada recusriva de enumeração, cortando os ramos não viáveis
-def BranchAndBound(heroes:list, af:set, conf:set,  left:list, right:list, l:int, n:int, B):
-   """Processamento sem cortes de otimalidade
-
-   Args:
-       heroes (list): Lista com todos os heróis que ainda não foram escolhidos para um grupo
-       left (list): Grupo do "lado esquerdo"
-       right (list): Grupo do "lado direito"
-       n (int): número de heróis ainda não escolhidos
-   """
-
-
-   global nodes, optL, optR, optConflict
-   nodes += 1
-
-   if(l == n):
-      c = num_conflicts(left, right, conf)
-      if(c < optConflict):
-         optL = left
-         optR = right
-         optConflict = c
-      return
-   else:
-      nextChoice = heroes[0]
-
-      if B(conf, left, right) <= optConflict:
-         if restriction(nextChoice, left, right, af, n) :
-            BranchAndBound(heroes[1:], af, conf, left + [nextChoice], right, l+1, n, B)
-
-         if restriction(nextChoice, right, left, af, n):
-            BranchAndBound(heroes[1:], af, conf, left, right + [nextChoice], l+1, n, B)
-
-
-# Chamada recusriva de enumeração, cortando os ramos não viáveis
-def Backtrack(heroes:list, af:set, conf:set,  left:list, right:list, l:int, n:int):
-   """Processamento sem cortes de otimalidade
-
-   Args:
-       heroes (list): Lista com todos os heróis que ainda não foram escolhidos para um grupo
-       left (list): Grupo do "lado esquerdo"
-       right (list): Grupo do "lado direito"
-       n (int): número de heróis ainda não escolhidos
-   """
-
-
-   global nodes, optL, optR, optConflict
-   nodes += 1
-
-   if(l == n):
-      c = num_conflicts(left, right, conf)
-      if(c < optConflict):
-         optL = left
-         optR = right
-         optConflict = c
-      return
-   else:
-      nextChoice = heroes[0]
-
-      if restriction(nextChoice, left, right, af, n) :
-         Backtrack(heroes[1:], af, conf, left + [nextChoice], right, l+1, n)
-
-      if restriction(nextChoice, right, left, af, n):
-         Backtrack(heroes[1:], af, conf, left, right + [nextChoice], l+1, n)
-
-
-# Chamada recusriva de enumeração (Sem optimalidade e viabilidade)
-def Enumerate(heroes:list, af:set, conf:set, left:list, right:list, l:int, n:int):
-   """Processamento sem cortes de viabilidade
-
-   Args:
-       heroes (list): Lista com todos os heróis que ainda não foram escolhidos para um grupo
-       left (list): Grupo do "lado esquerdo"
-       right (list): Grupo do "lado direito"
-       l (int): nú mero de heróis já escolhidos
-   """
-
-   global nodes, optL, optR, optConflict
-   nodes += 1
-
-   if(l == n):
-      c = num_conflicts(left, right, conf)
-      if(c < optConflict and affinities_ok(left, right, af)):
-         optL = left
-         optR = right
-         optConflict = c
-      return
-   else:
-      next = heroes[0]
-      # enumera escolhas do próximos elementos (sem a última escolha)
-      Enumerate(heroes[1:], af, conf ,left + [next], right, l+1, n)
-      Enumerate(heroes[1:], af, conf, left, right + [next], l+1, n)
-
-
 def print_saida(first:int, time:float):
    """Gera saida do programa na stdout e stderr
 
@@ -203,4 +110,5 @@ def print_saida(first:int, time:float):
       print(' '.join(map(str, optL)))
    else:
       print(optR)
-   print(f"{nodes} Nós na árvore e { (time * 1000) } milisegundo(s) de execução", file=sys.stderr)
+   # print(f"{nodes} Nós na árvore e { (time * 1000) } milisegundo(s) de execução", file=sys.stderr)
+   print(f"{nodes} { (time * 1000) }", file=sys.stderr)

@@ -94,6 +94,7 @@ def compl(a:tuple, b:tuple) -> tuple:
       d.remove(a[1])
       d.append(a[0])
    
+   d.sort()
    return tuple(d)
 
 
@@ -113,21 +114,30 @@ def num_triangles(C:list, team:set):
          p.remove(i)
 
    t = 0
-   for i in p:
-      for j in p[p.index(i)+1:]:
+   i = 0
+   while i < len(p):
+      found = 0
+      for j in range(len(p)):
          # Se algum de membro de p[j] está em p[i], verifica se o complemento dos dois
          # também está na lista
-         if any(x in j for x in i):
-            c = compl(i, j)
+         if p[i] != p[j] and any(x in p[j] for x in p[i]):
+            c = compl(p[i], p[j])
             if c in p:
                t += 1
 
-               p.remove(i)
-               p.remove(j)
+               pj = p[j]
+               pi = p[i]
+
+               p.remove(pi)
+               p.remove(pj)
                p.remove(c)
+               found = 1
+               i = 0
 
-               break
-
+         if found:
+            break
+      if not found:
+         i += 1
    return t
 
 def num_pentagon(C:list, team:set):
@@ -137,29 +147,49 @@ def num_pentagon(C:list, team:set):
        team (list): Lista de conflitos a procurar triângulos
    """
 
+   # Se tiver menos que 5 conflitos é impossível criar pentágono
    if(len(team) < 5):
       return 0
 
+   # Ordena pares do conjunto e remove pares onde algum membro já foi escolhido
    p = sorted(list(team))
    for i in p:
       if i[0] in C or i[1] in C:
          p.remove(i)
 
    q_pent = 0
-   for i in p:
-      for j in p:
-         # Procura um caminho entre i e j
-         if i != j and i[0] == j[0]:
+   i = 0
+   while i < len(p):
+      found = 0
+      for j in range(len(p)):
+         # Se saem do mesmo lugar, procura um caminho entre i e j
+         if p[i] != p[j] and p[i][0] == p[j][0]:
             way = 0
-            nextI = i[1]
+            visited = []
+            nextI = p[i][1]
             for elem in p:
                # Compara elementos diferentes de i e j buscando um caminho para o próximo I
-               if elem != i and elem != j and elem[0] == nextI:
+               if elem != p[i] and elem != p[j] and elem[0] == nextI:
                   nextI = elem[1]
+                  visited.append(elem)
                   way += 1
-            # Se possui três elementos ligando o caminho é um pentágono (5 elementos)
-            if way == 3:
+            # Se possui três elementos ligando o caminho, é um pentágono (5 elementos)
+            if way == 3 and (p[j][1] == visited[2][1]):
+               pj = p[j]
+               pi = p[i]
+
+               for v in visited:
+                  p.remove(v)
+               
+               p.remove(pi)
+               p.remove(pj)
                q_pent += 1
+               found = 1
+               i = 0
+         if found:
+            break
+      if not found:
+         i += 1
 
 
    return q_pent
