@@ -180,7 +180,9 @@ void dispatcher(){
   while( user_tasks > 0 ){
     #ifdef DEBUG
     printf(MAG);
-    if(readyTasks != NULL) queue_print("PPOS: dispatcher   -  Task(s) Queued: ", (queue_t *)readyTasks, print_elem);
+    if(readyTasks != NULL){
+      printf("%dms - ", systime()); queue_print("PPOS: dispatcher   -  Task(s) Queued: ", (queue_t *)readyTasks, print_elem);
+    }
     printf(RESET);
     #endif
 
@@ -195,7 +197,7 @@ void dispatcher(){
         prox = aux->next;
         if( aux->wakeTime == time ){
           #ifdef DEBUG
-          printf (BLU "PPOS: dispatcher   -  Waking up task %d on %dms\n" RESET, aux->id, systime()) ;
+          printf (BLU "%dms - PPOS: dispatcher   -  Waking up task %d on %dms\n" RESET, systime(), aux->id, systime()) ;
           #endif
 
           //if( sleepingTasks != NULL )queue_print("Dormindo: ", sleepingTasks, print_sleep);
@@ -223,7 +225,7 @@ void dispatcher(){
       //Tarefa terminada, libera pilha do contexto e remove da fila
       case TERMINATED:
         #ifdef DEBUG
-        printf (RED "PPOS: dispatcher   -  %d terminated, removing!\n" RESET, prox->id) ;
+        printf (RED "%dms - PPOS: dispatcher   -  %d terminated, removing!\n" RESET, systime(), prox->id) ;
         #endif
         free(prox->context.uc_stack.ss_sp);
         
@@ -236,7 +238,7 @@ void dispatcher(){
     }
   }
   #ifdef DEBUG
-  printf (BLU "PPOS: dispatcher   -  Empty task queue!\n" RESET) ;
+  printf (BLU "%dms - PPOS: dispatcher   -  Empty task queue!\n" RESET, systime()) ;
   #endif
   task_exit(0);
 }
@@ -317,7 +319,7 @@ int task_init (task_t *task,			// descritor da nova tarefa
     task->creationTime = systime();
 
     #ifdef DEBUG
-    printf (YEL "PPOS: task_init    -  Starting task %d\n" RESET, task->id ) ;
+    printf (YEL "%dms - PPOS: task_init    -  Starting task %d\n" RESET, systime(), task->id ) ;
     #endif
 
     curr_id++;
@@ -359,14 +361,14 @@ void task_exit(int exit_code){
     free(dispatcher_task.context.uc_stack.ss_sp);
 
     #ifdef DEBUG
-    printf (RED "PPOS: task_exit    -  Exiting PPOS\n" RESET);
+    printf (RED "%dms - PPOS: task_exit    -  Exiting PPOS\n" RESET, systime());
     #endif
 
     exit(exit_code);
   }
   else{
     #ifdef DEBUG
-    printf (YEL "PPOS: task_exit    -  Exiting task %d\n" RESET, curr_task->id);
+    printf (YEL "%dms - PPOS: task_exit    -  Exiting task %d\n" RESET, systime(), curr_task->id);
     #endif
 
     if(curr_task->waiting != NULL){
@@ -442,7 +444,7 @@ unsigned int systime (){
 void task_suspend (task_t **queue){
   if(queue){
     #ifdef DEBUG
-    printf (GRN "PPOS: task_suspend -  Suspending task %d\n" RESET, curr_task->id);
+    printf (GRN "%dms - PPOS: task_suspend -  Suspending task %d\n" RESET, systime(), curr_task->id);
     #endif
     
     int type = curr_task->task_type;
@@ -465,7 +467,7 @@ void task_suspend (task_t **queue){
 void task_resume (task_t *task, task_t **queue){
   if(queue && task){
     #ifdef DEBUG
-    printf (GRN "PPOS: task_resume  -  Resuming task %d\n" RESET, task->id);
+    printf (GRN "%dms - PPOS: task_resume  -  Resuming task %d\n" RESET, systime(), task->id);
     #endif
 
     queue_remove((queue_t **)queue, (queue_t*)task);
@@ -480,7 +482,7 @@ void task_resume (task_t *task, task_t **queue){
 int task_wait (task_t *task){
   if(task && task->status != TERMINATED){
     #ifdef DEBUG
-    printf (GRN "PPOS: task_wait    -  Task %d is waiting for task %d\n" RESET, curr_task->id, task->id);
+    printf (GRN "%dms - PPOS: task_wait    -  Task %d is waiting for task %d\n" RESET, systime(), curr_task->id, task->id);
     #endif
 
     task_suspend(&(task->waiting));
@@ -501,7 +503,7 @@ void task_sleep (int t){
   curr_task->wakeTime = systime() + t;
 
   #ifdef DEBUG
-  printf (BLU "PPOS: task_sleep   -  Task %d will sleep until %dms\n" RESET, curr_task->id, curr_task->wakeTime);
+  printf (BLU "%dms - PPOS: task_sleep   -  Task %d will sleep until %dms\n" RESET, systime(), curr_task->id, curr_task->wakeTime);
   #endif
 
   if(t > 0){
@@ -742,6 +744,10 @@ int mqueue_msgs (mqueue_t *queue){
 }
 
 //------------------------------------------------------------------------------------------ P13 ------------------------------------------------------------------------------------//
+
+/*
+  Função do gerente de disco
+*/
 void disk_manager(){
   int ret; 
 
