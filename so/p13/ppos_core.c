@@ -22,7 +22,6 @@ task_t disk_mgr;
 //Fila de prontos
 queue_t *readyTasks;
 queue_t *sleepingTasks;
-queue_t *suspended_tasks;
 
 //Ints para controle
 int curr_id = 0;
@@ -44,7 +43,7 @@ disk_t disk;
 */
 void wake_diskmgr(){
   disk.wake_signal = 1;
-  task_resume(&disk_mgr, (task_t**)&suspended_tasks);
+  task_resume(&disk_mgr, NULL);
 }
 
 
@@ -442,11 +441,10 @@ unsigned int systime (){
   Suspende a tarefa atual, movendo ela da fila de prontas para a fila indicada
 */
 void task_suspend (task_t **queue){
+  #ifdef DEBUG
+  printf (GRN "%dms - PPOS: task_suspend -  Suspending task %d\n" RESET, systime(), curr_task->id);
+  #endif
   if(queue){
-    #ifdef DEBUG
-    printf (GRN "%dms - PPOS: task_suspend -  Suspending task %d\n" RESET, systime(), curr_task->id);
-    #endif
-    
     int type = curr_task->task_type;
     curr_task->task_type = SYSTEM;
 
@@ -459,18 +457,35 @@ void task_suspend (task_t **queue){
 
     task_yield();
   }
+  // Se não tiver fila para suspensas, apenas remove da fila de prontas
+  else{
+    int type = curr_task->task_type;
+    curr_task->task_type = SYSTEM;
+
+    queue_remove((queue_t **)&readyTasks, (queue_t*)curr_task);
+    curr_task->status = SUSPENDED;
+    curr_task->prio_d = curr_task->prio_s;
+
+    curr_task->task_type = type;
+
+    task_yield();
+  }
 }
 
 /*
   Resume uma tarefa, colocando ela de volta na fila de prontas
 */
 void task_resume (task_t *task, task_t **queue){
+  #ifdef DEBUG
+  printf (GRN "%dms - PPOS: task_resume  -  Resuming task %d\n" RESET, systime(), task->id);
+  #endif
   if(queue && task){
-    #ifdef DEBUG
-    printf (GRN "%dms - PPOS: task_resume  -  Resuming task %d\n" RESET, systime(), task->id);
-    #endif
-
     queue_remove((queue_t **)queue, (queue_t*)task);
+    task->status = READY;
+    queue_append((queue_t **)&readyTasks, (queue_t*)task);
+  }
+  // Se nao foi colocado em uma fila, apenas coloca de volta no fila de prontas
+  else if(!queue && task){
     task->status = READY;
     queue_append((queue_t **)&readyTasks, (queue_t*)task);
   }
@@ -778,7 +793,7 @@ void disk_manager(){
 
     // suspende a tarefa corrente (retorna ao dispatcher)
     disk.sleeping = 1;
-    task_suspend((task_t **)&(suspended_tasks));
+    task_suspend(NULL);
   }
 }
 
@@ -833,7 +848,7 @@ int disk_block_read  (int block, void* buffer){
     curr_task->diskBuffer = buffer;
     curr_task->diskBlock = block;
     // acorda o gerente de disco (põe ele na fila de prontas)
-    task_resume(&disk_mgr, (task_t **)&suspended_tasks);
+    task_resume(&disk_mgr, NULL);
   }
 
   // libera semáforo de acesso ao disco
@@ -858,7 +873,7 @@ int disk_block_write (int block, void* buffer){
     curr_task->diskBuffer = buffer;
     curr_task->diskBlock = block;
     // acorda o gerente de disco (põe ele na fila de prontas)
-    task_resume(&disk_mgr, (task_t **)&suspended_tasks);
+    task_resume(&disk_mgr, NULL);
   }
 
   // libera semáforo de acesso ao disco
