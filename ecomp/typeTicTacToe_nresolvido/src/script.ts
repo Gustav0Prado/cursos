@@ -7,12 +7,13 @@ enum PlayerSigns {
 
 let gameActive: true
 let currentPlayer: number = 1
+let end : boolean = false
 let gameState: string[] = ["", "", "", "", "", "", "", "", ""];
 let cell: HTMLElement[] = [];
 
 //arrow function para mostrar mensagem que diz qual jogador ganhou
-const winningMessage = (winner:Number) : void =>{
-    `Jogador ${winner} venceu`
+const winningMessage = (winner:Number) : string =>{
+    return `Jogador ${winner} venceu!!`
 }
 
 // arrow function para mostrar mensagem quando o jogo empata       
@@ -35,7 +36,7 @@ const winningConditions: number[][] = [
 ];
 
 function handleCellPlayed(clickedCell: HTMLElement, clickedCellIndex: number): void {
-    if(gameState[clickedCellIndex] == ""){
+    if(!end && gameState[clickedCellIndex] == ""){
         cell.push(clickedCell)
 
         if (currentPlayer == 1){
@@ -62,14 +63,28 @@ function handleResultValidation(): void {
         let playedO: string = "";
         gameState.forEach((c, index) => {
             if(c == PlayerSigns.X){
-                playedX += `${c}, ${index} | `
+                playedX += `${index} `;
             }
             else if(c == PlayerSigns.O){
-                playedO += `${c}, ${index} | `
+                playedO += `${index} `;
             }
         })
-        console.log(playedX)
+        for(let i = 0; i < 8; ++i){
+            if ( playedX.match((winningConditions[i].join(' '))) != null ){
+                end = true;
+                statusDisplay.innerHTML = winningMessage(1);
+            }
+            else if( playedO.match((winningConditions[i].join(' '))) != null ){
+                end = true
+                statusDisplay.innerHTML = winningMessage(2);
+            }
+        }
     }
+
+    if(cell.length == 9){
+        statusDisplay.innerHTML = drawMessage();
+    }
+
 }
 
 function handleCellClick(clickedCellEvent: Event) {
@@ -82,6 +97,7 @@ function handleCellClick(clickedCellEvent: Event) {
 function handleRestartGame() {
     gameState = ["", "", "", "", "", "", "", "", ""];
     currentPlayer = 1;
+    end = false;
     statusDisplay.innerHTML = currentPlayerTurn();
 
     cell.forEach(c => c.innerText = "");

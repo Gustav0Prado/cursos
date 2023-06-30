@@ -6,11 +6,12 @@ var PlayerSigns;
 })(PlayerSigns || (PlayerSigns = {}));
 var gameActive;
 var currentPlayer = 1;
+var end = false;
 var gameState = ["", "", "", "", "", "", "", "", ""];
 var cell = [];
 //arrow function para mostrar mensagem que diz qual jogador ganhou
 var winningMessage = function (winner) {
-    "Jogador ".concat(winner, " venceu");
+    return "Jogador ".concat(winner, " venceu!!");
 };
 // arrow function para mostrar mensagem quando o jogo empata       
 var drawMessage = function () { return "Jogo empatou!!"; };
@@ -28,7 +29,7 @@ var winningConditions = [
     [2, 4, 6]
 ];
 function handleCellPlayed(clickedCell, clickedCellIndex) {
-    if (gameState[clickedCellIndex] == "") {
+    if (!end && gameState[clickedCellIndex] == "") {
         cell.push(clickedCell);
         if (currentPlayer == 1) {
             gameState[clickedCellIndex] = PlayerSigns.X;
@@ -52,13 +53,25 @@ function handleResultValidation() {
         var playedO_1 = "";
         gameState.forEach(function (c, index) {
             if (c == PlayerSigns.X) {
-                playedX_1 += "".concat(c, ", ").concat(index, " | ");
+                playedX_1 += "".concat(index, " ");
             }
             else if (c == PlayerSigns.O) {
-                playedO_1 += "".concat(c, ", ").concat(index, " | ");
+                playedO_1 += "".concat(index, " ");
             }
         });
-        console.log(playedX_1);
+        for (var i = 0; i < 8; ++i) {
+            if (playedX_1.match((winningConditions[i].join(' '))) != null) {
+                end = true;
+                statusDisplay.innerHTML = winningMessage(1);
+            }
+            else if (playedO_1.match((winningConditions[i].join(' '))) != null) {
+                end = true;
+                statusDisplay.innerHTML = winningMessage(2);
+            }
+        }
+    }
+    if (cell.length == 9) {
+        statusDisplay.innerHTML = drawMessage();
     }
 }
 function handleCellClick(clickedCellEvent) {
@@ -69,6 +82,7 @@ function handleCellClick(clickedCellEvent) {
 function handleRestartGame() {
     gameState = ["", "", "", "", "", "", "", "", ""];
     currentPlayer = 1;
+    end = false;
     statusDisplay.innerHTML = currentPlayerTurn();
     cell.forEach(function (c) { return c.innerText = ""; });
     cell = [];
