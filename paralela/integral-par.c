@@ -2,7 +2,7 @@
 #include <omp.h>
 
 #define MAX_THREADS 4
-#define num_steps 100000
+#define num_steps 1000000
 #define num_steps_thread num_steps/MAX_THREADS
 
 double step;
@@ -23,7 +23,7 @@ int main() {
          x = (i + 0.5) * step; // Largura do retangulo
          sum = sum + 4.0 / (1.0 + x*x); // Sum += Area do retangulo
       }
-      res[ID] = sum;
+      res[ID] = step * sum;
    }
    
    double total_res = 0.0;
