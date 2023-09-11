@@ -8,7 +8,7 @@
 double step;
 
 int main() {
-   double res[4];
+   double res;
 
    #pragma omp parallel num_threads(MAX_THREADS)
    {
@@ -21,14 +21,11 @@ int main() {
       step = 1.0/(double) num_steps;
       for(i = start; i < end; ++i) {
          x = (i + 0.5) * step; // Largura do retangulo
-         res[ID] += 4.0 / (1.0 + x*x); // Sum += Area do retangulo
+         sum = sum + 4.0 / (1.0 + x*x); // Sum += Area do retangulo
       }
-      res[ID] *= step;
+      #pragma omp critical
+         res += sum * step;
    }
    
-   double total_res = 0.0;
-   for(int j = 0; j < MAX_THREADS; ++j){
-      total_res += res[j];
-   }
-   printf("Resultado Paralelo: %.15f\n", total_res);
+   printf("Resultado Paralelo: %.15f\n", res);
 }
