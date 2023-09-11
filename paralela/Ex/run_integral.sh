@@ -11,9 +11,9 @@ printf "\n"
 # time ./integral-par
 # printf "\n"
 
-echo ">>> Integral Paralela - Critical"
-time ./integral-par-crit
-printf "\n"
+# echo ">>> Integral Paralela - Critical"
+# time ./integral-par-crit
+# printf "\n"
 
 # echo ">>> Integral Paralela - omp for"
 # time ./integral-par-pfor

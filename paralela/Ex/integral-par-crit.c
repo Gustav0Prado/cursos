@@ -8,7 +8,7 @@
 double step;
 
 int main() {
-   double res;
+   double res = 0.0;
 
    #pragma omp parallel num_threads(MAX_THREADS)
    {

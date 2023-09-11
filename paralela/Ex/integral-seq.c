@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-static long num_steps = 1000000 * 10;
+static long num_steps = 1000000 * 1;
 double step;
 
 int main() {
