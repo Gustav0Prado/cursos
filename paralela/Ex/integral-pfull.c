@@ -17,9 +17,8 @@ int main() {
       #pragma omp for reduction (+:res)
          for(i = 0; i < num_steps; ++i) {
             x = (i + 0.5) * step; // Largura do retangulo
-            sum = sum + 4.0 / (1.0 + x*x); // Sum += Area do retangulo
+            res += 4.0 / (1.0 + x*x) * step; // Sum += Area do retangulo
          }
-         res = res + (sum * step);
    }
    
    printf("Resultado Paralelo: %.15f\n", res);
