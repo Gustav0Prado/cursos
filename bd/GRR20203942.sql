@@ -13,7 +13,7 @@ FROM cidade c, pais p
 WHERE c.pais = p.codigo;
 
 -- Questão 4
-SELECT p.id, p.nome
+SELECT p.codigo, p.nome
 FROM cidade c JOIN pais p ON c.pais=p.codigo;
 
 -- Questão 5
