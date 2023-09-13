@@ -36,7 +36,7 @@ WHERE NOT EXISTS ((
 SELECT p.nome
 FROM pais p, paislingua pl
 WHERE p.codigo=pl.pais AND
-    lingua IN (’Portuguese’, ’English’)
+    lingua IN ('Portuguese', 'English')
 
 -- Questão 8
 SELECT c.id
