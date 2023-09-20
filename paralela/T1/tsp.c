@@ -96,14 +96,14 @@ void greedy_shortest_first_heuristic(int *x, int *y)
         }
     }
 
-    for (int i = 0; i < nb_towns; ++i)
-    {
-        for (int j = 0; j < nb_towns; ++j)
-        {
-            printf("to_town: %d, dist: %d | ", d_matrix[i][j].to_town, d_matrix[i][j].dist);
-        }
-        printf("\n");
-    }
+    // for (int i = 0; i < nb_towns; ++i)
+    // {
+    //     for (int j = 0; j < nb_towns; ++j)
+    //     {
+    //         printf("to_town: %d, dist: %d | ", d_matrix[i][j].to_town, d_matrix[i][j].dist);
+    //     }
+    //     printf("\n");
+    // }
 
     free(tempdist);
 }
@@ -149,7 +149,16 @@ int run_tsp()
     path = (int *)malloc(sizeof(int) * nb_towns);
     path[0] = 0;
 
-    tsp(1, 0, path);
+    //tsp(1, 0, path);
+
+    // Segunda cidade segue ordem de mais próximas da primeira
+    int second_town;
+    for (int i = 1; i < nb_towns; ++i)
+    {
+        second_town = d_matrix[0][i].to_town;
+        path[1] = second_town;
+        tsp(2, d_matrix[0][i].dist, path);
+    }
 
     free(path);
     for (i = 0; i < nb_towns; i++)
