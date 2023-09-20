@@ -20,12 +20,12 @@
 # define NPOINTS 1000
 # define MAXITER 1000
 
-void testpoint(void);
-
 struct d_complex{
    double r;
    double i;
 };
+
+void testpoint(struct d_complex c);
 
 struct d_complex c;
 int numoutside = 0;
@@ -36,12 +36,12 @@ int main(){
 
    //   Loop over grid of points in the complex plane which contains the Mandelbrot set,
    //   testing each point to see whether it is inside or outside the set.
-   #pragma omp parallel for default(shared) firstprivate(c,eps) private(i,j)
+   #pragma omp parallel for collapse(2) default(none) firstprivate(c,eps) private(j)
       for (i=0; i<NPOINTS; i++) {
          for (j=0; j<NPOINTS; j++) {
             c.r = -2.0+2.5*(double)(i)/(double)(NPOINTS)+eps;
             c.i = 1.125*(double)(j)/(double)(NPOINTS)+eps;
-            testpoint();
+            testpoint(c);
          }
       }
 
@@ -53,7 +53,7 @@ int main(){
    printf("Correct answer should be around 1.510659\n");
 }
 
-void testpoint(void){
+void testpoint(struct d_complex c){
    // Does the iteration z=z*z+c, until |z| > 2 when point is known to be outside set
    // If loop count reaches MAXITER, point is considered to be inside the set
 
