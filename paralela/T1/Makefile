@@ -1,12 +1,13 @@
 CC = gcc
 CFLAGS = -lm -g -fopenmp -Wall -O3
-SRCS = $(wildcard *.c)
-PROGS = $(patsubst %.c,%,$(SRCS))
 
-all: $(PROGS)
+all: tsp tsp-par
 
-%: %.c
-	$(CC) -o $@ $< $(CFLAGS)
+tsp: tsp.c
+	$(CC) -o tsp tsp.c $(CFLAGS)
+
+tsp-par: tsp-par.c
+	$(CC) -o tsp-par tsp-par.c $(CFLAGS)
 
 clean:
 	@echo "Limpando ..."

@@ -39,8 +39,9 @@ void tsp(int depth, int current_length, int path[])
     if (depth == nb_towns)
     {
         current_length += dist_to_origin[path[nb_towns - 1]];
-        if (current_length < min_distance)
+        if (current_length < min_distance){
             min_distance = current_length;
+        }
     }
     else
     {
@@ -68,16 +69,14 @@ void greedy_shortest_first_heuristic(int *x, int *y)
     // Could be faster, albeit not as didactic.
     // Anyway, for tractable sizes of the problem it
     // runs almost instantaneously.
-    for (i = 0; i < nb_towns; i++)
-    {
-        for (j = 0; j < nb_towns; j++)
-        {
+    for (i = 0; i < nb_towns; i++) {
+        for (j = 0; j < nb_towns; j++) {
             int dx = x[i] - x[j];
             int dy = y[i] - y[j];
             tempdist[j] = dx * dx + dy * dy;
         }
-        for (j = 0; j < nb_towns; j++)
-        {
+
+        for (j = 0; j < nb_towns; j++) {
             int tmp = INT_MAX;
             int town = 0;
             for (k = 0; k < nb_towns; k++)
@@ -121,8 +120,11 @@ void init_tsp()
         exit(1);
 
     d_matrix = (d_info **)malloc(sizeof(d_info *) * nb_towns);
+    
+    #pragma omp parallel for
     for (i = 0; i < nb_towns; i++)
         d_matrix[i] = (d_info *)malloc(sizeof(d_info) * nb_towns);
+    
     dist_to_origin = (int *)malloc(sizeof(int) * nb_towns);
 
     x = (int *)malloc(sizeof(int) * nb_towns);
@@ -150,14 +152,7 @@ int run_tsp()
     path = (int *)malloc(sizeof(int) * nb_towns);
     path[0] = 0;
 
-    // Segunda cidade segue ordem de mais próximas da primeira
-    int second_town = 0;
-    for (int i = 1; i < nb_towns; ++i)
-    {
-        second_town = d_matrix[0][i].to_town;
-        path[1] = second_town;
-        tsp(2, d_matrix[0][i].dist, path);
-    }
+    tsp(1, 0, path);
 
     free(path);
     for (i = 0; i < nb_towns; i++)
