@@ -1,3 +1,5 @@
 .vscode
 *.o
 tsp
+tsp-par
+simple.in
