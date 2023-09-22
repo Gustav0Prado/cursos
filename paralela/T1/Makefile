@@ -1,19 +1,13 @@
-FLAGS=-lm -g
+CC = gcc
+CFLAGS = -lm -g -fopenmp -Wall -O3
+SRCS = $(wildcard *.c)
+PROGS = $(patsubst %.c,%,$(SRCS))
 
-CC=gcc
+all: $(PROGS)
 
-RM=rm -f
-
-EXEC=tsp
-
-all: $(EXEC)
-
-$(EXEC): tsp.c
-	$(CC) $(EXEC).c -c -o $(EXEC).o $(FLAGS)
-	$(CC) $(EXEC).o -o 	 $(EXEC)   $(FLAGS)
-
-run:
-	./$(EXEC)
+%: %.c
+	$(CC) -o $@ $< $(CFLAGS)
 
 clean:
-	$(RM) $(EXEC).o $(EXEC)
+	@echo "Limpando ..."
+	@rm -rf ./tsp ./tsp-par

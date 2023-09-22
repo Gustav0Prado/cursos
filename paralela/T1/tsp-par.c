@@ -40,7 +40,8 @@ void tsp(int depth, int current_length, int path[])
     {
         current_length += dist_to_origin[path[nb_towns - 1]];
         if (current_length < min_distance)
-            min_distance = current_length;
+            #pragma omp critical
+                min_distance = current_length;
     }
     else
     {
@@ -150,7 +151,15 @@ int run_tsp()
     path = (int *)malloc(sizeof(int) * nb_towns);
     path[0] = 0;
 
-    tsp(1, 0, path);
+    // Segunda cidade segue ordem de mais próximas da primeira
+    int second_town = 0;
+    #pragma omp parallel for default(none) firstprivate(second_town, path) shared(nb_towns, d_matrix, min_distance)
+        for (int i = 1; i < nb_towns; ++i)
+        {
+            second_town = d_matrix[0][i].to_town;
+            path[1] = second_town;
+            tsp(2, d_matrix[0][i].dist, path);
+        }
 
     free(path);
     for (i = 0; i < nb_towns; i++)
