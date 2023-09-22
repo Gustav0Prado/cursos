@@ -3,6 +3,10 @@
 make clean
 make
 
+./generate.py
+
+TIMEFORMAT=%R
+
 echo "------------------"
 
 time ./tsp < simple.in
