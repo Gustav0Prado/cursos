@@ -15,13 +15,25 @@ struct node {
    struct node* next;
 };
 
-int fib(int n) {
+int fib(int n, int cut) {
    int x, y;
    if (n < 2) {
       return (n);
    } else {
-      x = fib(n - 1);
-      y = fib(n - 2);
+      if(cut < 15){
+         #pragma omp task shared(x) firstprivate(n)
+            x = fib(n - 1, cut+1);
+
+         #pragma omp task shared(y) firstprivate(n)
+            y = fib(n - 2, cut+1);
+
+         #pragma omp taskwait
+      }
+      else{
+         x = fib(n - 1, cut+1);
+         y = fib(n - 2, cut+1);
+      }
+
 	  return (x + y);
    }
 }
@@ -30,7 +42,7 @@ void processwork(struct node* p)
 {
    int n;
    n = p->data;
-   p->fibdata = fib(n);
+   p->fibdata = fib(n, 0);
 }
 
 struct node* init_list(struct node* p) {
@@ -59,6 +71,8 @@ int main(int argc, char *argv[]) {
    struct node *temp=NULL;
    struct node *head=NULL;
    
+   omp_set_num_threads(4);
+
    printf("Process linked list\n");
    printf("  Each linked list node will be processed by function 'processwork()'\n");
    printf("  Each ll node will compute %d fibonacci numbers beginning with %d\n",N,FS);      
@@ -71,13 +85,10 @@ int main(int argc, char *argv[]) {
       #pragma omp parallel
       {
          #pragma omp single
-         {
             while (p != NULL) {
-               #pragma omp task firstprivate(p)
-                  processwork(p);
+               processwork(p);
                p = p->next;
             }
-         }
       }
    }
 
