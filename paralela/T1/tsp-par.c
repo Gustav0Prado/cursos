@@ -39,9 +39,9 @@ void tsp(int depth, int current_length, int path[])
     if (depth == nb_towns)
     {
         current_length += dist_to_origin[path[nb_towns - 1]];
-        if (current_length < min_distance){
-            min_distance = current_length;
-        }
+            if (current_length < min_distance){
+                min_distance = current_length;
+            }
     }
     else
     {
@@ -65,36 +65,39 @@ void greedy_shortest_first_heuristic(int *x, int *y)
     int i, j, k, dist;
     int *tempdist;
 
-    tempdist = (int *)malloc(sizeof(int) * nb_towns);
     // Could be faster, albeit not as didactic.
     // Anyway, for tractable sizes of the problem it
     // runs almost instantaneously.
-    for (i = 0; i < nb_towns; i++) {
-        for (j = 0; j < nb_towns; j++) {
-            int dx = x[i] - x[j];
-            int dy = y[i] - y[j];
-            tempdist[j] = dx * dx + dy * dy;
-        }
+    #pragma omp parallel for default(none) shared(nb_towns, x, y, d_matrix,dist_to_origin) private(j,k,dist,tempdist)
+        for (i = 0; i < nb_towns; i++) {
+            tempdist = (int *)malloc(sizeof(int) * nb_towns);
 
-        for (j = 0; j < nb_towns; j++) {
-            int tmp = INT_MAX;
-            int town = 0;
-            for (k = 0; k < nb_towns; k++)
-            {
-                if (tempdist[k] < tmp)
-                {
-                    tmp = tempdist[k];
-                    town = k;
-                }
+            for (j = 0; j < nb_towns; j++) {
+                int dx = x[i] - x[j];
+                int dy = y[i] - y[j];
+                tempdist[j] = dx * dx + dy * dy;
             }
-            tempdist[town] = INT_MAX;
-            d_matrix[i][j].to_town = town;
-            dist = (int)sqrt(tmp);
-            d_matrix[i][j].dist = dist;
-            if (i == 0)
-                dist_to_origin[town] = dist;
+
+            for (j = 0; j < nb_towns; j++) {
+                int tmp = INT_MAX;
+                int town = 0;
+                for (k = 0; k < nb_towns; k++)
+                {
+                    if (tempdist[k] < tmp)
+                    {
+                        tmp = tempdist[k];
+                        town = k;
+                    }
+                }
+                tempdist[town] = INT_MAX;
+                d_matrix[i][j].to_town = town;
+                dist = (int)sqrt(tmp);
+                d_matrix[i][j].dist = dist;
+                if (i == 0)
+                    dist_to_origin[town] = dist;
+            }
+            free(tempdist);
         }
-    }
 
     // for (int i = 0; i < nb_towns; ++i)
     // {
@@ -104,8 +107,7 @@ void greedy_shortest_first_heuristic(int *x, int *y)
     //     }
     //     printf("\n");
     // }
-
-    free(tempdist);
+    
 }
 
 void init_tsp()

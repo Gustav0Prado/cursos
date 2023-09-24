@@ -76,6 +76,7 @@ void greedy_shortest_first_heuristic(int *x, int *y)
             int dy = y[i] - y[j];
             tempdist[j] = dx * dx + dy * dy;
         }
+
         for (j = 0; j < nb_towns; j++)
         {
             int tmp = INT_MAX;

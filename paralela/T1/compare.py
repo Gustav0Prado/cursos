@@ -20,7 +20,7 @@ for i in range(20):
    result = subprocess.run(f"TIMEFORMAT=%5R; time {dir}/tsp < simple.in", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, executable='/bin/bash')
    r = result.stdout.strip().decode().replace("\n", ", ")
    if len(lastResult) > 0 and r != lastResult:
-         print("Resultados inconsistentes!!!")
+         print("Resultados inconsistentes!!!\n")
          exit(-1)
    lastResult = r
    timeSeq.append( float(result.stderr.decode()[:-1]) )
