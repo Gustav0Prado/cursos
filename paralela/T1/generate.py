@@ -2,10 +2,8 @@
 
 import random
 
-def generateExample(maxInst, minTowns, maxTowns):
+def generateExample(inst, minTowns, maxTowns):
     f = open("simple.in", "w")
-
-    inst = random.randint(1, maxInst)
 
     f.write(f"{inst}\n");
 

@@ -53,6 +53,8 @@ void tsp(int depth, int current_length, int path[])
         me = path[depth - 1];
 
         int **paths = malloc(sizeof(void *)*nb_towns);
+
+        #pragma omp parallel for
         for(int i = 0; i < nb_towns; ++i){
             paths[i] = (int *)malloc(sizeof(int)*nb_towns);
         }
@@ -68,7 +70,7 @@ void tsp(int depth, int current_length, int path[])
                     path[depth] = town;
                     dist = d_matrix[me][i].dist;
 
-                    if(depth < 4){
+                    if(depth < 10){
                         // Copia path (único para cada thread) e cria task
                         memcpy(paths[i], path, sizeof(int)*nb_towns);
                         #pragma omp task default(none) firstprivate(i, current_length, dist, depth) shared(paths)
