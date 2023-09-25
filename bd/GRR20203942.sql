@@ -13,7 +13,7 @@ FROM cidade c, pais p
 WHERE c.pais = p.codigo;
 
 -- Questão 4
-SELECT p.codigo, p.nome
+SELECT c.id, p.nome
 FROM cidade c JOIN pais p ON c.pais=p.codigo;
 
 -- Questão 5
@@ -33,7 +33,7 @@ WHERE NOT EXISTS ((
         WHERE cm1.rio=cm2.rio));
 
 -- Questão 7
-SELECT p.nome
+SELECT p.nome, pl.lingua
 FROM pais p, paislingua pl
 WHERE p.codigo=pl.pais AND
     lingua IN ('Portuguese', 'English');

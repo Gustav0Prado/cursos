@@ -5,8 +5,9 @@ import subprocess, os, sys, generate, statistics
 os.system('make clean && make')
 
 if "-g" in sys.argv:
-   pos = sys.argv.index("-g")+1
-   generate.generateExample( int(sys.argv[pos]), int(sys.argv[pos+1]), int(sys.argv[pos+2]) )
+   if len(sys.argv) != 5:
+      pos = sys.argv.index("-g")+1
+      generate.generateExample( int(sys.argv[pos]), int(sys.argv[pos+1]), int(sys.argv[pos+2]) )
 
 dir = subprocess.check_output(['pwd']).decode()[:-1]
 

@@ -70,7 +70,7 @@ void tsp(int depth, int current_length, int path[])
                     path[depth] = town;
                     dist = d_matrix[me][i].dist;
 
-                    if(depth < 10){
+                    if(depth < 5){
                         // Copia path (único para cada thread) e cria task
                         memcpy(paths[i], path, sizeof(int)*nb_towns);
                         #pragma omp task default(none) firstprivate(i, current_length, dist, depth) shared(paths)
@@ -81,8 +81,8 @@ void tsp(int depth, int current_length, int path[])
                     }
                 }
             }
-            #pragma omp taskwait
         }
+
         for(int i = 0; i < nb_towns; ++i){
             free(paths[i]);
         }
