@@ -33,6 +33,8 @@ for i in range(ran):
 print(f"Tempo em segundos (Mediana) : {statistics.median(timeSeq)}")
 print(f"Resultado: \n{lastResult}")
 
+lastResult = []
+
 print(f"\nParalelo")
 for i in range(ran):
    result = subprocess.run(f"TIMEFORMAT=%5R; time {dir}/tsp-par < simple.in", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, executable='/bin/bash')
