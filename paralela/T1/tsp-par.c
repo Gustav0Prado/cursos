@@ -54,21 +54,14 @@ void tsp(int depth, int current_length, int path[])
 
         me = path[depth - 1];
 
-        #pragma omp parallel
+        for (i = 0; i < nb_towns; i++)
         {
-            #pragma omp single nowait
+            town = d_matrix[me][i].to_town;
+            if (!present(town, depth, path))
             {
-                for (i = 0; i < nb_towns; i++)
-                {
-                    town = d_matrix[me][i].to_town;
-                    if (!present(town, depth, path))
-                    {
-                        path[depth] = town;
-                        dist = d_matrix[me][i].dist;
-                        #pragma omp task firstprivate(depth, current_length, dist)
-                        tsp(depth + 1, current_length + dist, path);
-                    }
-                }
+                path[depth] = town;
+                dist = d_matrix[me][i].dist;
+                tsp(depth + 1, current_length + dist, path);
             }
         }
     }
@@ -155,12 +148,18 @@ int run_tsp()
 
     init_tsp();
 
-    path = (int *)malloc(sizeof(int) * nb_towns);
-    path[0] = 0;
+    
 
-    tsp(1, 0, path);
+    //tsp(1, 0, path);
+    #pragma omp parallel for private(path)
+    for(int i = 1; i < nb_towns; ++i){
+        path = (int *)malloc(sizeof(int) * nb_towns);
+        path[0] = 0;
+        path[1] = i;
+        tsp(2, dist_to_origin[i], path);
+        free(path);
+    }
 
-    free(path);
     for (i = 0; i < nb_towns; i++)
         free(d_matrix[i]);
     free(d_matrix);
