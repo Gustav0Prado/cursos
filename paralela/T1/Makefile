@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -lm -g -fopenmp -Wall
+CFLAGS = -lm -g -fopenmp -Wall -O3
 
 all: tsp tsp-par
 

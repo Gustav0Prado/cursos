@@ -42,9 +42,11 @@ void tsp(int depth, int current_length, int path[])
     {
         current_length += dist_to_origin[path[nb_towns - 1]];
         #pragma omp critical
+        {
             if (current_length < min_distance){
                 min_distance = current_length;
             }
+        }
     }
     else
     {
@@ -52,42 +54,23 @@ void tsp(int depth, int current_length, int path[])
 
         me = path[depth - 1];
 
-        int **paths = malloc(sizeof(void *)*nb_towns);
-
-        #pragma omp parallel for
-        for(int i = 0; i < nb_towns; ++i){
-            paths[i] = (int *)malloc(sizeof(int)*nb_towns);
-        }
-
         #pragma omp parallel
         {
-            #pragma omp single
-            for (i = 0; i < nb_towns; i++)
+            #pragma omp single nowait
             {
-                town = d_matrix[me][i].to_town;
-                if (!present(town, depth, path))
+                for (i = 0; i < nb_towns; i++)
                 {
-                    path[depth] = town;
-                    dist = d_matrix[me][i].dist;
-
-                    if(depth < 5){
-                        // Copia path (único para cada thread) e cria task
-                        memcpy(paths[i], path, sizeof(int)*nb_towns);
-                        #pragma omp task default(none) firstprivate(i, current_length, dist, depth) shared(paths)
-                            tsp(depth + 1, current_length + dist, paths[i]);
-                    }
-                    else{
+                    town = d_matrix[me][i].to_town;
+                    if (!present(town, depth, path))
+                    {
+                        path[depth] = town;
+                        dist = d_matrix[me][i].dist;
+                        #pragma omp task firstprivate(depth, current_length, dist)
                         tsp(depth + 1, current_length + dist, path);
                     }
                 }
             }
         }
-
-        for(int i = 0; i < nb_towns; ++i){
-            free(paths[i]);
-        }
-        free(paths);
-
     }
 }
 
@@ -99,10 +82,10 @@ void greedy_shortest_first_heuristic(int *x, int *y)
     // Could be faster, albeit not as didactic.
     // Anyway, for tractable sizes of the problem it
     // runs almost instantaneously.
-    tempdist = (int *)malloc(sizeof(int) * nb_towns);
 
-    // Paralelizacao só tem efeito com tamanhos maiores que 120
+    #pragma omp parallel for private(tempdist, i, j, k, dist) schedule(guided)
     for (i = 0; i < nb_towns; i++) {
+        tempdist = (int *)malloc(sizeof(int) * nb_towns);
         for (j = 0; j < nb_towns; j++) {
             int dx = x[i] - x[j];
             int dy = y[i] - y[j];
@@ -127,9 +110,9 @@ void greedy_shortest_first_heuristic(int *x, int *y)
             if (i == 0)
                 dist_to_origin[town] = dist;
         }
+        free(tempdist);
     }
 
-    free(tempdist);
 }
 
 void init_tsp()
@@ -145,7 +128,6 @@ void init_tsp()
 
     d_matrix = (d_info **)malloc(sizeof(d_info *) * nb_towns);
     
-    #pragma omp parallel for
     for (i = 0; i < nb_towns; i++)
         d_matrix[i] = (d_info *)malloc(sizeof(d_info) * nb_towns);
     
