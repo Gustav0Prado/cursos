@@ -8,7 +8,6 @@
 #include <stdlib.h>
 #include <limits.h>
 #include <math.h>
-#include <omp.h>
 
 int min_distance;
 int nb_towns;
@@ -97,15 +96,6 @@ void greedy_shortest_first_heuristic(int *x, int *y)
                 dist_to_origin[town] = dist;
         }
     }
-
-    // for (int i = 0; i < nb_towns; ++i)
-    // {
-    //     for (int j = 0; j < nb_towns; ++j)
-    //     {
-    //         printf("to_town: %d, dist: %d | ", d_matrix[i][j].to_town, d_matrix[i][j].dist);
-    //     }
-    //     printf("\n");
-    // }
 
     free(tempdist);
 }

@@ -23,7 +23,7 @@ for i in range(20):
          print("Resultados inconsistentes!!!\n")
          exit(-1)
    lastResult = r
-   timeSeq.append( float(result.stderr.decode()[:-1]) )
+   timeSeq.append( float(result.stderr.decode()[:-1].replace(",", "."))  )
 
 print(f"Tempo em segundos (Mediana) : {statistics.median(timeSeq)}")
 print(f"Resultado: \n{lastResult}")
@@ -36,7 +36,7 @@ for i in range(20):
          print("Resultados inconsistentes!!!")
          exit(-1)
    lastResult = r
-   timePar.append( float(result.stderr.decode()[:-1]) )
+   timePar.append( float(result.stderr.decode()[:-1].replace(",", "."))  )
 
 print(f"Tempo em segundos (Mediana) : {statistics.median(timePar)}")
 print(f"Resultado: \n{lastResult}")
