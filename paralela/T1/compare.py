@@ -30,7 +30,7 @@ for i in range(ran):
    lastResult = r
    timeSeq.append( float(result.stderr.decode()[:-1].replace(",", "."))  )
 
-print(f"Tempo em segundos (Mediana) : {statistics.median(timeSeq)}")
+print(f"Tempo em segundos (Media) : {statistics.mean(timeSeq)}")
 print(f"Resultado: \n{lastResult}")
 
 lastResult = []
@@ -45,5 +45,5 @@ for i in range(ran):
    lastResult = r
    timePar.append( float(result.stderr.decode()[:-1].replace(",", "."))  )
 
-print(f"Tempo em segundos (Mediana) : {statistics.median(timePar)}")
+print(f"Tempo em segundos (Media) : {statistics.mean(timePar)}")
 print(f"Resultado: \n{lastResult}")
