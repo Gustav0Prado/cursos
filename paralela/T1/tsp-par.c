@@ -6,6 +6,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <limits.h>
 #include <math.h>
 #include <omp.h>
@@ -34,11 +35,13 @@ int present(int town, int depth, int *path)
 void tsp(int depth, int current_length, int path[])
 {
     int i;
+
     if (current_length >= min_distance)
         return;
     if (depth == nb_towns)
     {
         current_length += dist_to_origin[path[nb_towns - 1]];
+        #pragma omp critical
             if (current_length < min_distance){
                 min_distance = current_length;
             }
@@ -46,17 +49,43 @@ void tsp(int depth, int current_length, int path[])
     else
     {
         int town, me, dist;
+
         me = path[depth - 1];
-        for (i = 0; i < nb_towns; i++)
-        {
-            town = d_matrix[me][i].to_town;
-            if (!present(town, depth, path))
-            {
-                path[depth] = town;
-                dist = d_matrix[me][i].dist;
-                tsp(depth + 1, current_length + dist, path);
-            }
+
+        int **paths = malloc(sizeof(void *)*nb_towns);
+        for(int i = 0; i < nb_towns; ++i){
+            paths[i] = (int *)malloc(sizeof(int)*nb_towns);
         }
+
+        #pragma omp parallel
+        {
+            #pragma omp single
+            for (i = 0; i < nb_towns; i++)
+            {
+                town = d_matrix[me][i].to_town;
+                if (!present(town, depth, path))
+                {
+                    path[depth] = town;
+                    dist = d_matrix[me][i].dist;
+
+                    if(depth < 4){
+                        // Copia path (único para cada thread) e cria task
+                        memcpy(paths[i], path, sizeof(int)*nb_towns);
+                        #pragma omp task default(none) firstprivate(i, current_length, dist, depth) shared(paths)
+                            tsp(depth + 1, current_length + dist, paths[i]);
+                    }
+                    else{
+                        tsp(depth + 1, current_length + dist, path);
+                    }
+                }
+            }
+            #pragma omp taskwait
+        }
+        for(int i = 0; i < nb_towns; ++i){
+            free(paths[i]);
+        }
+        free(paths);
+
     }
 }
 
