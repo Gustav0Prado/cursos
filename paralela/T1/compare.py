@@ -36,14 +36,15 @@ print(f"Resultado: \n{lastResult}")
 lastResult = []
 
 print(f"\nParalelo")
-for i in range(ran):
-   result = subprocess.run(f"TIMEFORMAT=%5R; time {dir}/tsp-par < simple.in", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, executable='/bin/bash')
-   r = result.stdout.strip().decode().replace("\n", ", ")
-   if len(lastResult) > 0 and r != lastResult:
-         print("Resultados inconsistentes!!!")
-         exit(-1)
-   lastResult = r
-   timePar.append( float(result.stderr.decode()[:-1].replace(",", "."))  )
+for t in [2,4,8,16]:
+   for i in range(ran):
+      result = subprocess.run(f"export OMP_NUM_THREADS={t};TIMEFORMAT=%5R; time {dir}/tsp-par < simple.in", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, executable='/bin/bash')
+      r = result.stdout.strip().decode().replace("\n", ", ")
+      if len(lastResult) > 0 and r != lastResult:
+            print("Resultados inconsistentes!!!")
+            exit(-1)
+      lastResult = r
+      timePar.append( float(result.stderr.decode()[:-1].replace(",", "."))  )
 
-print(f"Tempo em segundos (Media) : {statistics.mean(timePar)}")
-print(f"Resultado: \n{lastResult}")
+   print(f"Tempo em segundos (Media) com {t} threads : {statistics.mean(timePar)}")
+   print(f"Resultado: \n{lastResult}")
