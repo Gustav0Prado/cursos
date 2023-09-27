@@ -9,7 +9,7 @@ if "-g" in sys.argv:
    pos = sys.argv.index("-g")+1
    generate.generateExample( int(sys.argv[pos]), int(sys.argv[pos+1]), int(sys.argv[pos+2]) )
 
-if "-g" or "-e" in sys.argv:
+if ("-g" in sys.argv) or ("-e" in sys.argv):
    inp = "simple"
 
 if "-r" in sys.argv:
