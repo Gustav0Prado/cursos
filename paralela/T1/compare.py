@@ -4,9 +4,13 @@ import subprocess, os, sys, generate, statistics
 
 os.system('make clean && make')
 
+inp = "tsp"
 if "-g" in sys.argv:
    pos = sys.argv.index("-g")+1
    generate.generateExample( int(sys.argv[pos]), int(sys.argv[pos+1]), int(sys.argv[pos+2]) )
+
+if "-g" or "-e" in sys.argv:
+   inp = "simple"
 
 if "-r" in sys.argv:
    ran = int(sys.argv[sys.argv.index("-r")+1])
@@ -22,7 +26,7 @@ lastResult = []
 
 print(f"\nSequencial")
 for i in range(ran):
-   result = subprocess.run(f"TIMEFORMAT=%5R; time {dir}/tsp < simple.in", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, executable='/bin/bash')
+   result = subprocess.run(f"TIMEFORMAT=%5R; time {dir}/tsp < {inp}.in", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, executable='/bin/bash')
    r = result.stdout.strip().decode().replace("\n", ", ")
    if len(lastResult) > 0 and r != lastResult:
          print("Resultados inconsistentes!!!\n")
@@ -38,7 +42,7 @@ lastResult = []
 print(f"\nParalelo")
 for t in [2,4,8,16]:
    for i in range(ran):
-      result = subprocess.run(f"export OMP_NUM_THREADS={t};TIMEFORMAT=%5R; time {dir}/tsp-par < simple.in", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, executable='/bin/bash')
+      result = subprocess.run(f"export OMP_NUM_THREADS={t};TIMEFORMAT=%5R; time {dir}/tsp-par < {inp}.in", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, executable='/bin/bash')
       r = result.stdout.strip().decode().replace("\n", ", ")
       if len(lastResult) > 0 and r != lastResult:
             print("Resultados inconsistentes!!!")

@@ -148,10 +148,8 @@ int run_tsp()
 
     init_tsp();
 
-    
-
     //tsp(1, 0, path);
-    #pragma omp parallel for private(path)
+    #pragma omp parallel for private(path) schedule(dynamic)
     for(int i = 1; i < nb_towns; ++i){
         path = (int *)malloc(sizeof(int) * nb_towns);
         path[0] = 0;
