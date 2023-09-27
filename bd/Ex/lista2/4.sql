@@ -1,4 +1,4 @@
 select a.nomealu
-from aluno a join matricula m on a.numAlu=m.numAlu join disciplina d on m.nomeDisc=d.nome join professor p on d.idprof=p.idprof
-group by a.nomealu,d.horario
-having count(*) = 2;
+from aluno a natural join matricula m join d disciplina on m.nomedisc=d.nome
+group by a.nomealu, d.horario
+having count(m.nomedisc) > 1;

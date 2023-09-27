@@ -1,5 +1,5 @@
 SELECT p.nomeProf, count(d.nome) AS qtdedisc
-FROM Professor p JOIN disciplina d ON p.idProf = d.idProf
+FROM Professor p NATURAL JOIN disciplina d
 WHERE p.idProf IN (
    SELECT idProf
    FROM disciplina

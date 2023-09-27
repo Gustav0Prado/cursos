@@ -1,8 +1,3 @@
-# desonesto mas funciona
-select a.idade, floor(avg(a.ano))
-from aluno a
-group by a.idade;
-
 # jeito diferente
 SELECT a1.idade, a1.ano
 FROM aluno a1

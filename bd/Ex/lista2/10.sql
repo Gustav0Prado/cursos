@@ -1,6 +1,6 @@
 # Parece comparar cada elemento com a tabela inteira
 SELECT a.nomealu
-FROM aluno a JOIN matricula m ON a.numalu = m.numalu
+FROM aluno a NATURAL JOIN matricula m
 GROUP BY a.nomealu
 HAVING COUNT(m.nomedisc) >= ALL (
    SELECT COUNT(nomedisc)    
