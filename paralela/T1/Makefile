@@ -11,4 +11,4 @@ tsp-par: tsp-par.c
 
 clean:
 	@echo "Limpando ..."
-	@rm -rf ./tsp ./tsp-par
+	@rm -rf ./tsp ./tsp-par __pycache__

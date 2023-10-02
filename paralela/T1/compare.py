@@ -37,8 +37,6 @@ for i in range(ran):
 print(f"Tempo em segundos (Media) : {statistics.mean(timeSeq)}")
 print(f"Resultado: \n{lastResult}")
 
-lastResult = []
-
 print(f"\nParalelo")
 for t in [2,4,8,16]:
    for i in range(ran):
