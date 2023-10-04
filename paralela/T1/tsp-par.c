@@ -10,6 +10,7 @@
 #include <limits.h>
 #include <math.h>
 #include <omp.h>
+#include "utils.h"
 
 int min_distance;
 int nb_towns;
@@ -142,7 +143,7 @@ void init_tsp()
     free(y);
 }
 
-int run_tsp()
+int run_tsp(double *tpar)
 {
     int i, *path;
 
@@ -150,6 +151,8 @@ int run_tsp()
 
     //tsp(1, 0, path);
     
+    double inst_par = timestamp();
+
     #pragma omp parallel default(none) shared(nb_towns, dist_to_origin) private(path)
     {
         #pragma omp single
@@ -165,6 +168,9 @@ int run_tsp()
         }
     }
 
+    inst_par = timestamp() - inst_par;
+    *tpar += inst_par;
+
     for (i = 0; i < nb_towns; i++)
         free(d_matrix[i]);
     free(d_matrix);
@@ -174,11 +180,19 @@ int run_tsp()
 
 int main(int argc, char **argv)
 {
+    double tpar = 0.0;
+    double time = timestamp();
+
     int num_instances, st;
     st = scanf("%u", &num_instances);
     if (st != 1)
         exit(1);
     while (num_instances-- > 0)
-        printf("%d\n", run_tsp());
+        printf("%d ", run_tsp(&tpar));
+    printf("\n");
+
+    time = timestamp() - time;
+    printf("Tempo total: %lf\n", time);
+    printf("Tempo paralelo: %lf\n", tpar);
     return 0;
 }

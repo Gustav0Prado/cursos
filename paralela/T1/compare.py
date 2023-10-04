@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-import subprocess, os, sys, generate, statistics
+import subprocess, os, sys, generate, statistics, re
 
 os.system('make clean && make')
 
@@ -20,33 +20,36 @@ else:
 dir = subprocess.check_output(['pwd']).decode()[:-1]
 
 timeSeq = []
+timeTotalPar = []
 timePar = []
 
 lastResult = []
 
 print(f"\nSequencial")
 for i in range(ran):
-   result = subprocess.run(f"TIMEFORMAT=%5R; time {dir}/tsp < {inp}.in", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, executable='/bin/bash')
-   r = result.stdout.strip().decode().replace("\n", ", ")
+   result = subprocess.run(f"{dir}/tsp < {inp}.in", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, executable='/bin/bash')
+   r = result.stdout.decode().partition("\n")[0]
    if len(lastResult) > 0 and r != lastResult:
          print("Resultados inconsistentes!!!\n")
          exit(-1)
    lastResult = r
-   timeSeq.append( float(result.stderr.decode()[:-1].replace(",", "."))  )
+   timeSeq.append( float(re.findall("\d+\.\d+", result.stdout.decode())[0]) )
 
-print(f"Tempo em segundos (Media) : {statistics.mean(timeSeq)}")
-print(f"Resultado: \n{lastResult}")
+print(f"Tempo em segundos (Media) : {statistics.mean(timeSeq):.4f}, {statistics.stdev(timeSeq):.4f}")
+print(f"Resultado: {lastResult}")
 
 print(f"\nParalelo")
 for t in [2,4,8,16]:
    for i in range(ran):
-      result = subprocess.run(f"export OMP_NUM_THREADS={t};TIMEFORMAT=%5R; time {dir}/tsp-par < {inp}.in", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, executable='/bin/bash')
-      r = result.stdout.strip().decode().replace("\n", ", ")
+      result = subprocess.run(f"export OMP_NUM_THREADS={t}; {dir}/tsp-par < {inp}.in", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, executable='/bin/bash')
+      r = result.stdout.decode().partition("\n")[0]
       if len(lastResult) > 0 and r != lastResult:
             print("Resultados inconsistentes!!!")
             exit(-1)
       lastResult = r
-      timePar.append( float(result.stderr.decode()[:-1].replace(",", "."))  )
+      timeTotalPar.append( float(re.findall("\d+\.\d+", result.stdout.decode())[0]) )
+      timePar.append( float(re.findall("\d+\.\d+", result.stdout.decode())[1]) )
 
-   print(f"Tempo em segundos (Media) com {t} threads : {statistics.mean(timePar)}")
-   print(f"Resultado: \n{lastResult}")
+   print(f"Media Tparalelo - {t} threads : {statistics.mean(timePar):.4f}, {statistics.stdev(timePar):.4f}")
+   print(f"Media   Ttotal  - {t} threads : {statistics.mean(timeTotalPar):.4f}, {statistics.stdev(timeTotalPar):.4f}")
+   print(f"Resultado: {lastResult}\n")

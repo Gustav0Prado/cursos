@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <limits.h>
 #include <math.h>
+#include "utils.h"
 
 int min_distance;
 int nb_towns;
@@ -153,11 +154,17 @@ int run_tsp()
 
 int main(int argc, char **argv)
 {
+    double time = timestamp();
+
     int num_instances, st;
     st = scanf("%u", &num_instances);
     if (st != 1)
         exit(1);
     while (num_instances-- > 0)
-        printf("%d\n", run_tsp());
+        printf("%d ", run_tsp());
+    printf("\n");
+
+    time = timestamp() - time;
+    printf("Tempo total: %lf\n", time);
     return 0;
 }
