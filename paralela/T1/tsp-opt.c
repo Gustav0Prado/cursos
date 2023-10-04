@@ -6,10 +6,8 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <limits.h>
 #include <math.h>
-#include <omp.h>
 #include "utils.h"
 
 int min_distance;
@@ -24,45 +22,30 @@ typedef struct
 d_info **d_matrix;
 int *dist_to_origin;
 
-int present(int town, int depth, int *path)
+void tsp(int depth, int current_length, char *path, int last)
 {
     int i;
-    for (i = 0; i < depth; i++)
-        if (path[i] == town)
-            return 1;
-    return 0;
-}
-
-void tsp(int depth, int current_length, int path[])
-{
-    int i;
-
     if (current_length >= min_distance)
         return;
     if (depth == nb_towns)
     {
-        current_length += dist_to_origin[path[nb_towns - 1]];
-        #pragma omp critical
-        {
-            if (current_length < min_distance){
-                min_distance = current_length;
-            }
-        }
+        current_length += dist_to_origin[last];
+        if (current_length < min_distance)
+            min_distance = current_length;
     }
     else
     {
         int town, me, dist;
-
-        me = path[depth - 1];
-
+        me = last;
         for (i = 0; i < nb_towns; i++)
         {
             town = d_matrix[me][i].to_town;
-            if (!present(town, depth, path))
+            if (path[town] == 0)
             {
-                path[depth] = town;
+                path[town] = 1;
                 dist = d_matrix[me][i].dist;
-                tsp(depth + 1, current_length + dist, path);
+                tsp(depth + 1, current_length + dist, path, town);
+                path[town] = 0;
             }
         }
     }
@@ -71,21 +54,23 @@ void tsp(int depth, int current_length, int path[])
 void greedy_shortest_first_heuristic(int *x, int *y)
 {
     int i, j, k, dist;
+    int *tempdist;
 
+    tempdist = (int *)malloc(sizeof(int) * nb_towns);
     // Could be faster, albeit not as didactic.
     // Anyway, for tractable sizes of the problem it
     // runs almost instantaneously.
-    
-    #pragma omp parallel for private(i, j, k, dist) schedule(guided)
-    for (i = 0; i < nb_towns; i++) {
-        int *tempdist = (int *)malloc(sizeof(int) * nb_towns);
-        for (j = 0; j < nb_towns; j++) {
+    for (i = 0; i < nb_towns; i++)
+    {
+        for (j = 0; j < nb_towns; j++)
+        {
             int dx = x[i] - x[j];
             int dy = y[i] - y[j];
             tempdist[j] = dx * dx + dy * dy;
         }
 
-        for (j = 0; j < nb_towns; j++) {
+        for (j = 0; j < nb_towns; j++)
+        {
             int tmp = INT_MAX;
             int town = 0;
             for (k = 0; k < nb_towns; k++)
@@ -103,9 +88,9 @@ void greedy_shortest_first_heuristic(int *x, int *y)
             if (i == 0)
                 dist_to_origin[town] = dist;
         }
-        free(tempdist);
     }
 
+    free(tempdist);
 }
 
 void init_tsp()
@@ -120,10 +105,8 @@ void init_tsp()
         exit(1);
 
     d_matrix = (d_info **)malloc(sizeof(d_info *) * nb_towns);
-    
     for (i = 0; i < nb_towns; i++)
         d_matrix[i] = (d_info *)malloc(sizeof(d_info) * nb_towns);
-    
     dist_to_origin = (int *)malloc(sizeof(int) * nb_towns);
 
     x = (int *)malloc(sizeof(int) * nb_towns);
@@ -142,34 +125,19 @@ void init_tsp()
     free(y);
 }
 
-int run_tsp(double *tpar)
+int run_tsp()
 {
-    int i, *path;
+    int i;
+    char *path;
 
     init_tsp();
 
-    //tsp(1, 0, path);
-    
-    double inst_par = timestamp();
+    path = calloc(nb_towns, sizeof(char));
+    path[0] = 1;
 
-    #pragma omp parallel default(none) shared(nb_towns, dist_to_origin) private(path)
-    {
-        #pragma omp single
-        {
-            #pragma omp taskloop
-            for(int i = 1; i < nb_towns; ++i){
-                path = (int *)malloc(sizeof(int) * nb_towns);
-                path[0] = 0;
-                path[1] = i;
-                tsp(2, dist_to_origin[i], path);
-                free(path);
-            }
-        }
-    }
+    tsp(1, 0, path, 0);
 
-    inst_par = timestamp() - inst_par;
-    *tpar += inst_par;
-
+    free(path);
     for (i = 0; i < nb_towns; i++)
         free(d_matrix[i]);
     free(d_matrix);
@@ -179,7 +147,6 @@ int run_tsp(double *tpar)
 
 int main(int argc, char **argv)
 {
-    double tpar = 0.0;
     double time = timestamp();
 
     int num_instances, st;
@@ -187,13 +154,12 @@ int main(int argc, char **argv)
     if (st != 1)
         exit(1);
     while (num_instances-- > 0)
-        printf("%d ", run_tsp(&tpar));
+        printf("%d ", run_tsp());
     printf("\n");
 
     free(dist_to_origin);
 
     time = timestamp() - time;
     printf("Tempo total: %lf\n", time/1000);
-    printf("Tempo paralelo: %lf\n", tpar/1000);
     return 0;
 }

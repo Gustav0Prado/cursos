@@ -164,7 +164,9 @@ int main(int argc, char **argv)
         printf("%d ", run_tsp());
     printf("\n");
 
+    free(dist_to_origin);
+
     time = timestamp() - time;
-    printf("Tempo total: %lf\n", time);
+    printf("Tempo total: %lf\n", time/1000);
     return 0;
 }
