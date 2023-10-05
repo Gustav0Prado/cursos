@@ -3,4 +3,5 @@ __pycache__
 *.o
 tsp
 tsp-par
+tsp-opt
 simple.in

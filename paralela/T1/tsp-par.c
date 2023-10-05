@@ -24,16 +24,7 @@ typedef struct
 d_info **d_matrix;
 int *dist_to_origin;
 
-int present(int town, int depth, int *path)
-{
-    int i;
-    for (i = 0; i < depth; i++)
-        if (path[i] == town)
-            return 1;
-    return 0;
-}
-
-void tsp(int depth, int current_length, int path[])
+void tsp(int depth, int current_length, char path[], int last)
 {
     int i;
 
@@ -41,7 +32,7 @@ void tsp(int depth, int current_length, int path[])
         return;
     if (depth == nb_towns)
     {
-        current_length += dist_to_origin[path[nb_towns - 1]];
+        current_length += dist_to_origin[last];
         #pragma omp critical
         {
             if (current_length < min_distance){
@@ -53,22 +44,23 @@ void tsp(int depth, int current_length, int path[])
     {
         int town, me, dist;
 
-        me = path[depth - 1];
+        me = last;
 
         for (i = 0; i < nb_towns; i++)
         {
             town = d_matrix[me][i].to_town;
-            if (!present(town, depth, path))
+            if (path[town] == 0)
             {
-                path[depth] = town;
+                path[town] = 1;
                 dist = d_matrix[me][i].dist;
-                tsp(depth + 1, current_length + dist, path);
+                tsp(depth + 1, current_length + dist, path, town);
+                path[town] = 0;
             }
         }
     }
 }
 
-void greedy_shortest_first_heuristic(int *x, int *y)
+void greedy_shortest_first_heuristic(int *x, int *y, double *tpar)
 {
     int i, j, k, dist;
 
@@ -76,6 +68,8 @@ void greedy_shortest_first_heuristic(int *x, int *y)
     // Anyway, for tractable sizes of the problem it
     // runs almost instantaneously.
     
+    double inst_par = timestamp();
+
     #pragma omp parallel for private(i, j, k, dist) schedule(guided)
     for (i = 0; i < nb_towns; i++) {
         int *tempdist = (int *)malloc(sizeof(int) * nb_towns);
@@ -106,9 +100,10 @@ void greedy_shortest_first_heuristic(int *x, int *y)
         free(tempdist);
     }
 
+    *tpar += timestamp() - inst_par;
 }
 
-void init_tsp()
+void init_tsp(double *tpar)
 {
     int i, st;
     int *x, *y;
@@ -136,7 +131,7 @@ void init_tsp()
             exit(1);
     }
 
-    greedy_shortest_first_heuristic(x, y);
+    greedy_shortest_first_heuristic(x, y, tpar);
 
     free(x);
     free(y);
@@ -144,28 +139,21 @@ void init_tsp()
 
 int run_tsp(double *tpar)
 {
-    int i, *path;
+    int i;
+    char *path;
 
-    init_tsp();
-
-    //tsp(1, 0, path);
+    init_tsp(tpar);
     
     double inst_par = timestamp();
 
-    #pragma omp parallel default(none) shared(nb_towns, dist_to_origin) private(path)
-    {
-        #pragma omp single
-        {
-            #pragma omp taskloop
-            for(int i = 1; i < nb_towns; ++i){
-                path = (int *)malloc(sizeof(int) * nb_towns);
-                path[0] = 0;
-                path[1] = i;
-                tsp(2, dist_to_origin[i], path);
-                free(path);
-            }
-        }
-    }
+    #pragma omp parallel for default(none) shared(nb_towns, dist_to_origin) private(path) schedule(dynamic)
+	for(int i = 1; i < nb_towns; ++i){
+		path = calloc(nb_towns, sizeof(char));
+		path[0] = 1;
+		path[i] = 1;
+		tsp(2, dist_to_origin[i], path, i);
+		free(path);
+	}
 
     inst_par = timestamp() - inst_par;
     *tpar += inst_par;

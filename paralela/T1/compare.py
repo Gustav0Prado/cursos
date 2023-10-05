@@ -25,9 +25,9 @@ timePar = []
 
 lastResult = []
 
-print(f"\nSequencial")
+print(f"\nSequencial Otimizado")
 for i in range(ran):
-   result = subprocess.run(f"{dir}/tsp < {inp}.in", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, executable='/bin/bash')
+   result = subprocess.run(f"{dir}/tsp-opt < {inp}.in", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, executable='/bin/bash')
    r = result.stdout.decode().partition("\n")[0]
    if len(lastResult) > 0 and r != lastResult:
          print("Resultados inconsistentes!!!\n")
@@ -35,8 +35,12 @@ for i in range(ran):
    lastResult = r
    timeSeq.append( float(re.findall("\d+\.\d+", result.stdout.decode())[0]) )
 
-print(f"Tempo em segundos (Media) : {statistics.mean(timeSeq):.4f}, {statistics.stdev(timeSeq):.4f}")
+if (ran > 1):
+   print(f"Tempo em segundos (Media) : {statistics.mean(timeSeq):.6f}, {statistics.stdev(timeSeq):.6f}")
+else:
+   print(f"Tempo em segundos (Media) : {statistics.mean(timeSeq):.6f}")
 print(f"Resultado: {lastResult}")
+
 
 print(f"\nParalelo")
 for t in [2,4,8,16]:
@@ -50,6 +54,10 @@ for t in [2,4,8,16]:
       timeTotalPar.append( float(re.findall("\d+\.\d+", result.stdout.decode())[0]) )
       timePar.append( float(re.findall("\d+\.\d+", result.stdout.decode())[1]) )
 
-   print(f"Media Tparalelo - {t} threads : {statistics.mean(timePar):.4f}, {statistics.stdev(timePar):.4f}")
-   print(f"Media   Ttotal  - {t} threads : {statistics.mean(timeTotalPar):.4f}, {statistics.stdev(timeTotalPar):.4f}")
+   if (ran > 1):
+      print(f"Media Tparalelo - {t} threads : {statistics.mean(timePar):.6f}, {statistics.stdev(timePar):.6f}")
+      print(f"Media   Ttotal  - {t} threads : {statistics.mean(timeTotalPar):.6f}, {statistics.stdev(timeTotalPar):.6f}")
+   else:
+      print(f"Media Tparalelo - {t} threads : {statistics.mean(timePar):.6f}")
+      print(f"Media   Ttotal  - {t} threads : {statistics.mean(timeTotalPar):.6f}")
    print(f"Resultado: {lastResult}\n")
