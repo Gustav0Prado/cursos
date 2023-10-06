@@ -17,6 +17,10 @@ if "-r" in sys.argv:
 else:
    ran = 20
 
+check = True
+if "-d" in sys.argv:
+   check = False
+
 dir = subprocess.check_output(['pwd']).decode()[:-1]
 
 timeSeq = []
@@ -29,7 +33,7 @@ print(f"\nSequencial Otimizado")
 for i in range(ran):
    result = subprocess.run(f"{dir}/tsp-opt < {inp}.in", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, executable='/bin/bash')
    r = result.stdout.decode().partition("\n")[0]
-   if len(lastResult) > 0 and r != lastResult:
+   if check and len(lastResult) > 0 and r != lastResult:
          print("Resultados inconsistentes!!!\n")
          exit(-1)
    lastResult = r
@@ -47,7 +51,7 @@ for t in [2,4,8,16]:
    for i in range(ran):
       result = subprocess.run(f"export OMP_NUM_THREADS={t}; {dir}/tsp-par < {inp}.in", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, executable='/bin/bash')
       r = result.stdout.decode().partition("\n")[0]
-      if len(lastResult) > 0 and r != lastResult:
+      if check and len(lastResult) > 0 and r != lastResult:
             print("Resultados inconsistentes!!!")
             exit(-1)
       lastResult = r
