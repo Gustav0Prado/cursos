@@ -31,7 +31,7 @@ lastResult = []
 
 print(f"\nSequencial Otimizado")
 for i in range(ran):
-   result = subprocess.run(f"{dir}/tsp-opt < {inp}.in", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, executable='/bin/bash')
+   result = subprocess.run(f"{dir}/tsp < {inp}.in", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, executable='/bin/bash')
    r = result.stdout.decode().partition("\n")[0]
    if check and len(lastResult) > 0 and r != lastResult:
          print("Resultados inconsistentes!!!\n")
@@ -47,7 +47,7 @@ print(f"Resultado: {lastResult}")
 
 
 print(f"\nParalelo")
-for t in [2,4,8,16]:
+for t in [2,4]:
    for i in range(ran):
       result = subprocess.run(f"export OMP_NUM_THREADS={t}; {dir}/tsp-par < {inp}.in", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, executable='/bin/bash')
       r = result.stdout.decode().partition("\n")[0]

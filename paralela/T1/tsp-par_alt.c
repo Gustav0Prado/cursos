@@ -52,7 +52,7 @@ void tsp(int depth, int current_length, char path[], int last)
             {
                 for (i = 0; i < nb_towns; i++)
                 {
-                    char *new_path = calloc(nb_towns, sizeof(char));
+                    char new_path[nb_towns];
                     town = d_matrix[me][i].to_town;
                     if (path[town] == 0)
                     {
@@ -172,18 +172,10 @@ int run_tsp(double *tpar)
     path[0] = 1;
     tsp(1, 0, path, 0);
 
-    // #pragma omp parallel for default(none) shared(nb_towns, dist_to_origin) private(path) schedule(dynamic)
-	// for(i = 1; i < nb_towns; ++i){
-	// 	path = calloc(nb_towns, sizeof(char));
-	// 	path[0] = 1;
-	// 	path[i] = 1;
-	// 	tsp(2, dist_to_origin[i], path, i);
-	// 	free(path);
-	// }
-
     inst_par = timestamp() - inst_par;
     *tpar += inst_par;
 
+    free(path);
     for (i = 0; i < nb_towns; i++)
         free(d_matrix[i]);
     free(d_matrix);
