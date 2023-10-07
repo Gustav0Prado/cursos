@@ -71,5 +71,6 @@ for t in [2,4]:
    else:
       print(f"Media   Ttotal  - {t} threads : {medTotalPar:.6f} - S(p) = {(medSeq/medTotalPar):.2f}")
    print(f"Resultado: {lastResult}\n")
+   timeTotalPar = []
 
 os.system("echo powersave | sudo tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor")

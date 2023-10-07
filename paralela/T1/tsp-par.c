@@ -24,37 +24,59 @@ typedef struct
 d_info **d_matrix;
 int *dist_to_origin;
 
-void tsp(int depth, int current_length, char path[], int last)
+int present(int town, int depth, int *path)
 {
     int i;
+    for (i = 0; i < depth; i++)
+        if (path[i] == town)
+            return 1;
+    return 0;
+}
 
+void tsp(int depth, int current_length, int path[])
+{
+    int i;
     if (current_length >= min_distance)
         return;
     if (depth == nb_towns)
     {
-        current_length += dist_to_origin[last];
-        #pragma omp critical
-        {
-            if (current_length < min_distance){
-                min_distance = current_length;
-            }
-        }
+        current_length += dist_to_origin[path[nb_towns - 1]];
+        if (current_length < min_distance)
+            min_distance = current_length;
     }
     else
     {
         int town, me, dist;
-
-        me = last;
-
-        for (i = 0; i < nb_towns; i++)
-        {
-            town = d_matrix[me][i].to_town;
-            if (path[town] == 0)
+        me = path[depth - 1];
+        if(depth <= 2){
+            #pragma omp parallel
+            #pragma omp single nowait
             {
-                path[town] = 1;
-                dist = d_matrix[me][i].dist;
-                tsp(depth + 1, current_length + dist, path, town);
-                path[town] = 0;
+                for (i = 0; i < nb_towns; i++)
+                {
+                    int new_path[nb_towns];
+                    town = d_matrix[me][i].to_town;
+                    if (!present(town, depth, path))
+                    {
+                        path[depth] = town;
+                        dist = d_matrix[me][i].dist;
+                        memcpy(new_path, path, sizeof(int)*nb_towns);
+                        #pragma omp task
+                            tsp(depth + 1, current_length + dist, new_path);
+                    }
+                }
+            }
+        }
+        else{
+            for (i = 0; i < nb_towns; i++)
+            {
+                town = d_matrix[me][i].to_town;
+                if (!present(town, depth, path))
+                {
+                    path[depth] = town;
+                    dist = d_matrix[me][i].dist;
+                    tsp(depth + 1, current_length + dist, path);
+                }
             }
         }
     }
@@ -136,19 +158,13 @@ void init_tsp()
 int run_tsp()
 {
     int i;
-    char *path;
+    int *path;
 
     init_tsp();
     
-
-    #pragma omp parallel for default(none) shared(nb_towns, dist_to_origin) private(path) schedule(dynamic)
-	for(int i = 1; i < nb_towns; ++i){
-		path = calloc(nb_towns, sizeof(char));
-		path[0] = 1;
-		path[i] = 1;
-		tsp(2, dist_to_origin[i], path, i);
-		free(path);
-	}
+    path = (int *)malloc(sizeof(int) * nb_towns);
+    path[0] = 0;
+    tsp(1, 0, path);
 
     for (i = 0; i < nb_towns; i++)
         free(d_matrix[i]);

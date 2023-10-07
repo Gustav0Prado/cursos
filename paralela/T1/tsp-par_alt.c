@@ -46,23 +46,19 @@ void tsp(int depth, int current_length, char path[], int last)
 
         me = last;
 
-        if(depth <= 4){
-            #pragma omp parallel
-            #pragma omp single nowait
+        if(depth <= 2){
+            for (i = 0; i < nb_towns; i++)
             {
-                for (i = 0; i < nb_towns; i++)
+                char new_path[nb_towns];
+                town = d_matrix[me][i].to_town;
+                if (path[town] == 0)
                 {
-                    char new_path[nb_towns];
-                    town = d_matrix[me][i].to_town;
-                    if (path[town] == 0)
-                    {
-                        path[town] = 1;
-                        dist = d_matrix[me][i].dist;
-                        memcpy(new_path, path, sizeof(char)*nb_towns);
-                        #pragma omp task
-                            tsp(depth + 1, current_length + dist, new_path, town);
-                        path[town] = 0;
-                    }
+                    path[town] = 1;
+                    dist = d_matrix[me][i].dist;
+                    memcpy(new_path, path, sizeof(char)*nb_towns);
+                    #pragma omp task
+                        tsp(depth + 1, current_length + dist, new_path, town);
+                    path[town] = 0;
                 }
             }
         }
@@ -165,7 +161,9 @@ int run_tsp()
     path = calloc(nb_towns, sizeof(char));
     path[0] = 1;
     
-    tsp(1, 0, path, 0);
+    #pragma omp parallel
+    #pragma omp single
+        tsp(1, 0, path, 0);
 
     free(path);
     for (i = 0; i < nb_towns; i++)
