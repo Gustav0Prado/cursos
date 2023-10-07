@@ -38,11 +38,14 @@ for i in range(ran):
          exit(-1)
    lastResult = r
    timeSeq.append( float(re.findall("\d+\.\d+", result.stdout.decode())[0]) )
+   timePar.append( float(re.findall("\d+\.\d+", result.stdout.decode())[1]) )
 
 if (ran > 1):
-   print(f"Tempo em segundos (Media) : {statistics.mean(timeSeq):.6f}, {statistics.stdev(timeSeq):.6f}")
+   print(f"Tempo em segundos   (Media) : {statistics.mean(timeSeq):.6f}, {statistics.stdev(timeSeq):.6f}")
 else:
-   print(f"Tempo em segundos (Media) : {statistics.mean(timeSeq):.6f}")
+   print(f"Tempo em segundos   (Media) : {statistics.mean(timeSeq):.6f}")
+
+print(f"Tempo Paralelizavel (Media) : {(statistics.mean(timePar)/statistics.mean(timeSeq)*100):.2f}%")
 print(f"Resultado: {lastResult}")
 
 
@@ -56,12 +59,9 @@ for t in [2,4]:
             exit(-1)
       lastResult = r
       timeTotalPar.append( float(re.findall("\d+\.\d+", result.stdout.decode())[0]) )
-      timePar.append( float(re.findall("\d+\.\d+", result.stdout.decode())[1]) )
 
    if (ran > 1):
-      print(f"Media Tparalelo - {t} threads : {statistics.mean(timePar):.6f}, {statistics.stdev(timePar):.6f}")
       print(f"Media   Ttotal  - {t} threads : {statistics.mean(timeTotalPar):.6f}, {statistics.stdev(timeTotalPar):.6f}")
    else:
-      print(f"Media Tparalelo - {t} threads : {statistics.mean(timePar):.6f}")
       print(f"Media   Ttotal  - {t} threads : {statistics.mean(timeTotalPar):.6f}")
    print(f"Resultado: {lastResult}\n")
