@@ -60,15 +60,13 @@ void tsp(int depth, int current_length, char path[], int last)
     }
 }
 
-void greedy_shortest_first_heuristic(int *x, int *y, double *tpar)
+void greedy_shortest_first_heuristic(int *x, int *y)
 {
     int i, j, k, dist;
 
     // Could be faster, albeit not as didactic.
     // Anyway, for tractable sizes of the problem it
     // runs almost instantaneously.
-    
-    double inst_par = timestamp();
 
     #pragma omp parallel for private(i, j, k, dist) schedule(guided)
     for (i = 0; i < nb_towns; i++) {
@@ -99,11 +97,9 @@ void greedy_shortest_first_heuristic(int *x, int *y, double *tpar)
         }
         free(tempdist);
     }
-
-    *tpar += timestamp() - inst_par;
 }
 
-void init_tsp(double *tpar)
+void init_tsp()
 {
     int i, st;
     int *x, *y;
@@ -131,20 +127,19 @@ void init_tsp(double *tpar)
             exit(1);
     }
 
-    greedy_shortest_first_heuristic(x, y, tpar);
+    greedy_shortest_first_heuristic(x, y);
 
     free(x);
     free(y);
 }
 
-int run_tsp(double *tpar)
+int run_tsp()
 {
     int i;
     char *path;
 
-    init_tsp(tpar);
+    init_tsp();
     
-    double inst_par = timestamp();
 
     #pragma omp parallel for default(none) shared(nb_towns, dist_to_origin) private(path) schedule(dynamic)
 	for(int i = 1; i < nb_towns; ++i){
@@ -155,9 +150,6 @@ int run_tsp(double *tpar)
 		free(path);
 	}
 
-    inst_par = timestamp() - inst_par;
-    *tpar += inst_par;
-
     for (i = 0; i < nb_towns; i++)
         free(d_matrix[i]);
     free(d_matrix);
@@ -167,7 +159,6 @@ int run_tsp(double *tpar)
 
 int main(int argc, char **argv)
 {
-    double tpar = 0.0;
     double time = timestamp();
 
     int num_instances, st;
@@ -175,13 +166,12 @@ int main(int argc, char **argv)
     if (st != 1)
         exit(1);
     while (num_instances-- > 0)
-        printf("%d ", run_tsp(&tpar));
+        printf("%d ", run_tsp());
     printf("\n");
 
     free(dist_to_origin);
 
     time = timestamp() - time;
     printf("Tempo total: %lf\n", time/1000);
-    printf("Tempo paralelo: %lf\n", tpar/1000);
     return 0;
 }

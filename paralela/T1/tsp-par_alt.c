@@ -46,9 +46,9 @@ void tsp(int depth, int current_length, char path[], int last)
 
         me = last;
 
-        if(depth <= 1){
+        if(depth <= 4){
             #pragma omp parallel
-            #pragma omp single
+            #pragma omp single nowait
             {
                 for (i = 0; i < nb_towns; i++)
                 {

@@ -4,6 +4,8 @@ import subprocess, os, sys, generate, statistics, re
 
 os.system('make clean && make')
 
+os.system("echo performance | sudo tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor")
+
 inp = "tsp"
 if "-g" in sys.argv:
    pos = sys.argv.index("-g")+1
@@ -40,12 +42,14 @@ for i in range(ran):
    timeSeq.append( float(re.findall("\d+\.\d+", result.stdout.decode())[0]) )
    timePar.append( float(re.findall("\d+\.\d+", result.stdout.decode())[1]) )
 
-if (ran > 1):
-   print(f"Tempo em segundos   (Media) : {statistics.mean(timeSeq):.6f}, {statistics.stdev(timeSeq):.6f}")
-else:
-   print(f"Tempo em segundos   (Media) : {statistics.mean(timeSeq):.6f}")
+medSeq = statistics.mean(timeSeq)
 
-print(f"Tempo Paralelizavel (Media) : {(statistics.mean(timePar)/statistics.mean(timeSeq)*100):.2f}%")
+if (ran > 1):
+   print(f"Tempo em segundos   (Media) : {medSeq:.6f}, {statistics.stdev(timeSeq):.6f}")
+else:
+   print(f"Tempo em segundos   (Media) : {medSeq:.6f}")
+
+print(f"Tempo Paralelizavel (Media) : {(statistics.mean(timePar)/medSeq*100):.2f}%")
 print(f"Resultado: {lastResult}")
 
 
@@ -60,8 +64,12 @@ for t in [2,4]:
       lastResult = r
       timeTotalPar.append( float(re.findall("\d+\.\d+", result.stdout.decode())[0]) )
 
+   medTotalPar = statistics.mean(timeTotalPar)
+
    if (ran > 1):
-      print(f"Media   Ttotal  - {t} threads : {statistics.mean(timeTotalPar):.6f}, {statistics.stdev(timeTotalPar):.6f}")
+      print(f"Media   Ttotal  - {t} threads : {medTotalPar:.6f}, {statistics.stdev(timeTotalPar):.6f} - S(p) = {(medSeq/medTotalPar):.2f}")
    else:
-      print(f"Media   Ttotal  - {t} threads : {statistics.mean(timeTotalPar):.6f}")
+      print(f"Media   Ttotal  - {t} threads : {medTotalPar:.6f} - S(p) = {(medSeq/medTotalPar):.2f}")
    print(f"Resultado: {lastResult}\n")
+
+os.system("echo powersave | sudo tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor")
