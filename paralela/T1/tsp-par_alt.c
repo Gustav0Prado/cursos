@@ -182,12 +182,11 @@ int main(int argc, char **argv)
     if (st != 1)
         exit(1);
     while (num_instances-- > 0)
-        printf("%d ", run_tsp());
-    printf("\n");
+        printf("%d\n", run_tsp());
 
     free(dist_to_origin);
 
     time = timestamp() - time;
-    printf("Tempo total: %lf\n", time/1000);
+    //printf("Tempo total: %lf\n", time/1000);
     return 0;
 }
