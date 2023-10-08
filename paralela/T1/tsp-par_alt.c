@@ -10,10 +10,18 @@
 #include <limits.h>
 #include <math.h>
 #include <omp.h>
-#include "utils.h"
+#include <time.h>
 
 int min_distance;
 int nb_towns;
+
+//Funcao retorna o tempo atual em segundos
+double timestamp(void)
+{
+  struct timespec tp;
+  clock_gettime(CLOCK_MONOTONIC_RAW, &tp);
+  return((double)(tp.tv_sec*1.0e3 + tp.tv_nsec*1.0e-6)/1000);
+}
 
 typedef struct
 {
@@ -187,6 +195,6 @@ int main(int argc, char **argv)
     free(dist_to_origin);
 
     time = timestamp() - time;
-    //printf("Tempo total: %lf\n", time/1000);
+    printf("Tempo total: %lf\n", time);
     return 0;
 }

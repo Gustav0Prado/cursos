@@ -10,7 +10,7 @@ tsp: tsp.c tsp-opt.c
 	$(CC) -o tsp tsp-opt.c utils.o $(CFLAGS)
 
 tsp-par: tsp-par.c tsp-par_alt.c
-	$(CC) -o tsp-par tsp-par_alt.c utils.o $(CFLAGS)
+	$(CC) -o tsp-par tsp-par_alt.c $(CFLAGS)
 
 clean:
 	@echo "Limpando ..."
