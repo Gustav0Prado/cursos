@@ -5,3 +5,6 @@ mpi: pi.c
 
 run: mpi
 	mpirun --hostfile hosts.txt -np 4 ./mpi
+
+clean:
+	rm -rf ./mpi
