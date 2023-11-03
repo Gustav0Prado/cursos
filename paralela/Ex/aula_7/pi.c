@@ -17,12 +17,12 @@ int main (int argc, char **argv) {
     int i; double x, pi, sum = 0.0;
     step = 1.0/(double) num_steps;
 
-    int start = my_rank * num_steps/n_procs;
-    int end = (my_rank+1) * num_steps/n_procs;
+    // int start = my_rank * num_steps/n_procs;
+    // int end = (my_rank+1) * num_steps/n_procs;
 
     // printf("start: %d, end: %d\n", start, end);
 
-    for (int i = start; i < end; i++){
+    for (int i = my_rank; i < num_steps; i+= n_procs){
         x = (i + 0.5) * step; // Largura do retângulo
         sum = sum + 4.0 / (1.0 + x*x); // Sum += Área do retângulo
     }
