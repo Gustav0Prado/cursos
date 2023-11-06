@@ -4,7 +4,7 @@ mpi: pi.c
 	mpicc -o mpi pi.c -O3
 
 run: mpi
-	mpirun --hostfile hosts.txt -np $(procs) ./mpi
+	mpirun --hostfile hosts.txt -np 8 ./mpi
 
 clean:
-	rm -rf ./mpi
+	rm -f mpi a.out

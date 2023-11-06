@@ -8,7 +8,7 @@ double step;
 
 int main (int argc, char **argv) {
     int my_rank, n_procs;
-    char msg[100];
+    double msg;
     MPI_Status status;
     MPI_Init(&argc, &argv);
     MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
@@ -16,11 +16,6 @@ int main (int argc, char **argv) {
 
     int i; double x, pi, sum = 0.0;
     step = 1.0/(double) num_steps;
-
-    // int start = my_rank * num_steps/n_procs;
-    // int end = (my_rank+1) * num_steps/n_procs;
-
-    // printf("start: %d, end: %d\n", start, end);
 
     for (int i = my_rank; i < num_steps; i+= n_procs){
         x = (i + 0.5) * step; // Largura do retângulo
@@ -32,16 +27,15 @@ int main (int argc, char **argv) {
     if(my_rank == 0){
         printf("Proc %d: %.10g \n", 0, pi);
         for (int i = 1; i < n_procs; i++) {
-            MPI_Recv(msg, 100, MPI_CHAR, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
-            printf("Proc %d: %.10g \n", status.MPI_SOURCE, atof(msg));
-            pi += atof(msg);
+            MPI_Recv(&msg, 1, MPI_DOUBLE, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
+            printf("Proc %d: %.10g \n", status.MPI_SOURCE, msg);
+            pi += msg;
         }
 
         printf("\nPi total: %.10g \n", pi);
     }
     else{
-        sprintf(msg, "%.10g", pi);
-        MPI_Send(msg, strlen(msg) + 1, MPI_CHAR, 0, 0, MPI_COMM_WORLD);
+        MPI_Send(&pi, 1, MPI_DOUBLE, 0, 0, MPI_COMM_WORLD);
     }
 
     MPI_Finalize();
