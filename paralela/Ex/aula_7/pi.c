@@ -14,7 +14,7 @@ int main (int argc, char **argv) {
     MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
     MPI_Comm_size(MPI_COMM_WORLD, &n_procs);
 
-    int i; double x, pi, sum = 0.0;
+    double x, pi, sum = 0.0;
     step = 1.0/(double) num_steps;
 
     for (int i = my_rank; i < num_steps; i+= n_procs){

@@ -8,8 +8,6 @@
 #include <stdlib.h>
 #include <limits.h>
 #include <math.h>
-#include <string.h>
-#include <mpi.h>
 #include "utils.h"
 
 int min_distance;
@@ -133,42 +131,17 @@ void init_tsp(double *tpar)
 
 int run_tsp(double *tpar)
 {
-    int i, my_rank, n_procs;
-    char msg[100], *path;
-    MPI_Status status;
-    MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
-    MPI_Comm_size(MPI_COMM_WORLD, &n_procs);
-
+    int i;
+    char *path;
 
     init_tsp(tpar);
 
-    path = malloc(sizeof(char) * nb_towns);
+    path = calloc(nb_towns, sizeof(char));
     path[0] = 1;
 
     double inst_par = timestamp();
 
-    for (int i = my_rank+1; i < nb_towns; i+=n_procs){
-        path[i] = 1;
-        tsp(2, dist_to_origin[i], path, i);
-        path[i] = 0;
-    }
-
-    // if(my_rank == 0){
-    //     printf("Proc %d: %d \n", 0, min_distance);
-    //     for (int i = 1; i < n_procs; i++) {
-    //         MPI_Recv(msg, 100, MPI_CHAR, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
-
-    //         int rcv_dist = atoi(msg);
-    //         printf("Proc %d: %d \n", status.MPI_SOURCE, rcv_dist);
-    //         if(rcv_dist < min_distance) {
-    //             min_distance = rcv_dist;
-    //         }
-    //     }
-    // }
-    // else{
-    //     sprintf(msg, "%d", min_distance);
-    //     MPI_Send(msg, strlen(msg) + 1, MPI_CHAR, 0, 0, MPI_COMM_WORLD);
-    // }
+    tsp(1, 0, path, 0);
 
     *tpar += timestamp() - inst_par;
 
@@ -182,8 +155,6 @@ int run_tsp(double *tpar)
 
 int main(int argc, char **argv)
 {
-    MPI_Init(&argc, &argv);
-
     double tpar = 0.0;
     double time = timestamp();
 
@@ -199,8 +170,5 @@ int main(int argc, char **argv)
 
     time = timestamp() - time;
     printf("Tempo total: %lf\n", time/1000);
-
-    MPI_Finalize();
-
     return 0;
 }

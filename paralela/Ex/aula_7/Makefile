@@ -1,7 +1,9 @@
 all: mpi
 
+CFLAGS = -Wall -O3
+
 mpi: pi.c
-	mpicc -o mpi pi.c -O3
+	mpicc -o mpi pi.c $(CFLAGS)
 
 run: mpi
 	mpirun --hostfile hosts.txt -np 8 ./mpi
