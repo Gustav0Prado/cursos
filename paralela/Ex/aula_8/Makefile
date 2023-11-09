@@ -1,6 +1,6 @@
 all: mpi
 
-CFLAGS = -Wall -O3
+CFLAGS = -Wall -O3 -g
 
 mpi: laplace.c
 	mpicc -o mpi laplace.c $(CFLAGS)

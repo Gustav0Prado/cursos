@@ -19,6 +19,7 @@ int main( int argc, char **argv ){
 
 	//int stat;							/* Error Status  */
 	int niter;							/* iter counter  */
+	int n_linhas = (NR+2)/(n_procs-1);
 
 	float **t, **told;
 	float dt;							/* Delta t       */
@@ -47,28 +48,30 @@ int main( int argc, char **argv ){
 		for( i=0; i<=NR+1; i++ ) {       	/* Copy the values into told */
 			for( j=0; j<=NC+1; j++ ) {
 				told[i][j] = t[i][j];
-				printf("%08.4f ", told[i][j]);	/* Debug purposes only */
+				//printf("%08.4f ", told[i][j]);	/* Debug purposes only */
 			}
-			printf("\n");						/* Debug purposes only */
+			//printf("\n");						/* Debug purposes only */
 		}
 	}
 	else {
-		t =  calloc(1, sizeof(float*));
-		t[0] = calloc((NR+2)*(NC+2), sizeof(float));
-		told =  calloc(1, sizeof(float*));
-		told[0] = calloc((NR+2)*(NC+2), sizeof(float));
+		t =  calloc(n_linhas, sizeof(float*));
+		t[0] = calloc((n_linhas)*(NC+2), sizeof(float));
+		for( i=0; i<n_linhas; i++)				/* Copy the pointers */
+			t[i] = &t[0][i*(NC+2)];
 	}
 
-	MPI_Scatter(t, NR, MPI_FLOAT, t, NR, MPI_FLOAT, 0, MPI_COMM_WORLD);
-	if(rank != 0){
-		for( i=0; i<1; i++ ) {
+	MPI_Scatter(t[0], (NR+2)*n_linhas, MPI_FLOAT, t[0], (NR+2)*n_linhas, MPI_FLOAT, 0, MPI_COMM_WORLD);
+	if(rank > 0){
+		for( i=0; i<n_linhas; i++ ) {
 			for( j=0; j<=NR+1; j++ ) {
 				printf("%08.4f ", t[i][j]);
 			}
+			printf("\n");
 		}
-		printf("\n");
 	}
-
+	
+	MPI_Finalize();
+	return 0;
 
    /*-------------------------------------------------*/
   /* Do Computation on Sub-grid for Niter iterations */
