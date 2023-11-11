@@ -169,7 +169,7 @@ int main(int argc, char **argv)
     free(dist_to_origin);
 
     time = timestamp() - time;
-    printf("Tempo total: %lf\n", time/1000);
-    printf("Tempo   par: %lf\n", tpar/1000);
+    printf("Tempo total: %.15f\n", time);
+    printf("Tempo   par: %.15f\n", tpar);
     return 0;
 }

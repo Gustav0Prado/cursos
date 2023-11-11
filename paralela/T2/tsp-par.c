@@ -8,9 +8,9 @@
 #include <stdlib.h>
 #include <limits.h>
 #include <math.h>
-#include "utils.h"
+#include <mpi.h>
 
-int min_distance;
+int min_distance, reduc_min_dist;
 int nb_towns;
 
 typedef struct
@@ -22,9 +22,15 @@ typedef struct
 d_info **d_matrix;
 int *dist_to_origin;
 
-void tsp(int depth, int current_length, char *path, int last)
+void tsp(int depth, int current_length, char *path, int last, int count)
 {
     int i;
+    if (count == nb_towns*3) {
+        MPI_Allreduce(&min_distance, &reduc_min_dist, 1, MPI_INT, MPI_MIN, MPI_COMM_WORLD);
+        min_distance = reduc_min_dist;
+        count = 0;
+    }
+
     if (current_length >= min_distance)
         return;
     if (depth == nb_towns)
@@ -44,19 +50,17 @@ void tsp(int depth, int current_length, char *path, int last)
             {
                 path[town] = 1;
                 dist = d_matrix[me][i].dist;
-                tsp(depth + 1, current_length + dist, path, town);
+                tsp(depth + 1, current_length + dist, path, town, count+1);
                 path[town] = 0;
             }
         }
     }
 }
 
-void greedy_shortest_first_heuristic(int *x, int *y, double *tpar)
+void greedy_shortest_first_heuristic(int *x, int *y)
 {
     int i, j, k, dist;
     int *tempdist;
-
-    double inst_par = timestamp();
 
     tempdist = (int *)malloc(sizeof(int) * nb_towns);
     // Could be faster, albeit not as didactic.
@@ -93,82 +97,113 @@ void greedy_shortest_first_heuristic(int *x, int *y, double *tpar)
     }
 
     free(tempdist);
-
-    *tpar += timestamp() - inst_par;
 }
 
-void init_tsp(double *tpar)
+void init_tsp(int *x, int *y)
 {
     int i, st;
-    int *x, *y;
 
     min_distance = INT_MAX;
-
-    st = scanf("%u", &nb_towns);
-    if (st != 1)
-        exit(1);
 
     d_matrix = (d_info **)malloc(sizeof(d_info *) * nb_towns);
     for (i = 0; i < nb_towns; i++)
         d_matrix[i] = (d_info *)malloc(sizeof(d_info) * nb_towns);
     dist_to_origin = (int *)malloc(sizeof(int) * nb_towns);
 
-    x = (int *)malloc(sizeof(int) * nb_towns);
-    y = (int *)malloc(sizeof(int) * nb_towns);
-
-    for (i = 0; i < nb_towns; i++)
-    {
-        st = scanf("%u %u", x + i, y + i);
-        if (st != 2)
-            exit(1);
-    }
-
-    greedy_shortest_first_heuristic(x, y, tpar);
-
-    free(x);
-    free(y);
+    greedy_shortest_first_heuristic(x, y);
 }
 
-int run_tsp(double *tpar)
+void run_tsp(int rank, int n_procs)
 {
     int i;
     char *path;
 
-    init_tsp(tpar);
-
     path = calloc(nb_towns, sizeof(char));
     path[0] = 1;
 
-    double inst_par = timestamp();
+    for(int i = (rank+1); i < nb_towns; i += n_procs){
+        path[i] = 1;
+        tsp(2, dist_to_origin[i], path, i, 0);
+        path[i] = 0;
+    }
 
-    tsp(1, 0, path, 0);
-
-    *tpar += timestamp() - inst_par;
+    MPI_Allreduce(&min_distance, &reduc_min_dist, 1, MPI_INT, MPI_MIN, MPI_COMM_WORLD);
 
     free(path);
     for (i = 0; i < nb_towns; i++)
         free(d_matrix[i]);
     free(d_matrix);
+}
 
-    return min_distance;
+void read_stdin(int **x, int **y){
+    int st;
+    
+    st = scanf("%u", &nb_towns);
+    if (st != 1)
+        nb_towns = 0;
+
+    *x = malloc(sizeof(int) * nb_towns);
+    *y = malloc(sizeof(int) * nb_towns);
+
+    for(int i = 0; i < nb_towns; ++i){
+        st = scanf("%u %u", (*x) + i, (*y) + i);
+        if (st != 2)
+            nb_towns = 0;
+    }
 }
 
 int main(int argc, char **argv)
 {
-    double tpar = 0.0;
-    double time = timestamp();
+    MPI_Init(&argc, &argv);
+    int rank, n_procs, num_instances, st, buff_size;
+    int *x, *y;
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &n_procs);
 
-    int num_instances, st;
-    st = scanf("%u", &num_instances);
-    if (st != 1)
-        exit(1);
+    double time = MPI_Wtime();
+
+    if(rank == 0) {    
+        st = scanf("%u", &num_instances);
+        if (st != 1)
+            num_instances = 0;
+    }
+    
+    // Manda para todos o num de instancias
+    MPI_Bcast(&num_instances, 1, MPI_INT, 0, MPI_COMM_WORLD);
+
     while (num_instances-- > 0)
-        printf("%d ", run_tsp(&tpar));
+        if(rank == 0) read_stdin(&x, &y);
+
+        // Broadcast do num de cidades e alocacao do buffer
+        MPI_Bcast(&nb_towns, 1, MPI_INT, 0, MPI_COMM_WORLD);
+        
+        // Caso tenha havido algum problema na leitura, finaliza execucao
+        if(nb_towns == 0){
+            MPI_Finalize();
+            return 1;
+        }
+        else if (rank > 0) {
+            x = malloc(sizeof(int) * nb_towns);
+            y = malloc(sizeof(int) * nb_towns);
+        }
+        
+        // Broadcast do x e y lidos para os outros processos
+        MPI_Bcast(x, nb_towns, MPI_INT, 0, MPI_COMM_WORLD);
+        MPI_Bcast(y, nb_towns, MPI_INT, 0, MPI_COMM_WORLD);
+
+        init_tsp(x, y);
+        run_tsp(rank, n_procs);
+
+        if (rank == 0) printf("%d ", reduc_min_dist);
     printf("\n");
 
     free(dist_to_origin);
+    free(x);
+    free(y);
 
-    time = timestamp() - time;
-    printf("Tempo total: %lf\n", time/1000);
+    time = MPI_Wtime() - time;
+    if(rank == 0) printf("Tempo total: %.15f\n", time);
+
+    MPI_Finalize();
     return 0;
 }

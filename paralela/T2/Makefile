@@ -11,5 +11,8 @@ mpi: tsp-par.c
 tsp: tsp.c
 	gcc -o tsp tsp.c utils.o $(CFLAGS)
 
+run:
+	mpirun --hostfile hosts.txt -np 1 ./mpi < simple.in
+
 clean:
 	rm -rf ./mpi ./tsp *.o

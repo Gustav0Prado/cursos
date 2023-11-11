@@ -4,8 +4,6 @@ import subprocess, os, sys, generate, statistics, re
 
 os.system('make clean && make')
 
-os.system("echo performance | sudo tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor")
-
 inp = "tsp"
 if "-g" in sys.argv:
    pos = sys.argv.index("-g")+1
@@ -42,21 +40,22 @@ for i in range(ran):
    timeSeq.append( float(re.findall("\d+\.\d+", result.stdout.decode())[0]) )
    timePar.append( float(re.findall("\d+\.\d+", result.stdout.decode())[1]) )
 
-medSeq = statistics.mean(timeSeq)
+medSeq = statistics.mean(timeSeq) / 1000
+medPar = statistics.mean(timePar) / 1000
 
 if (ran > 1):
-   print(f"Tempo em segundos   (Media) : {medSeq:.6f}, {statistics.stdev(timeSeq):.6f}")
+   print(f"Tempo em segundos   (Media) : {medSeq:.7f}, {statistics.stdev(timeSeq):.7f}")
 else:
-   print(f"Tempo em segundos   (Media) : {medSeq:.6f}")
+   print(f"Tempo em segundos   (Media) : {medSeq:.7f}")
 
-print(f"Tempo Paralelizavel (Media) : {(statistics.mean(timePar)/medSeq*100):.2f}%")
+print(f"Tempo Paralelizavel (Media) : {(medPar/medSeq):.7f}")
 print(f"Resultado: {lastResult}")
 
 
 print(f"\nParalelo")
-for t in [2,4]:
+for t in [2]:
    for i in range(ran):
-      result = subprocess.run(f"mpirun --hostfile hosts.txt -np 1 {dir}/mpi < {inp}.in", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, executable='/bin/bash')
+      result = subprocess.run(f"mpirun --hostfile hosts.txt -np {t} {dir}/mpi < {inp}.in", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, executable='/bin/bash')
       r = result.stdout.decode().partition("\n")[0]
       if check and len(lastResult) > 0 and r != lastResult:
             print("Resultados inconsistentes!!!")
@@ -67,10 +66,8 @@ for t in [2,4]:
    medTotalPar = statistics.mean(timeTotalPar)
 
    if (ran > 1):
-      print(f"Media   Ttotal  - {t} threads : {medTotalPar:.6f}, {statistics.stdev(timeTotalPar):.6f} - S(p) = {(medSeq/medTotalPar):.2f}")
+      print(f"Media   Ttotal  - {t} processos : {medTotalPar:.7f}, {statistics.stdev(timeTotalPar):.7f} - S(p) = {(medSeq/medTotalPar):.2f}")
    else:
-      print(f"Media   Ttotal  - {t} threads : {medTotalPar:.6f} - S(p) = {(medSeq/medTotalPar):.2f}")
+      print(f"Media   Ttotal  - {t} processos: {medTotalPar:.7f} - S(p) = {(medSeq/medTotalPar):.2f}")
    print(f"Resultado: {lastResult}\n")
    timeTotalPar = []
-
-os.system("echo powersave | sudo tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor")
