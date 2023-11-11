@@ -32,7 +32,7 @@ lastResult = []
 print(f"\nSequencial Otimizado")
 for i in range(ran):
    result = subprocess.run(f"{dir}/tsp < {inp}.in", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, executable='/bin/bash')
-   r = result.stdout.decode().partition("\n")[0]
+   r = result.stdout.decode().partition("\n")[0].strip()
    if check and len(lastResult) > 0 and r != lastResult:
          print("Resultados inconsistentes!!!\n")
          exit(-1)
@@ -44,7 +44,7 @@ medSeq = statistics.mean(timeSeq) / 1000
 medPar = statistics.mean(timePar) / 1000
 
 if (ran > 1):
-   print(f"Tempo em segundos   (Media) : {medSeq:.7f}, {statistics.stdev(timeSeq):.7f}")
+   print(f"Tempo em segundos   (Media) : {medSeq:.7f}, {statistics.stdev(timeSeq)/1000:.7f}")
 else:
    print(f"Tempo em segundos   (Media) : {medSeq:.7f}")
 
@@ -56,9 +56,10 @@ print(f"\nParalelo")
 for t in [2]:
    for i in range(ran):
       result = subprocess.run(f"mpirun --hostfile hosts.txt -np {t} {dir}/mpi < {inp}.in", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, executable='/bin/bash')
-      r = result.stdout.decode().partition("\n")[0]
+      r = result.stdout.decode().partition("\n")[0].strip()
       if check and len(lastResult) > 0 and r != lastResult:
             print("Resultados inconsistentes!!!")
+            print(f"{lastResult} - {r}")
             exit(-1)
       lastResult = r
       timeTotalPar.append( float(re.findall("\d+\.\d+", result.stdout.decode())[0]) )

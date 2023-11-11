@@ -25,6 +25,7 @@ int *dist_to_origin;
 void tsp(int depth, int current_length, char *path, int last, int count)
 {
     int i;
+
     if (count == nb_towns*3) {
         MPI_Allreduce(&min_distance, &reduc_min_dist, 1, MPI_INT, MPI_MIN, MPI_COMM_WORLD);
         min_distance = reduc_min_dist;
@@ -121,6 +122,7 @@ void run_tsp(int rank, int n_procs)
     path = calloc(nb_towns, sizeof(char));
     path[0] = 1;
 
+    // Divide escolha da segunda cidade entre os processos
     for(int i = (rank+1); i < nb_towns; i += n_procs){
         path[i] = 1;
         tsp(2, dist_to_origin[i], path, i, 0);
@@ -195,7 +197,7 @@ int main(int argc, char **argv)
         run_tsp(rank, n_procs);
 
         if (rank == 0) printf("%d ", reduc_min_dist);
-    printf("\n");
+    if (rank == 0) printf("\n");
 
     free(dist_to_origin);
     free(x);
