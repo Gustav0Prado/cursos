@@ -123,11 +123,8 @@ void run_tsp(int rank, int n_procs)
     path = calloc(nb_towns, sizeof(char));
     path[0] = 1;
 
-    int start = rank+1;
-    int end = start + (nb_towns/n_procs);
-
     // Divide escolha da segunda cidade entre os processos
-    for(int i = start; i < end; i++){
+    for(int i = (rank+1); i < nb_towns; i+=n_procs){
         path[i] = 1;
         tsp(2, dist_to_origin[i], path, i, 0);
         path[i] = 0;
@@ -183,7 +180,7 @@ int main(int argc, char **argv)
 
         // Broadcast do num de cidades e alocacao do buffer
         MPI_Bcast(&nb_towns, 1, MPI_INT, 0, MPI_COMM_WORLD);
-        cut = 50;
+        cut = 100;
         
         // Caso tenha havido algum problema na leitura, finaliza execucao
         if(nb_towns == 0){

@@ -12,7 +12,7 @@ tsp: tsp.c
 	gcc -o tsp tsp.c utils.o $(CFLAGS)
 
 run: all
-	mpirun --hostfile hosts.txt -np 8 ./mpi < simple.in
+	mpirun --hostfile hosts.txt -np $(p) ./mpi < simple.in
 
 clean:
 	rm -rf ./mpi ./tsp *.o
