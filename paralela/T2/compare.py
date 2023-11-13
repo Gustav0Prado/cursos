@@ -53,7 +53,7 @@ print(f"Resultado: {lastResult}")
 
 
 print(f"\nParalelo")
-for t in [2]:
+for t in [2,4,8]:
    for i in range(ran):
       result = subprocess.run(f"mpirun --hostfile hosts.txt -np {t} {dir}/mpi < {inp}.in", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, executable='/bin/bash')
       r = result.stdout.decode().partition("\n")[0].strip()

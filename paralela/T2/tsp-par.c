@@ -11,7 +11,7 @@
 #include <mpi.h>
 
 int min_distance, reduc_min_dist;
-int nb_towns;
+int nb_towns, cut;
 
 typedef struct
 {
@@ -26,12 +26,6 @@ void tsp(int depth, int current_length, char *path, int last, int count)
 {
     int i;
 
-    if (count == nb_towns*3) {
-        MPI_Allreduce(&min_distance, &reduc_min_dist, 1, MPI_INT, MPI_MIN, MPI_COMM_WORLD);
-        min_distance = reduc_min_dist;
-        count = 0;
-    }
-
     if (current_length >= min_distance)
         return;
     if (depth == nb_towns)
@@ -39,6 +33,13 @@ void tsp(int depth, int current_length, char *path, int last, int count)
         current_length += dist_to_origin[last];
         if (current_length < min_distance)
             min_distance = current_length;
+        
+        if (count == cut) {
+            MPI_Allreduce(&min_distance, &reduc_min_dist, 1, MPI_INT, MPI_MIN, MPI_COMM_WORLD);
+            min_distance = reduc_min_dist;
+            count = -1;
+        }
+        count++;
     }
     else
     {
@@ -51,7 +52,7 @@ void tsp(int depth, int current_length, char *path, int last, int count)
             {
                 path[town] = 1;
                 dist = d_matrix[me][i].dist;
-                tsp(depth + 1, current_length + dist, path, town, count+1);
+                tsp(depth + 1, current_length + dist, path, town, count);
                 path[town] = 0;
             }
         }
@@ -122,8 +123,11 @@ void run_tsp(int rank, int n_procs)
     path = calloc(nb_towns, sizeof(char));
     path[0] = 1;
 
+    int start = rank+1;
+    int end = start + (nb_towns/n_procs);
+
     // Divide escolha da segunda cidade entre os processos
-    for(int i = (rank+1); i < nb_towns; i += n_procs){
+    for(int i = start; i < end; i++){
         path[i] = 1;
         tsp(2, dist_to_origin[i], path, i, 0);
         path[i] = 0;
@@ -163,6 +167,7 @@ int main(int argc, char **argv)
     MPI_Comm_size(MPI_COMM_WORLD, &n_procs);
 
     double time = MPI_Wtime();
+    double init = MPI_Wtime();
 
     if(rank == 0) {    
         st = scanf("%u", &num_instances);
@@ -178,6 +183,7 @@ int main(int argc, char **argv)
 
         // Broadcast do num de cidades e alocacao do buffer
         MPI_Bcast(&nb_towns, 1, MPI_INT, 0, MPI_COMM_WORLD);
+        cut = 50;
         
         // Caso tenha havido algum problema na leitura, finaliza execucao
         if(nb_towns == 0){
