@@ -5,7 +5,7 @@ import subprocess, os, sys, generate, statistics, re
 os.system('make clean && make')
 
 # Seta modo Perfomance
-subprocess.run("echo performance | sudo tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor", shell=True, stdout=subprocess.DEVNULL)
+subprocess.run("echo performance > /sys/devices/system/cpu/cpufreq/policy3/scaling_governor", shell=True, stdout=subprocess.DEVNULL)
 print("\nSetado para o modo performance")
 
 # Pega num de cores por nucleo
@@ -82,5 +82,5 @@ for t in [i for i in range(0, cores+1, 2) if i != 0]:
    timeTotalPar = []
 
 # Volta para o modo powersave
-subprocess.run("echo powersave | sudo tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor", shell=True, stdout=subprocess.DEVNULL)
+subprocess.run("echo performance > /sys/devices/system/cpu/cpufreq/policy3/scaling_governor", shell=True, stdout=subprocess.DEVNULL)
 print("Setado para o modo powersave")
