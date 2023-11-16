@@ -10,8 +10,10 @@
 #include <math.h>
 #include <mpi.h>
 
-int min_distance, nb_towns;
-int rank, n_procs, flag;
+int min_distance, nb_towns, reduc_min;
+int rank, n_procs, flag, reduce = 0;
+MPI_Status status;
+MPI_Request request;
 
 typedef struct
 {
@@ -24,22 +26,19 @@ int *dist_to_origin;
 
 void tsp(int depth, int current_length, char *path, int last)
 {
-    int i;
-
     if (current_length >= min_distance)
         return;
     if (depth == nb_towns)
     {
         current_length += dist_to_origin[last];
-        if (current_length < min_distance) {
+        if (current_length < min_distance)
             min_distance = current_length;
-        }
     }
     else
     {
         int town, me, dist;
         me = last;
-        for (i = 0; i < nb_towns; i++)
+        for (int i = 1; i < nb_towns; i++)
         {
             town = d_matrix[me][i].to_town;
             if (path[town] == 0)
@@ -109,7 +108,7 @@ void init_tsp(int *x, int *y)
     greedy_shortest_first_heuristic(x, y);
 }
 
-void run_tsp(int rank, int n_procs)
+void run_tsp()
 {
     int i;
     char *path;
@@ -118,13 +117,13 @@ void run_tsp(int rank, int n_procs)
     path[0] = 1;
 
     // Divide escolha da segunda cidade entre os processos
-    for(int i = (rank+1); i < nb_towns; i++){
+    for(int i = (rank+1); i < nb_towns; i+=n_procs){
         path[i] = 1;
         tsp(2, dist_to_origin[i], path, i);
         path[i] = 0;
     }
 
-    MPI_Allreduce(&min_distance, &min_distance, 1, MPI_INT, MPI_MIN, MPI_COMM_WORLD);
+    MPI_Allreduce (&min_distance, &min_distance, 1, MPI_INT, MPI_MIN, MPI_COMM_WORLD);
 
     free(path);
     for (i = 0; i < nb_towns; i++)
@@ -189,7 +188,7 @@ int main(int argc, char **argv)
         MPI_Bcast(y, nb_towns, MPI_INT, 0, MPI_COMM_WORLD);
 
         init_tsp(x, y);
-        run_tsp(rank, n_procs);
+        run_tsp();
 
         if (rank == 0) printf("%d ", min_distance);
     if (rank == 0) printf("\n");
