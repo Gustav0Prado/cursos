@@ -24,15 +24,23 @@ typedef struct
 d_info **d_matrix;
 int *dist_to_origin;
 
-void tsp(int depth, int current_length, char *path, int last)
+void tsp(int depth, int current_length, char *path, int last, int iter)
 {
     if (current_length >= min_distance)
         return;
     if (depth == nb_towns)
     {
         current_length += dist_to_origin[last];
-        if (current_length < min_distance)
+        if (current_length < min_distance) {
             min_distance = current_length;
+            MPI_Iallreduce(&min_distance, &reduc_min, 1, MPI_INT, MPI_MIN, MPI_COMM_WORLD, &request);
+        }
+
+        if (iter % 250 == 0) {
+            MPI_Test(&request, &flag, &status);
+            if (flag) min_distance = reduc_min;
+        }
+        iter++;
     }
     else
     {
@@ -45,7 +53,7 @@ void tsp(int depth, int current_length, char *path, int last)
             {
                 path[town] = 1;
                 dist = d_matrix[me][i].dist;
-                tsp(depth + 1, current_length + dist, path, town);
+                tsp(depth + 1, current_length + dist, path, town, iter);
                 path[town] = 0;
             }
         }
@@ -119,7 +127,7 @@ void run_tsp()
     // Divide escolha da segunda cidade entre os processos
     for(int i = (rank+1); i < nb_towns; i+=n_procs){
         path[i] = 1;
-        tsp(2, dist_to_origin[i], path, i);
+        tsp(2, dist_to_origin[i], path, i, 0);
         path[i] = 0;
     }
 
