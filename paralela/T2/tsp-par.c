@@ -33,12 +33,16 @@ void tsp(int depth, int current_length, char *path, int last, int iter)
         current_length += dist_to_origin[last];
         if (current_length < min_distance) {
             min_distance = current_length;
-            MPI_Iallreduce(&min_distance, &reduc_min, 1, MPI_INT, MPI_MIN, MPI_COMM_WORLD, &request);
         }
 
-        if (iter % 250 == 0) {
+        if (!reduce && iter % 100000 == 0) {
+            MPI_Iallreduce(&min_distance, &reduc_min, 1, MPI_INT, MPI_MIN, MPI_COMM_WORLD, &request);
+            reduce = 1;
+        }
+        else if (reduce && iter % 50000 == 0){
             MPI_Test(&request, &flag, &status);
             if (flag) min_distance = reduc_min;
+            reduce = 0;
         }
         iter++;
     }
