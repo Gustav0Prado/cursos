@@ -4,6 +4,10 @@ import subprocess, os, sys, generate, statistics, re
 
 os.system('make clean && make')
 
+with open(r"hosts.txt", 'r') as fp:
+    for count, line in enumerate(fp):
+        pass
+
 # Seta modo Perfomance
 subprocess.run("echo performance > /sys/devices/system/cpu/cpufreq/policy3/scaling_governor", shell=True, stdout=subprocess.DEVNULL)
 print("\nSetado para o modo performance")
@@ -67,7 +71,7 @@ if runSeq:
 
 
 print(f"\n=> Paralelo")
-for t in [i for i in range(0, cores+1, 2) if i != 0]:
+for t in [i for i in range(0, ((cores+1) * (count+1)), 2) if i != 0]:
    for i in range(ran):
       result = subprocess.run(f"mpirun --hostfile hosts.txt -np {t} {dir}/mpi < {inp}.in", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, executable='/bin/bash')
       r = result.stdout.decode().partition("\n")[0].strip()
