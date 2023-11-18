@@ -51,12 +51,10 @@ void tsp(int depth, int current_length, char *path, int last)
     }
 }
 
-void greedy_shortest_first_heuristic(int *x, int *y, double *tpar)
+void greedy_shortest_first_heuristic(int *x, int *y)
 {
     int i, j, k, dist;
     int *tempdist;
-
-    double inst_par = timestamp();
 
     tempdist = (int *)malloc(sizeof(int) * nb_towns);
     // Could be faster, albeit not as didactic.
@@ -93,11 +91,9 @@ void greedy_shortest_first_heuristic(int *x, int *y, double *tpar)
     }
 
     free(tempdist);
-
-    *tpar += timestamp() - inst_par;
 }
 
-void init_tsp(double *tpar)
+void init_tsp()
 {
     int i, st;
     int *x, *y;
@@ -123,7 +119,7 @@ void init_tsp(double *tpar)
             exit(1);
     }
 
-    greedy_shortest_first_heuristic(x, y, tpar);
+    greedy_shortest_first_heuristic(x, y);
 
     free(x);
     free(y);
@@ -134,7 +130,7 @@ int run_tsp(double *tpar)
     int i;
     char *path;
 
-    init_tsp(tpar);
+    init_tsp();
 
     path = calloc(nb_towns, sizeof(char));
     path[0] = 1;

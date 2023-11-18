@@ -4,17 +4,21 @@ import subprocess, os, sys, generate, statistics, re
 
 os.system('make clean && make')
 
+remote = []
 with open(r"hosts.txt", 'r') as fp:
     for count, line in enumerate(fp):
-        pass
+        h = str(line).strip()
+        if h != "localhost": remote.append(h)
 
 # Seta modo Perfomance
 subprocess.run("echo performance > /sys/devices/system/cpu/cpufreq/policy3/scaling_governor", shell=True, stdout=subprocess.DEVNULL)
+for host in remote:
+   subprocess.run(f"ssh {host} 'echo performance > /sys/devices/system/cpu/cpufreq/policy3/scaling_governor'", shell=True, stdout=subprocess.DEVNULL)
 print("\nSetado para o modo performance")
 
 # Pega num de cores por nucleo
 cores = int (subprocess.check_output("export LC_ALL=C; lscpu | awk '/^Core\(s\) per socket:/ {print $4}';", shell=True).decode())
-print (f"CPU com {cores} cores")
+print (f"{count+1} CPU(s) com {cores} cores")
 
 inp = "tsp"
 
@@ -71,9 +75,9 @@ if runSeq:
 
 
 print(f"\n=> Paralelo")
-for t in [i for i in range(0, ((cores+1) * (count+1)), 2) if i != 0]:
+for t in [2,4,6,8]:
    for i in range(ran):
-      result = subprocess.run(f"mpirun --hostfile hosts.txt -np {t} {dir}/mpi < {inp}.in", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, executable='/bin/bash')
+      result = subprocess.run(f"mpirun --hostfile hosts.txt -np {t+1} {dir}/mpi < {inp}.in", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, executable='/bin/bash')
       r = result.stdout.decode().partition("\n")[0].strip()
       if check and len(lastResult) > 0 and r != lastResult:
             print("Resultados inconsistentes!!!")
@@ -92,5 +96,7 @@ for t in [i for i in range(0, ((cores+1) * (count+1)), 2) if i != 0]:
    timeTotalPar = []
 
 # Volta para o modo powersave
-subprocess.run("echo performance > /sys/devices/system/cpu/cpufreq/policy3/scaling_governor", shell=True, stdout=subprocess.DEVNULL)
+subprocess.run("echo powersave > /sys/devices/system/cpu/cpufreq/policy3/scaling_governor", shell=True, stdout=subprocess.DEVNULL)
+for host in remote:
+   subprocess.run(f"ssh {host} 'echo powersave > /sys/devices/system/cpu/cpufreq/policy3/scaling_governor'", shell=True, stdout=subprocess.DEVNULL)
 print("Setado para o modo powersave")
