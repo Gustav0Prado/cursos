@@ -18,6 +18,7 @@ int min_distance, nb_towns, rank, n_procs;
 #define MIN_DIST  3
 #define END_WORK  4
 #define START     5
+#define NEW_WORK  6
 
 typedef struct
 {
@@ -135,18 +136,26 @@ void read_stdin(int **x, int **y){
 }
 
 void manager () {
-   int num_instances, st, i_buff, dist, pos;
-   int last_i = 1, last_j = 2, buff_siz;
-   int alive = n_procs-1;
-   int *x, *y;
-   char *path, *buffer;
+   int num_instances, st, i_buff, dist, pos, buff_siz, orig_inst, alive;
+   char waiting[n_procs-1];
 
    // Le n de instancias
    st = scanf("%u", &num_instances);
       if (st != 1)
          MPI_Abort (MPI_COMM_WORLD, 1);
+   orig_inst = num_instances;
+
+   // Fila de espera inicia vazia
+   for (int i = 0; i < n_procs-1; ++i) {
+      waiting[i] = 0;
+   }
 
    while (num_instances-- > 0) {
+      int *x, *y;
+      int last_i = 1, last_j = 2;
+      char *path, *buffer;
+
+      alive = n_procs-1;
       read_stdin(&x, &y);
       
       // Aloca vetor de path (caminho)
@@ -157,7 +166,15 @@ void manager () {
       // Aloca buffer
       int buff_siz = sizeof(int) * 3 * nb_towns;
       buffer = malloc (buff_siz);
-   
+
+      // Fila de espera inicia vazia
+      for (int i = 0; i < n_procs-1; ++i) {
+         if (waiting[i]) {
+            MPI_Send (&nb_towns, 1, MPI_INT, i+1, NEW_WORK, MPI_COMM_WORLD);
+            waiting[i] = 0;
+         }
+      }
+
       // Enquanto houverem trabalhadores ativos
       while (alive > 0) {
          MPI_Recv (&i_buff, 1, MPI_INT, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
@@ -166,10 +183,21 @@ void manager () {
 
             // Algum trabalhador quer iniciar, se houver o que calcular retorna positivamente, senao pede para o trabalhador encerrar
             case START:
-               if (last_i < nb_towns)
-                  MPI_Send (&nb_towns, 1, MPI_INT, status.MPI_SOURCE, WORK, MPI_COMM_WORLD);
-               else {
+               if (last_i < nb_towns) {
+                  if (i_buff == orig_inst-num_instances-1)
+                     MPI_Send (&nb_towns, 1, MPI_INT, status.MPI_SOURCE, NEW_WORK, MPI_COMM_WORLD);
+                  else
+                     MPI_Send (&nb_towns, 1, MPI_INT, status.MPI_SOURCE, WORK, MPI_COMM_WORLD);
+               }
+               
+               // Se for a ultima instancia, processo pode encerrar
+               else if (num_instances == 0) {
                   MPI_Send (&nb_towns, 1, MPI_INT, status.MPI_SOURCE, END_WORK, MPI_COMM_WORLD);
+                  alive--;
+               }
+               // Senao, processo entra na fila de espera para pegar a proxima
+               else {
+                  waiting[status.MPI_SOURCE-1] = 1;
                   alive--;
                }
                break;
@@ -220,6 +248,7 @@ void manager () {
             case MIN_DIST:
                if (i_buff < min_distance)
                   min_distance = i_buff;
+               break;
 
             default:
                break;
@@ -227,78 +256,83 @@ void manager () {
       }
 
       printf ("%d ", min_distance);
+
+      free (x);
+      free (y);
+      free (dist_to_origin);
+      free (path);
+      for (int i = 0; i < nb_towns; i++)
+         free(d_matrix[i]);
+      free(d_matrix);
+      free (buffer);
    }
    printf ("\n");
-
-   free (buffer);
 }
 
 void worker () {
    int *x, *y, buff_siz;
    char *path, *buffer;
-   int towns = 0;
+   int inst = 0;
 
    while (1) {
-      MPI_Send (&towns, 1, MPI_INT, 0, START, MPI_COMM_WORLD);
+      MPI_Send (&inst, 1, MPI_INT, 0, START, MPI_COMM_WORLD);
       MPI_Recv (&nb_towns, 1, MPI_INT, 0, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
 
-      if (status.MPI_TAG == WORK) {
-         // Nova instancia, aloca e inicia estruturas
-         if (nb_towns != towns) {
-            // Pede nova instancia
-            MPI_Send (&towns, 1, MPI_INT, 0, GET_INST, MPI_COMM_WORLD);
+      if (status.MPI_TAG == NEW_WORK) {
+         // Pede nova instancia
+         MPI_Send (&inst, 1, MPI_INT, 0, GET_INST, MPI_COMM_WORLD);
 
-            // Desaloca estruturas da instancia anterior
-            if (towns != 0) {
-               free (buffer);
-               free (x);
-               free (y);
-               free (dist_to_origin);
-               free (path);
-               for (int i = 0; i < nb_towns; i++)
-                  free(d_matrix[i]);
-               free(d_matrix);
-            }
-
-            // Aloca buffer
-            buff_siz = sizeof(int) * 3 * nb_towns;
-            buffer = malloc (buff_siz);
-
-            x = malloc(sizeof(int) * nb_towns);
-            y = malloc(sizeof(int) * nb_towns);
-            path = malloc (sizeof(char) * nb_towns);
-
-            int pos = 0;
-            MPI_Recv (buffer, buff_siz, MPI_PACKED, 0, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
-            MPI_Unpack (buffer, buff_siz, &pos, x, nb_towns, MPI_INT, MPI_COMM_WORLD);
-            MPI_Unpack (buffer, buff_siz, &pos, y, nb_towns, MPI_INT, MPI_COMM_WORLD);
-
-            init_tsp (x, y);
-            towns = nb_towns;
+         // Desaloca estruturas da instancia anterior
+         if (inst != 0) {
+            free (buffer);
+            free (x);
+            free (y);
+            free (dist_to_origin);
+            free (path);
+            for (int i = 0; i < nb_towns; i++)
+               free(d_matrix[i]);
+            free(d_matrix);
          }
 
-         int last, dist;
-         MPI_Send (&towns, 1, MPI_INT, 0, GET_WORK, MPI_COMM_WORLD);
+         // Aloca buffer
+         buff_siz = sizeof(int) * 3 * nb_towns;
+         buffer = malloc (buff_siz);
+
+         x = malloc(sizeof(int) * nb_towns);
+         y = malloc(sizeof(int) * nb_towns);
+         path = malloc (sizeof(char) * nb_towns);
 
          int pos = 0;
          MPI_Recv (buffer, buff_siz, MPI_PACKED, 0, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
-         MPI_Unpack (buffer, buff_siz, &pos, &min_distance, 1, MPI_INT, MPI_COMM_WORLD);
-         MPI_Unpack (buffer, buff_siz, &pos, &last, 1, MPI_INT, MPI_COMM_WORLD);
-         MPI_Unpack (buffer, buff_siz, &pos, &dist, 1, MPI_INT, MPI_COMM_WORLD);
-         MPI_Unpack (buffer, buff_siz, &pos, path, nb_towns, MPI_CHAR, MPI_COMM_WORLD);
+         MPI_Unpack (buffer, buff_siz, &pos, x, nb_towns, MPI_INT, MPI_COMM_WORLD);
+         MPI_Unpack (buffer, buff_siz, &pos, y, nb_towns, MPI_INT, MPI_COMM_WORLD);
 
-         tsp (3, dist, path, last);
-
-         MPI_Send (&min_distance, 1, MPI_INT, 0, MIN_DIST, MPI_COMM_WORLD);
+         init_tsp (x, y);
+         inst++;
       }
       else if (status.MPI_TAG == END_WORK)
          break;
+
+      int last, dist;
+      MPI_Send (&inst, 1, MPI_INT, 0, GET_WORK, MPI_COMM_WORLD);
+
+      int pos = 0;
+      MPI_Recv (buffer, buff_siz, MPI_PACKED, 0, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
+      MPI_Unpack (buffer, buff_siz, &pos, &min_distance, 1, MPI_INT, MPI_COMM_WORLD);
+      MPI_Unpack (buffer, buff_siz, &pos, &last, 1, MPI_INT, MPI_COMM_WORLD);
+      MPI_Unpack (buffer, buff_siz, &pos, &dist, 1, MPI_INT, MPI_COMM_WORLD);
+      MPI_Unpack (buffer, buff_siz, &pos, path, nb_towns, MPI_CHAR, MPI_COMM_WORLD);
+
+      tsp (3, dist, path, last);
+
+      MPI_Send (&min_distance, 1, MPI_INT, 0, MIN_DIST, MPI_COMM_WORLD);
    }
 
    free (x);
    free (y);
    free (dist_to_origin);
    free (path);
+   free (buffer);
    for (int i = 0; i < nb_towns; i++)
       free(d_matrix[i]);
    free(d_matrix);
