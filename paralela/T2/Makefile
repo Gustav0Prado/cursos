@@ -12,7 +12,6 @@ tsp: tsp.c
 	gcc -o tsp tsp.c utils.o $(CFLAGS)
 
 run: clean all
-	mpirun --hostfile hosts.txt -np $(p) ./mpi < simple.in
-
+	mpirun --hostfile hosts.txt -np $(p) valgrind ./mpi < simple.in 
 clean:
 	rm -rf ./mpi ./tsp *.o

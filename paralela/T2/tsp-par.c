@@ -178,7 +178,7 @@ int main(int argc, char **argv)
     // Manda para todos o num de instancias
     MPI_Bcast(&num_instances, 1, MPI_INT, 0, MPI_COMM_WORLD);
 
-    while (num_instances-- > 0)
+    while (num_instances-- > 0){
         if(rank == 0) read_stdin(&x, &y);
 
         // Broadcast do num de cidades e alocacao do buffer
@@ -201,12 +201,12 @@ int main(int argc, char **argv)
         init_tsp(x, y);
         run_tsp();
 
+        free(dist_to_origin);
+        free(x);
+        free(y);
         if (rank == 0) printf("%d ", min_distance);
+    }
     if (rank == 0) printf("\n");
-
-    free(dist_to_origin);
-    free(x);
-    free(y);
 
     time = MPI_Wtime() - time;
     if(rank == 0) printf("Tempo total: %.15f\n", time);

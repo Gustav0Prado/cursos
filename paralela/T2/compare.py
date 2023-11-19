@@ -77,21 +77,27 @@ if runSeq:
 print(f"\n=> Paralelo")
 for t in [3,5,7,9]:
    for i in range(ran):
-      result = subprocess.run(f"mpirun --hostfile hosts.txt -np {t+1} {dir}/mpi < {inp}.in", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, executable='/bin/bash')
+      result = subprocess.run(f"mpirun --hostfile hosts.txt -np {t} {dir}/mpi 2> /dev/null < {inp}.in", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, executable='/bin/bash')
       r = result.stdout.decode().partition("\n")[0].strip()
       if check and len(lastResult) > 0 and r != lastResult:
             print("Resultados inconsistentes!!!")
-            print(f"{lastResult} - {r}")
+            print(f"|{lastResult}| - |{r}|")
             exit(-1)
       lastResult = r
       timeTotalPar.append( float(re.findall("\d+\.\d+", result.stdout.decode())[0]) )
 
    medTotalPar = statistics.mean(timeTotalPar)
 
-   if (ran > 1):
-      print(f"   Media   Ttotal  - {t} processos : {medTotalPar:.7f}, {statistics.stdev(timeTotalPar):.7f} - S(p) = {(medSeq/medTotalPar):.2f}")
+   if (runSeq):
+      if (ran > 1):
+         print(f"   Media   Ttotal  - {t} processos : {medTotalPar:.7f}, {statistics.stdev(timeTotalPar):.7f} - S(p) = {(medSeq/medTotalPar):.2f}")
+      else:
+         print(f"   Media   Ttotal  - {t} processos: {medTotalPar:.7f} - S(p) = {(medSeq/medTotalPar):.2f}")
    else:
-      print(f"   Media   Ttotal  - {t} processos: {medTotalPar:.7f} - S(p) = {(medSeq/medTotalPar):.2f}")
+      if (ran > 1):
+         print(f"   Media   Ttotal  - {t} processos : {medTotalPar:.7f}, {statistics.stdev(timeTotalPar):.7f}")
+      else:
+         print(f"   Media   Ttotal  - {t} processos: {medTotalPar:.7f}")
    print(f"   Resultado: {lastResult}\n")
    timeTotalPar = []
 

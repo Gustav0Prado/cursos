@@ -6,6 +6,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <limits.h>
 #include <math.h>
 #include <mpi.h>
@@ -121,8 +122,9 @@ void read_stdin(int **x, int **y){
    
    // Le n de cidades
    st = scanf("%u", &nb_towns);
-   if (st != 1)
-      MPI_Abort (MPI_COMM_WORLD, 1);
+   if (st != 1){
+      MPI_Abort (MPI_COMM_WORLD, 123);
+   }
 
    *x = malloc(sizeof(int) * nb_towns);
    *y = malloc(sizeof(int) * nb_towns);
@@ -130,19 +132,20 @@ void read_stdin(int **x, int **y){
    // Le x e y
    for(int i = 0; i < nb_towns; ++i){
       st = scanf("%u %u", (*x) + i, (*y) + i);
-      if (st != 2)
-         MPI_Abort (MPI_COMM_WORLD, 1);
+      if (st != 2) {
+         MPI_Abort (MPI_COMM_WORLD, 123);
+      }
    }
 }
 
 void manager () {
-   int num_instances, st, i_buff, dist, pos, buff_siz, orig_inst, alive;
+   int num_instances, st, i_buff = 0, dist, pos, buff_siz, orig_inst, alive;
    char waiting[n_procs-1];
 
    // Le n de instancias
    st = scanf("%u", &num_instances);
-      if (st != 1)
-         MPI_Abort (MPI_COMM_WORLD, 1);
+   if (st != 1)
+      MPI_Abort (MPI_COMM_WORLD, 123);
    orig_inst = num_instances;
 
    // Fila de espera inicia vazia
@@ -166,10 +169,14 @@ void manager () {
       // Aloca buffer
       int buff_siz = sizeof(int) * 3 * nb_towns;
       buffer = malloc (buff_siz);
+      memset (buffer, 0, buff_siz);
+
+      int disp = (nb_towns-1)*(nb_towns-2);
 
       // Fila de espera inicia vazia
       for (int i = 0; i < n_procs-1; ++i) {
          if (waiting[i]) {
+            disp--;
             MPI_Send (&nb_towns, 1, MPI_INT, i+1, NEW_WORK, MPI_COMM_WORLD);
             waiting[i] = 0;
          }
@@ -183,13 +190,13 @@ void manager () {
 
             // Algum trabalhador quer iniciar, se houver o que calcular retorna positivamente, senao pede para o trabalhador encerrar
             case START:
-               if (last_i < nb_towns) {
+               if (disp > 0) {
+                  disp--;
                   if (i_buff == orig_inst-num_instances-1)
                      MPI_Send (&nb_towns, 1, MPI_INT, status.MPI_SOURCE, NEW_WORK, MPI_COMM_WORLD);
                   else
                      MPI_Send (&nb_towns, 1, MPI_INT, status.MPI_SOURCE, WORK, MPI_COMM_WORLD);
                }
-               
                // Se for a ultima instancia, processo pode encerrar
                else if (num_instances == 0) {
                   MPI_Send (&nb_towns, 1, MPI_INT, status.MPI_SOURCE, END_WORK, MPI_COMM_WORLD);
