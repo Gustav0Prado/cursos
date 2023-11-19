@@ -75,7 +75,7 @@ if runSeq:
 
 
 print(f"\n=> Paralelo")
-for t in [2,4,6,8]:
+for t in [3,5,7,9]:
    for i in range(ran):
       result = subprocess.run(f"mpirun --hostfile hosts.txt -np {t+1} {dir}/mpi < {inp}.in", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, executable='/bin/bash')
       r = result.stdout.decode().partition("\n")[0].strip()
