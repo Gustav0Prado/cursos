@@ -277,7 +277,7 @@ void manager () {
 }
 
 void worker () {
-   int *x, *y, buff_siz;
+   int *x, *y, buff_siz, old_towns = 0;
    char *path, *buffer;
    int inst = 0;
 
@@ -296,7 +296,7 @@ void worker () {
             free (y);
             free (dist_to_origin);
             free (path);
-            for (int i = 0; i < nb_towns; i++)
+            for (int i = 0; i < old_towns; i++)
                free(d_matrix[i]);
             free(d_matrix);
          }
@@ -333,6 +333,8 @@ void worker () {
       tsp (3, dist, path, last);
 
       MPI_Send (&min_distance, 1, MPI_INT, 0, MIN_DIST, MPI_COMM_WORLD);
+
+      old_towns = nb_towns;
    }
 
    free (x);
