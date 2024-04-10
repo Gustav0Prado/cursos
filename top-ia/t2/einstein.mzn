@@ -12,14 +12,17 @@ array[1..5] of var Pets:           arrP;
 array[1..5] of var Bebidas:        arrB;
 array[1..5] of var Hobbies:        arrH;
 
+var 1..5: c;
+
 constraint alldifferent(arrN);
 constraint alldifferent(arrC);
 constraint alldifferent(arrP);
 constraint alldifferent(arrB);
 constraint alldifferent(arrH);
 
-constraint arrN[1] = Noruegues;   % Noruegues mora na primeira casa
-constraint arrB[3] = Leite;       % Morador da casa do meio bebe leite
+constraint arrN[1] = Noruegues; % Noruegues mora na primeira casa
+constraint arrB[3] = Leite;     % Morador da casa do meio bebe leite
+constraint arrP[c] = Peixe;     % Restrição para guardar o  
 
 constraint exists (i in 1..5) (arrN[i] = Britanico   /\ arrC[i] = Vermelho);
 constraint exists (i in 1..5) (arrN[i] = Sueco       /\ arrP[i] = Cachorro);
@@ -40,3 +43,12 @@ constraint exists (i1 in 1..4, i2 in 2..5) ((arrH[i1] = Basquete   /\ arrB[i1+1]
                             \/ (arrH[i2] = Basquete   /\ arrB[i2-1] = Agua));
 
 solve satisfy;
+
+output [
+    "Nacionalidades: \(arrN)\n" ++
+    "Cores:          \(arrC)\n" ++
+    "Pets:           \(arrP)\n" ++
+    "Bebidas:        \(arrB)\n" ++
+    "Hobbies:        \(arrH)\n\n" ++
+    "-> O dono do peixe eh o \(arrN[c]) na casa \(c)\n"
+]
