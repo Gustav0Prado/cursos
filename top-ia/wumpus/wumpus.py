@@ -13,7 +13,7 @@ with open(sys.argv[1]) as file:
         L.append([int(s) for s in file.readline().split(' ')])
 
 cmd = f"swipl -s src/main.pl -g wumpus_simplificado({N},{str(L).replace(' ', '')}). -g halt"
-print(cmd)
+# print(cmd)
 clist = cmd.split(' ')
 
 result = subprocess.run(clist, stdout=subprocess.PIPE)
