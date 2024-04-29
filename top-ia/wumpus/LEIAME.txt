@@ -1,3 +1,5 @@
+Gustavo do Prado Silva - GRR20203942
+
 O que foi feito:
     * Até onde pude ver, a busca está completa, todos os exemplos tem saída true e os falsos false (sem solução) ou param ao cair no poço (halt).
     Não achei nenhum exemplo que quebre o programa (ainda) mas pode ser possível
