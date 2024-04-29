@@ -41,6 +41,6 @@ anda(I, J, I1, J, N):- I < N-1, I1 is I+1.  % anda para baixo
 
 verifica_caminho(I, J, Caminho):- not(member([I,J], Caminho)).  % Verifica se posicao I, J ainda NAO faz parte do caminho
 
-seguro(I, J, N):- % Pergunta a BC se a posicao I, J eh segura
+seguro(I, J, N):- % Pergunta a BC se a posicao I, J eh segura (sem poço)
     poco(I, J, N, Ind),
     not(ask_bc(Ind)).
