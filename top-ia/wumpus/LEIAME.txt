@@ -1,0 +1,22 @@
+O que foi feito:
+    * Até onde pude ver, a busca está completa, todos os exemplos tem saída true e os falsos false (sem solução) ou param ao cair no poço (halt).
+    Não achei nenhum exemplo que quebre o programa (ainda) mas pode ser possível
+Entrada:
+    * Entrada segue para o programa .pl segue o formato de listas do prolog, por exemplo:
+    [[0, 0], [0,3]] é o mesmo que o mapa 0 0
+                                             0 3
+    Porém é meio chato usar isso quando se tem uma entrada maior, por isso fiz o script Python para redirecionar para o prolog uma entrada no mesmo formato que as usadas nos exemplos dados do programa do Wumpus em C (estão na pasta exemplos/).
+Saida:
+    * A saída apresenta o caminho percorrido (índices das posições na matriz) em forma de lista e uma mensagem se fosse ganhou/perdeu o jogo. As mensagens podem ser retiradas se forem incômodas, coloquei mais para ter um feedback além de true/false.
+Script Python:
+    * Script tem como entrada um arquivo .in no mesmo formato dos exemplos, ou seja, na primeira linha o número N de linhas e nas seguintes o mapa em forma de matriz.
+    Exemplo: ./wumpus.py exemplos/ex2.in
+    O script python converte o mapa para o formato do prolog para ser mais fácil testar, printa a saída da execução do prolog e o motivo principal de eu ter feito ele: Desenha o caminho percorrido no mapa (isso ajudou muito a entender o que estava acontecendo).
+    Basicamente vai printar o mapa como está no arquivo de entrada, mas colocar setas (▸, ▾, ◂, ▴) indicando para qual direção foi andado no mapa a cada passo, por ex:
+    (Entrada)  0 0 0 0       ▸ ▾ 0 0  (Saída)
+               0 0 1 0  ->   ▾ ◂ 1 0
+               0 1 2 1       ▾ 1 2 1
+               0 3 1 0       ▸ ➌ 1 0
+    
+    Então fica uma forma bem visual de entender o caminho percorrido no programa
+    OBS: Vale ressaltar que sempre começamos da canto superior esquerdo
