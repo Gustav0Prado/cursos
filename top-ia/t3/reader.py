@@ -69,7 +69,7 @@ def le_entrada():
       # Le as restrições
       prob.num_rest = int(entrada.readline())
       for i in range(prob.num_rest):
-         linha_tipo   = entrada.readline()
+         linha_tipo   = entrada.readline().strip('\n')
          linha_escopo = entrada.readline()
          linha_tuplas = entrada.readline()
          
