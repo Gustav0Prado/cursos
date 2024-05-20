@@ -46,7 +46,7 @@ def backtrack(prob: Problema):
    i = 0
 
    while (i >= 0) and (i < prob.num_var):
-      print(valores)
+      # print(valores)
       a_i = prox_valor(prob, prob.dominio_problema[i], valores)
       if a_i != None:
          valores.append(a_i)
