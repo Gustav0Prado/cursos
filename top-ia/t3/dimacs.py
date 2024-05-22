@@ -20,6 +20,8 @@ def bit_to_var(b:list, cl:list, tam:int):
       else: res.append(-cl2[i])
    return res
 
+#------------------------------------------------------------------------------------------------
+
 # Se permutacao for valida, ou seja, se ao fazer OR de todos os elementos
 # não der FALSE, é uma tupla valida para a restricao
 def permut_valida(b:list, cl: list, tam: int):
@@ -29,6 +31,7 @@ def permut_valida(b:list, cl: list, tam: int):
       elif(b[i] == '0'): res += 1
    return (res > 0)
    
+#------------------------------------------------------------------------------------------------
 
 # Acha todas as tuplas de cada restricao
 def restr_validos(cl:list):
@@ -45,6 +48,7 @@ def restr_validos(cl:list):
    
    print(f'{len(permutacoes)} {" ".join(permutacoes)}')
 
+#------------------------------------------------------------------------------------------------
 
 # Leitura da entrada padrão
 for line in sys.stdin:
@@ -59,8 +63,6 @@ for line in sys.stdin:
    if (token[0] != 'c') and (token[0] != 'p'):
       token = [int(x) for x in token]
       clausulas.append(token[:-1])
-
-# print(f'{clausulas}\n')
 
 # Printa variáveis, podem ser negativas (negadas/falso) ou positivas (verdadeiras)
 print(num_var)

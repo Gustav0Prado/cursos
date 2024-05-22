@@ -10,6 +10,8 @@ class Problema:
       self.num_var  = 0
       self.num_rest = 0
 
+#------------------------------------------------------------------------------------------------
+
 class Dominio:
    def __init__(self, tamanho, valores):
       self.tamanho = tamanho
@@ -19,6 +21,8 @@ class Dominio:
    def __str__(self):
       return "\tTamanho do domínio = " + str(self.tamanho) + "\n\tValores do domínio = " + str(self.valores)
    
+#------------------------------------------------------------------------------------------------
+
 class Restricao:
    def __init__(self, tipo, tamanho_escopo, escopo, tamanho_tuplas, tuplas):
       self.tipo = tipo
@@ -32,6 +36,7 @@ class Restricao:
       saida += "\n\tQuantidade de tuplas = " + str(self.tamanho_tuplas) + "\n\tTuplas = " + str(self.tuplas)
       return saida
 
+#------------------------------------------------------------------------------------------------
 
 # Particiona uma lista em várias listas menores de tamanho tam
 def split(tam, lista):
@@ -43,6 +48,7 @@ def split(tam, lista):
       res.append(l)
    return res
 
+#------------------------------------------------------------------------------------------------
 
 def le_entrada():
    prob = Problema()
