@@ -55,28 +55,26 @@ def split(tam, lista):
 def le_entrada():
    prob = Problema()
 
-   # Leitura do arquivo de entrada
-   with open(sys.argv[1]) as entrada:
-      # Le variaveis
-      prob.num_var = int(entrada.readline())
-      for i in range(prob.num_var):
-         linha = entrada.readline()
-         res = [eval(i) for i in linha.strip('\n').split(' ')] # Converte a linha dada na entrada para uma lista de inteiros
-         
-         dominio_xn = Dominio(res[0], res[1:])
-         prob.dominio_problema.append(dominio_xn)
+   # Le variaveis
+   prob.num_var = int(sys.stdin.readline())
+   for i in range(prob.num_var):
+      linha = sys.stdin.readline()
+      res = [eval(i) for i in linha.strip('\n').split(' ')] # Converte a linha dada na entrada para uma lista de inteiros
+      
+      dominio_xn = Dominio(res[0], res[1:])
+      prob.dominio_problema.append(dominio_xn)
 
-      # Le as restrições
-      prob.num_rest = int(entrada.readline())
-      for i in range(prob.num_rest):
-         linha_tipo   = entrada.readline().strip('\n')
-         linha_escopo = entrada.readline()
-         linha_tuplas = entrada.readline()
-         
-         res_escopo = [eval(i) for i in linha_escopo.strip('\n').split(' ')] # Converte a linha dada na entrada para uma lista de inteiros
-         res_tuplas = [eval(i) for i in linha_tuplas.strip('\n').split(' ')] # Converte a linha dada na entrada para uma lista de inteiros
-         
-         restricao_n = Restricao(linha_tipo, res_escopo[0], res_escopo[1:], res_tuplas[0], split(res_escopo[0], res_tuplas[1:]))
-         prob.restricoes_problema.append(restricao_n)
+   # Le as restrições
+   prob.num_rest = int(sys.stdin.readline())
+   for i in range(prob.num_rest):
+      linha_tipo   = sys.stdin.readline().strip('\n')
+      linha_escopo = sys.stdin.readline()
+      linha_tuplas = sys.stdin.readline()
+      
+      res_escopo = [eval(i) for i in linha_escopo.strip('\n').split(' ')] # Converte a linha dada na entrada para uma lista de inteiros
+      res_tuplas = [eval(i) for i in linha_tuplas.strip('\n').split(' ')] # Converte a linha dada na entrada para uma lista de inteiros
+      
+      restricao_n = Restricao(linha_tipo, res_escopo[0], res_escopo[1:], res_tuplas[0], split(res_escopo[0], res_tuplas[1:]))
+      prob.restricoes_problema.append(restricao_n)
       
    return prob

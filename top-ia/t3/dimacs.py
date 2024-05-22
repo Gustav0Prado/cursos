@@ -37,19 +37,18 @@ def restr_validos(cl:list):
    print(f'{len(permutacoes)} {" ".join(permutacoes)}')
 
 # Leitura do arquivo de entrada
-with open(sys.argv[1]) as entrada:
-   for line in entrada:
-      token = line.strip('\n').split(' ')
+for line in sys.stdin:
+   token = line.strip('\n').split(' ')
 
-      # Achou declaracao da cnf
-      if (token[0] == 'p'):
-         num_var = int(token[2])
-         num_clausulas = int(token[3])
+   # Achou declaracao da cnf
+   if (token[0] == 'p'):
+      num_var = int(token[2])
+      num_clausulas = int(token[3])
 
-      # Achou declaracao das clausulas
-      if (token[0] != 'c') and (token[0] != 'p'):
-         token = [int(x) for x in token]
-         clausulas.append(token[:-1])
+   # Achou declaracao das clausulas
+   if (token[0] != 'c') and (token[0] != 'p'):
+      token = [int(x) for x in token]
+      clausulas.append(token[:-1])
 
 # print(f'{clausulas}\n')
 
