@@ -10,6 +10,7 @@ def prox_valido(dom: Dominio):
          dom.valido[i] = 0   # Marca valor como usado
          return dom.valores[i]
 
+
 # Acha o proximo valido, mas retorna apenas o primeiro que atende as restricoes
 def prox_valor(prob: Problema, dom: Dominio, valores: list):
    a_i = prox_valido(dom)
@@ -17,16 +18,19 @@ def prox_valor(prob: Problema, dom: Dominio, valores: list):
       a_i = prox_valido(dom)
    return a_i
 
+
 # Ao voltar o nivel da recursao, reseta quais valores sao validos nos proximos niveis
 def reset_validos(dom: Dominio):
    dom.valido = [1]*dom.tamanho
 
+# Retorna uma lista l com os valores das variáveis dos indices indicados pelo escopo
 def val_escopo(escopo:list, valores:list):
    l = []
    for i in escopo:
       l.append(valores[i-1])
    return l
 
+# Verifica se valoracao fere alguma restricao dada
 def verifica_restricoes(prob: Problema, valores: list):
    # Verifica as tuplas da restricao, 
    for res in prob.restricoes_problema:
@@ -41,6 +45,7 @@ def verifica_restricoes(prob: Problema, valores: list):
             if tupla == val_escopo(res.escopo, valores): return False
    return True
 
+
 def backtrack(prob: Problema):   
    valores = []  # Cria uma valoracao inicial zerada
    i = 0
@@ -48,6 +53,8 @@ def backtrack(prob: Problema):
    while (i >= 0) and (i < prob.num_var):
       # print(valores)
       a_i = prox_valor(prob, prob.dominio_problema[i], valores)
+      
+      # Achou algum valor possivel como proximo
       if a_i != None:
          valores.append(a_i)
          i = i + 1

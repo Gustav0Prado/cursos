@@ -33,16 +33,8 @@ class Restricao:
       return saida
 
 
+# Particiona uma lista em várias listas menores de tamanho tam
 def split(tam, lista):
-   """Particiona uma lista em várias listas menores de tamanho tam
-
-   Args:
-       tam (int):    Tamanho das listas de saída
-       lista (list): Lista de entrada
-
-   Returns:
-       res: Lista com as listas menores particionadas 
-   """
    res = []
    while lista != []:
       l = []
