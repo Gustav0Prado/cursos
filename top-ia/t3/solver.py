@@ -67,7 +67,7 @@ def backtrack(prob: Problema):
 
    while (i >= 0) and (i < prob.num_var):
       # print(valores)
-      a_i = prox_valor(prob, prob.dominio_problema[i-1], valores)
+      a_i = prox_valor(prob, prob.dominio_problema[i], valores)
       
       # Achou algum valor possivel como proximo
       if a_i != None:
@@ -77,7 +77,7 @@ def backtrack(prob: Problema):
       # Caso contrário, reseta valores válidos do dominio,
       # retira ultimo valor (se existir algum) e retrocede
       else:
-         reset_validos(prob.dominio_problema[i-1])
+         reset_validos(prob.dominio_problema[i])
          if valores: valores.pop()
          i = i - 1
    

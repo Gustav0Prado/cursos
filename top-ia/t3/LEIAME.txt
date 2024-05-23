@@ -1,0 +1,29 @@
+# Gustavo do Prado Silva - GRR20203942
+
+# Como rodar: Solver
+
+   python3 solver.py
+   
+   * A entrada do programa é lido do stdin, então é possível digitar toda a entrada,
+   mas recomendo apenas redirecionar de uma arquivo. ex:
+      python3 solver.py < input/color.in
+
+   * A saída do programa contém a valoração das variáveis em formato de lista. ex: Resultado = [1,2,3,4,5]
+   No caso de não ter resultado (inconsistente), a saída também indicara isso ("Problema Inconsistente - Sem Solução")
+
+# Como usar: Dimacs
+
+   python3 dimacs.py
+
+   * Assim como o solver, lê da entrada padrão, mas recomendo redirecionar de arquivo.
+      python3 dimacs.py < input/ex1.csp
+   
+   * A saída desse programa é feita na saída padrão, com o formato certo para o solver, então é possível fazer isso:
+      python3 dimacs.py < input/ex1.csp | python3 solver.py
+   Para transformar de dimacs para o formato do solver e já resolver o problema
+
+# Observacoes:
+
+   * Consegui rodar o exemplo de coloração de mapas e alguns exemplos de csp corretos, POREM não consegui terminar de rodar o exemplo da
+   palavra-cruzada, ele demorou algumas horas e mesmo assim não terminou (não deu erro, apenas demorou bastante e ainda não tinha chegado na resposta)
+   então não sei se isso seria normal devido ao backtracking nao ter otimização ou se tem algo errado no algoritmo principal.
