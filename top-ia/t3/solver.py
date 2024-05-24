@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 # Gustavo do Prado Silva - GRR20203942
 
-from reader import *
+from reader import *      
 
 # Retorna primeiro valor do dominio que ainda nao foi usado
 def prox_valido(dom: Dominio):
@@ -23,7 +23,8 @@ def prox_valor(prob: Problema, dom: Dominio, valores: list):
 
 # Ao voltar o nivel da recursao, reseta quais valores sao validos nos proximos niveis
 def reset_validos(dom: Dominio):
-   dom.valido = [1]*dom.tamanho
+   for i in range(dom.tamanho):
+      if dom.valido[i] == 0: dom.valido[i] = 1
 
 #------------------------------------------------------------------------------------------------
 
@@ -36,27 +37,48 @@ def val_escopo(escopo:list, valores:list):
 
 #------------------------------------------------------------------------------------------------
 
+# Verifica se existe alguma tupla de alguma restricao que invalida a valoracao dada
+def existe_tupla_invalida(res:Restricao, tupla:list, valores:list):
+   dif = False
+   for i in range(res.tamanho_escopo):
+      ind = res.escopo[i]-1
+
+      # Caso variável presente no escopo ainda nao tenha sido escolhida, apenas pula ela
+      if len(valores) < ind+1: continue
+      if tupla[i] != valores[ind]: dif = True
+   return dif
+
+#------------------------------------------------------------------------------------------------
+
+# Conta quantos valores da tupla são iguais ao da valoracao dada
+def count_tuplas_validas(res:Restricao, tupla:list, valores:list):
+   count = 0
+   for i in range(res.tamanho_escopo):
+      ind = res.escopo[i]-1
+      if len(valores) < ind+1: continue
+      elif tupla[i] == valores[ind]: count += 1
+   return count
+
+#------------------------------------------------------------------------------------------------
+
 # Verifica se valoracao fere alguma restricao dada
 def verifica_restricoes(prob: Problema, valores: list):
    
    # Para cada restricao, verifica se possui todas as variáveis para aquele escopo
    # e se sim, verifica se estao validas comparando com as todas as tuplas dela
    for res in prob.restricoes_problema:
-      if res.escopo[-1] > len(valores): return True
-      
       if res.tipo == 'V':
          valida = False
          
          # Tenta verificar se existe pelo menos uma tupla que valide essa valoração dada
          for tupla in res.tuplas:
-            if tupla == val_escopo(res.escopo, valores): valida = True
-         
+            if not existe_tupla_invalida(res, tupla, valores): valida = True
          if not valida: return False
       else:
 
-         # Verifica se valoração é igual a qualquer uma das tuplas, o que é inválido
+         # Verifica se todos os valores de alguma tupla sao iguais da valoracao dada
          for tupla in res.tuplas:
-            if tupla == val_escopo(res.escopo, valores): return False
+            if count_tuplas_validas(res, tupla, valores) == res.tamanho_escopo: return False
    return True
 
 #------------------------------------------------------------------------------------------------
@@ -90,8 +112,10 @@ def main():
    prob = le_entrada()
    val = backtrack(prob)
    
-   if val != None: print(f'Resultado = {val}')
-   else: print("Problema Inconsistente - Sem Solução")
+   if val != None: print(val)
+      # for i in range(len(val)):
+      #    print(f'x{i+1} = {val[i]}')
+   else: print("INVIAVEL ")
 
 if __name__ == "__main__":
    main()
