@@ -112,9 +112,9 @@ def main():
    prob = le_entrada()
    val = backtrack(prob)
    
-   if val != None: print(val)
-      # for i in range(len(val)):
-      #    print(f'x{i+1} = {val[i]}')
+   if val != None: 
+      for i in range(len(val)):
+         print(f'x{i+1} = {val[i]}')
    else: print("INVIAVEL ")
 
 if __name__ == "__main__":
