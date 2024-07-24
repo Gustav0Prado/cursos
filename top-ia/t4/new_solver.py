@@ -41,9 +41,37 @@ def restricoes_validas(prob: Problema, dom: Dominio, valores: list):
    return True
 
 #------------------------------------------------------------------------------------------------
-#
+# Retorna se todos os valores do dominio sao invalidos
 def nenhum_valido (dom: Dominio):
    return all(i == 0 for i in dom.valido)
+
+
+#------------------------------------------------------------------------------------------------
+# Atualiza domínio j, tal que R_c é GAC em relação a x_j
+def revisaGAC(r_c: Restricao, dominios: list, x_j: int):
+   for a_j in dominios[x_j]:
+      # se nao existe uma combinacao que satisfaz r_c, remove do dominio
+
+#------------------------------------------------------------------------------------------------
+# Consistencia de arco generalizada
+def GAC_3(prob: Problema):
+   pilha = []
+
+   for r_c in prob.restricoes_problema:
+      for x_i in prob.num_var:
+         pilha.append((r_c, x_i))
+   
+   # Revisa todos os pares R_c e x_i
+   while len(pilha) != 0:
+      (r_c, x_i) = pilha.pop()
+      D_i = prob.dominio_problema[x_i]
+      revisaGAC(r_c, prob.dominio_problema, x_i)
+
+      # Se houve alteração em D_i, propaga ela
+      if D_i != prob.dominio_problema[x_i]:
+         for r_c in prob.restricoes_problema:
+            for x_j in prob.num_var:
+               if x_j != x_i: pilha.append((r_c, x_j))
 
 #------------------------------------------------------------------------------------------------
 def backtrack(prob: Problema):   
