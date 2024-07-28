@@ -45,12 +45,48 @@ def restricoes_validas(prob: Problema, dom: Dominio, valores: list):
 def nenhum_valido (dom: Dominio):
    return all(i == 0 for i in dom.valido)
 
+#------------------------------------------------------------------------------------------------
+# Retorna se existe alguma combinacao de valores dos outros dominios que respeite a restricao
+def existem_dominios_validos(a_j: int, x_j: int, r_c: Restricao, dominios: list, N: int):
+   valoracao = []
+   i = 0
+
+   dominios_new = dominios.copy()
+
+   # Faz o backtracking procurando valoracoes validas das outras variaveis
+   # que respeitem R_c
+   while (i >= 0) and (i <= N):
+      if (i == x_j):
+         valoracao.append(a_j)
+      
+      if (i == N):
+         # Tenta verificar se existe pelo menos uma tupla que valide essa valoração dada
+         for tupla in r_c.tuplas:
+            if tupla == extrai_vars(valoracao, r_c.escopo): return True
+
+         # Nao respeitou a restricao
+         if valoracao: valoracao.pop()
+         i = i - 1
+
+      else:
+         if nenhum_valido(dominios_new[i]):
+            # Precisa pensar melhor nisso aq eu acho
+            reset_validos(dominios_new[i])
+            if valoracao: valoracao.pop()
+            i = i - 1
+         else:
+            a_i = escolhe_prox(dominios_new[i])
+            valoracao.append(a_i)
+            i = i + 1
+   return False
 
 #------------------------------------------------------------------------------------------------
 # Atualiza domínio j, tal que R_c é GAC em relação a x_j
-def revisaGAC(r_c: Restricao, dominios: list, x_j: int):
+def revisaGAC(prob:Problema, r_c: Restricao, dominios: list, x_j: int):
    for a_j in dominios[x_j]:
       # se nao existe uma combinacao que satisfaz r_c, remove do dominio
+      if not existem_dominios_validos(a_j, x_j, r_c, dominios, prob.num_var):
+         dominios[x_j].remove(a_j)
 
 #------------------------------------------------------------------------------------------------
 # Consistencia de arco generalizada
@@ -65,7 +101,7 @@ def GAC_3(prob: Problema):
    while len(pilha) != 0:
       (r_c, x_i) = pilha.pop()
       D_i = prob.dominio_problema[x_i]
-      revisaGAC(r_c, prob.dominio_problema, x_i)
+      revisaGAC(prob, r_c, prob.dominio_problema, x_i)
 
       # Se houve alteração em D_i, propaga ela
       if D_i != prob.dominio_problema[x_i]:
