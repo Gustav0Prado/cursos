@@ -2,20 +2,18 @@
 # Gustavo do Prado Silva - GRR20203942
 
 from reader import *
+from copy import deepcopy
 
 #------------------------------------------------------------------------------------------------
 # Ao voltar o nivel da recursao, reseta quais valores sao validos nos proximos niveis
 def reset_validos(dom: Dominio):
-   for i in range(dom.tamanho):
-      if dom.valido[i] == 0: dom.valido[i] = 1
+   dom.valores = dom.orig.copy()
 
 #------------------------------------------------------------------------------------------------
 # Retorna primeiro valor do dominio que ainda nao foi usado
 def escolhe_prox(dom: Dominio):
-   for i in range(dom.tamanho):
-      if dom.valido[i] == 1:
-         dom.valido[i] = 0   # Marca valor como usado
-         return dom.valores[i]
+   dom.invalidos.append(dom.valores[0])
+   return dom.valores.pop(0)
    
 #------------------------------------------------------------------------------------------------
 # Retorna lista com a valoracao das variaveis de um determinado escopo
@@ -41,96 +39,109 @@ def restricoes_validas(prob: Problema, dom: Dominio, valores: list):
    return True
 
 #------------------------------------------------------------------------------------------------
-# Retorna se todos os valores do dominio sao invalidos
+# Retorna se não existem valores válidos no dominio
 def nenhum_valido (dom: Dominio):
-   return all(i == 0 for i in dom.valido)
+   return (len(dom.valores) == 0)
 
 #------------------------------------------------------------------------------------------------
 # Retorna se existe alguma combinacao de valores dos outros dominios que respeite a restricao
 def existem_dominios_validos(a_j: int, x_j: int, r_c: Restricao, dominios: list, N: int):
-   valoracao = []
+   valoracao = [None]*N
    i = 0
-
-   dominios_new = dominios.copy()
+   
+   # Deixa apenas x_j como valido
+   dominios[x_j].valores = [a_j]
 
    # Faz o backtracking procurando valoracoes validas das outras variaveis
    # que respeitem R_c
    while (i >= 0) and (i <= N):
-      if (i == x_j):
-         valoracao.append(a_j)
-      
       if (i == N):
          # Tenta verificar se existe pelo menos uma tupla que valide essa valoração dada
          for tupla in r_c.tuplas:
             if tupla == extrai_vars(valoracao, r_c.escopo): return True
 
          # Nao respeitou a restricao
-         if valoracao: valoracao.pop()
          i = i - 1
 
       else:
-         if nenhum_valido(dominios_new[i]):
+         if nenhum_valido(dominios[i]) and (valoracao[i] != None):
             # Precisa pensar melhor nisso aq eu acho
-            reset_validos(dominios_new[i])
-            if valoracao: valoracao.pop()
+            if i != x_j:
+               for inv in dominios[i].invalidos:
+                  dominios[i].valores.append(inv)
+               dominios[i].invalidos = []
+            else:
+               # Deixa apenas x_j como valido
+               dominios[x_j].valores = [a_j]
+            valoracao[i] = None
             i = i - 1
          else:
-            a_i = escolhe_prox(dominios_new[i])
-            valoracao.append(a_i)
+            a_i = escolhe_prox(dominios[i])
+            valoracao[i] = a_i
             i = i + 1
    return False
 
 #------------------------------------------------------------------------------------------------
 # Atualiza domínio j, tal que R_c é GAC em relação a x_j
-def revisaGAC(prob:Problema, r_c: Restricao, dominios: list, x_j: int):
-   for a_j in dominios[x_j]:
+def revisaGAC(prob:Problema, r_c: Restricao, dominios: list, x_j: int, valoracao: list):
+   D_j = deepcopy(dominios)
+   remover = []
+
+   for a_j in dominios[x_j].valores:
+      for i in range(len(valoracao)):
+         if valoracao[i] != None:
+            D_j[i].valores.append(valoracao[i])
+            
       # se nao existe uma combinacao que satisfaz r_c, remove do dominio
-      if not existem_dominios_validos(a_j, x_j, r_c, dominios, prob.num_var):
-         dominios[x_j].remove(a_j)
+      if not existem_dominios_validos(a_j, x_j, r_c, D_j, prob.num_var):
+         remover.append(a_j)
+      
+   # elementos sao salvos pra remover depois senao o python se perde na lista
+   for item in remover:
+      dominios[x_j].valores.remove(item)
 
 #------------------------------------------------------------------------------------------------
 # Consistencia de arco generalizada
-def GAC_3(prob: Problema):
+def GAC_3(prob: Problema, valoracao: list):
    pilha = []
 
    for r_c in prob.restricoes_problema:
-      for x_i in prob.num_var:
+      for x_i in range(prob.num_var):
          pilha.append((r_c, x_i))
    
    # Revisa todos os pares R_c e x_i
    while len(pilha) != 0:
       (r_c, x_i) = pilha.pop()
-      D_i = prob.dominio_problema[x_i]
-      revisaGAC(prob, r_c, prob.dominio_problema, x_i)
+      D_i = prob.dominio_problema[x_i].valores.copy()
+      revisaGAC(prob, r_c, prob.dominio_problema, x_i, valoracao)
 
       # Se houve alteração em D_i, propaga ela
-      if D_i != prob.dominio_problema[x_i]:
+      if D_i != prob.dominio_problema:
          for r_c in prob.restricoes_problema:
-            for x_j in prob.num_var:
+            for x_j in range(prob.num_var):
                if x_j != x_i: pilha.append((r_c, x_j))
 
 #------------------------------------------------------------------------------------------------
 def backtrack(prob: Problema):   
-   valores = []  # Cria uma valoracao inicial zerada
+   valoracao = [None] * prob.num_var  # Cria uma valoracao inicial "zerada"
    i = 0
 
    while (i >= 0) and (i <= prob.num_var):
       if (i == prob.num_var):
-         if restricoes_validas(prob, prob.dominio_problema[i-1], valores):
-            return valores
+         if restricoes_validas(prob, prob.dominio_problema[i-1], valoracao):
+            return valoracao
          else:
-            if valores: valores.pop()
             i = i - 1
 
       else:
-         if nenhum_valido(prob.dominio_problema[i]):
+         if nenhum_valido(prob.dominio_problema[i]) and (valoracao[i] != None):
             reset_validos(prob.dominio_problema[i])
-            if valores: valores.pop()
+            valoracao[i] = None
             i = i - 1
          else:
+            GAC_3(prob, valoracao)
             a_i = escolhe_prox(prob.dominio_problema[i])
-            valores.append(a_i)
-            # print(f'i = {i} | valores = {valores} | dominio = {prob.dominio_problema[i].valido} | a_i = {a_i}')
+            valoracao[i] = a_i
             i = i + 1
    return None
 

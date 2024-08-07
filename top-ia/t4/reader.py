@@ -16,7 +16,8 @@ class Dominio:
    def __init__(self, tamanho, valores):
       self.tamanho = tamanho
       self.valores = valores
-      self.valido  = [1]*tamanho
+      self.orig    = valores.copy()
+      self.invalidos = []
 
    def __str__(self):
       return "\tTamanho do domínio = " + str(self.tamanho) + "\n\tValores do domínio = " + str(self.valores)

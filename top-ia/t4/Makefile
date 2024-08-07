@@ -1,7 +1,7 @@
 all: solver dimacs
 
 solver: solver.py
-	cp solver.py ./solver
+	cp new_solver.py ./solver
 	chmod +x ./solver
 
 dimacs: dimacs.py

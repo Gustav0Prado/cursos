@@ -1,0 +1,2 @@
+# Var dizendo quantos validos no dominio
+# Escolher primeiro a com menor dominio -> Validos comeca zerado, contador interno e outro pro ultimo escolhido
