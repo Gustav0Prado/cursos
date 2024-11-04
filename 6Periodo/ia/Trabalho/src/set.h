@@ -1,0 +1,1 @@
+void generate_subsets(int *set, int n, int r, int *temp, int index, int i, void (*f)(int *subset));
