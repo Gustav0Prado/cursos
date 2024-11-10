@@ -5,13 +5,14 @@
  * Função que converte de índice i e j (linha e coluna) para um índice único
  */
 int ind(Game g, int i, int j) {
-    return (i*g.cols + j);
+    return (i*g.cols + j + 1);
 }
 
 /**
  * Função que reverte de um índice único para i e j (linha e coluna)
  */
 int mat(Game g, int x) {
+    x--;
     return g.matrix[x / g.lines][x % g.cols - 1];
 }
 

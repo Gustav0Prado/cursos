@@ -4,7 +4,31 @@
 #include "sat.h"
 
 /**
- * 
+ * Le saida do SAT Solver e coloca em uma matriz
+ */
+void read_outuput(Game *g){
+    FILE *result = fopen("result.sat", "r");
+
+    char buff[256];
+
+    fgets (buff, sizeof(buff), result);
+    for (int i = 0; i < (*g).lines; i++) {
+        for (int j = 0; j < (*g).cols; j++) {
+            fscanf(result, "%s", buff);
+            if (atoi(buff) < 0) {
+                (*g).res[i][j] = 0;
+            }
+            else{
+                (*g).res[i][j] = 1;
+            }
+        }
+    }
+
+    fclose(result);
+}
+
+/**
+ * Insere infos do sat (DIMACS) no inicio do arquivo
  */
 void prepend(Game g){
     FILE *orig = fopen("formula.sat", "r+");
@@ -136,4 +160,8 @@ void start_game(Game *g){
 
     fclose(f);
     prepend((*g));
+
+    system("./utils/minisat formula.sat result.sat");
+
+    read_outuput(g);
 }

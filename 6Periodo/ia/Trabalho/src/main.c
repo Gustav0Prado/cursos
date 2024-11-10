@@ -14,10 +14,16 @@ int main() {
     g.lines = n + 2;
     g.cols  = m + 2;
 
-    /* Aloca matriz */
+    /* Aloca matriz expandida*/
     g.matrix = malloc(sizeof(int*)*g.lines);
     for (int i = 0; i < g.lines; ++i) {
         g.matrix[i] = malloc(sizeof(int) * g.cols);
+    }
+
+    /* Aloca matriz do resultado*/
+    g.res = malloc(sizeof(int*)*g.lines);
+    for (int i = 0; i < g.lines; ++i) {
+        g.res[i] = malloc(sizeof(int) * g.cols);
     }
 
     /* Le toda matriz */
@@ -32,7 +38,7 @@ int main() {
     /* Imprime matriz resultante */
     for (int i = 0; i < g.lines; ++i) {
         for (int j = 0; j < g.cols; ++j) {
-            printf("%d ", g.matrix[i][j]);
+            printf("%d ", g.res[i][j]);
         }
         printf("\n");
     }
@@ -40,6 +46,9 @@ int main() {
     /* Libera estruturas usadas */
     for (int i = 0; i < g.lines; ++i) {
         free(g.matrix[i]);
+    }
+    for (int i = 0; i < g.lines; ++i) {
+        free(g.res[i]);
     }
     free(g.matrix);
 }

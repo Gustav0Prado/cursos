@@ -8,7 +8,7 @@ void loneliness(Game g, Set s, FILE* file){
     for (int i = 0; i < s.subset_size; i++) {
         fprintf(file, "%d ", s.subset[i]);
     }
-    fprintf(file, "\n");
+    fprintf(file, "0\n");
 }
 
 /**
@@ -27,7 +27,7 @@ void stagnation(Game g, Set s, FILE* file){
             fprintf(file, "%d ", s.arr[i]);
         }
     }
-    fprintf(file, "\n");
+    fprintf(file, "0\n");
 }
 
 /**
@@ -37,7 +37,7 @@ void overcrowding(Game g, Set s, FILE* file){
     for (int i = 0; i < s.subset_size; i++) {
         fprintf(file, "-%d ", s.subset[i]);
     }
-    fprintf(file, "\n");
+    fprintf(file, "0\n");
 }
 
 /**
@@ -56,7 +56,7 @@ void preservation(Game g, Set s, FILE* file){
             fprintf(file, "%d ", s.arr[i]);
         }
     }
-    fprintf(file, "\n");
+    fprintf(file, "0\n");
 }
 
 /**
@@ -72,5 +72,5 @@ void life(Game g, Set s, FILE* file){
             fprintf(file, "%d ", s.arr[i]);
         }
     }
-    fprintf(file, "\n");
+    fprintf(file, "0\n");
 }

@@ -9,7 +9,7 @@ game_of_life: src/main.c dist/set.o dist/sat.o dist/game.o
 dist/set.o: src/set.c
 	gcc -c src/set.c -o dist/set.o $(CFLAGS)
 
-fist/sat.o: src/sat.c
+dist/sat.o: src/sat.c
 	gcc -c src/sat.c -o dist/sat.o $(CFLAGS)
 
 dist/game.o: src/game.c
