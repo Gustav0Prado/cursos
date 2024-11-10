@@ -27,16 +27,9 @@ int main() {
         }
     }
 
-    /**
-     * Faz os memes aqui
-     */
-    int set[8];
-    int temp[7];
-    FILE* f = fopen("formula.sat", "w");
-    pick_neighbors(g, &set, 1, 1);
-    generate_subsets(g, set, 8, 7, temp, 0, 0, f, loneliness);
+   start_game(&g);
 
-    /* Imprime matriz */
+    /* Imprime matriz resultante */
     for (int i = 0; i < g.lines; ++i) {
         for (int j = 0; j < g.cols; ++j) {
             printf("%d ", g.matrix[i][j]);
@@ -45,7 +38,7 @@ int main() {
     }
 
     /* Libera estruturas usadas */
-    for (int i = 0; i < n; ++i) {
+    for (int i = 0; i < g.lines; ++i) {
         free(g.matrix[i]);
     }
     free(g.matrix);

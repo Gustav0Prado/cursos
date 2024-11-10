@@ -5,6 +5,10 @@
 #include "game.h"
 #include "set.h"
 
-void loneliness(Game g, int *subset, int size, FILE* file);
+void loneliness(Game g, Set s, FILE* file);
+void stagnation(Game g, Set s, FILE* file);
+void overcrowding(Game g, Set s, FILE* file);
+void preservation(Game g, Set s, FILE* file);
+void life(Game g, Set s, FILE* file);
 
 #endif

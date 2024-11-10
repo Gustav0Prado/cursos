@@ -1,16 +1,19 @@
-all: main
+CFLAGS = -g
 
-main: src/main.c set.o sat.o game.o
-	gcc -o main src/main.c set.o sat.o game.o
+all: game_of_life
 
-set.o: src/set.c
-	gcc -c src/set.c
+game_of_life: src/main.c dist/set.o dist/sat.o dist/game.o
+	gcc -o dist/main src/main.c dist/set.o dist/sat.o dist/game.o $(CFLAGS)
+	ln -fs dist/main game_of_life
 
-sat.o: src/sat.c
-	gcc -c src/sat.c
+dist/set.o: src/set.c
+	gcc -c src/set.c -o dist/set.o $(CFLAGS)
 
-game.o: src/game.c
-	gcc -c src/game.c
+fist/sat.o: src/sat.c
+	gcc -c src/sat.c -o dist/sat.o $(CFLAGS)
+
+dist/game.o: src/game.c
+	gcc -c src/game.c -o dist/game.o $(CFLAGS)
 
 clean:
-	rm -rf set.o sat.o main
+	rm -rf dist/*.o dist/main game_of_life *.sat
