@@ -63,7 +63,22 @@ class SearchProblem:
         """
         util.raiseNotDefined()
 
-
+def generic_search(problem: SearchProblem, insertFunction) -> List[Directions]:
+    # Fronteira começa com o estado inicial e caminho até a solução começa vazio
+    fringe = [problem.getStartState()]
+    path = []
+    visited = []
+    pathStack = []
+    
+    # Enquanto a fronteira não é vazia, explora ela
+    while len(fringe) > 0:
+        node = fringe.pop(0)
+        if node not in visited:
+            visited.append(node)
+            if problem.isGoalState(node):
+                return path
+            fringe, pathStack = insertFunction(node, fringe, pathStack, path)
+        path = pathStack.pop()
 
 
 def tinyMazeSearch(problem: SearchProblem) -> List[Directions]:
@@ -89,12 +104,35 @@ def depthFirstSearch(problem: SearchProblem) -> List[Directions]:
     print("Is the start a goal?", problem.isGoalState(problem.getStartState()))
     print("Start's successors:", problem.getSuccessors(problem.getStartState()))
     """
-    "*** YOUR CODE HERE ***"
+    def insertBeginning(node, fringe: list, pathStack, path) -> List:
+        new_fringe = fringe.copy()
+        new_pathStack = pathStack.copy()
+        
+        # Para cada sucessor, os insere no começo da fila
+        for s, dir, _ in problem.getSuccessors(node):
+            new_fringe.insert(0, s)
+            new_pathStack.append(path + [dir])
+        
+        return new_fringe, new_pathStack
+    
+    return generic_search(problem, insertBeginning)
     util.raiseNotDefined()
 
 def breadthFirstSearch(problem: SearchProblem) -> List[Directions]:
     """Search the shallowest nodes in the search tree first."""
-    "*** YOUR CODE HERE ***"
+    
+    def insertEnd(node, fringe: list, pathStack, path) -> List:
+        new_fringe = fringe.copy()
+        new_pathStack = pathStack.copy()
+        
+        # Para cada sucessor, os insere no começo da fila
+        for s, dir, _ in problem.getSuccessors(node):
+            new_fringe.append(s)
+            new_pathStack.append(path + [dir])
+        
+        return new_fringe, new_pathStack
+    
+    return generic_search(problem, insertEnd)
     util.raiseNotDefined()
 
 def uniformCostSearch(problem: SearchProblem) -> List[Directions]:
