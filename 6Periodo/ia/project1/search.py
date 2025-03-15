@@ -128,7 +128,7 @@ def breadthFirstSearch(problem: SearchProblem) -> List[Directions]:
         # Para cada sucessor, os insere no começo da fila
         for s, dir, _ in problem.getSuccessors(node):
             new_fringe.append(s)
-            new_pathStack.append(path + [dir])
+            new_pathStack.insert(0, path + [dir])
         
         return new_fringe, new_pathStack
     
