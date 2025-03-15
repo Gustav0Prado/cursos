@@ -65,18 +65,18 @@ class SearchProblem:
 
 def generic_search(problem: SearchProblem, insertFunction) -> List[Directions]:
     # Fronteira começa com o estado inicial e caminho até a solução começa vazio
-    fringe = [(problem.getStartState(), [])]
+    fringe = [(problem.getStartState(), [], 0)]
     path = []
     visited = []
     
     # Enquanto a fronteira não é vazia, explora ela
     while len(fringe) > 0:
-        node, path = fringe.pop(0)
+        node, path, cost = fringe.pop(0)
         if node not in visited:
             visited.append(node)
             if problem.isGoalState(node):
                 return path
-            fringe = insertFunction(node, fringe, path)
+            fringe = insertFunction(node, fringe, path, cost)
 
 
 def tinyMazeSearch(problem: SearchProblem) -> List[Directions]:
@@ -106,8 +106,8 @@ def depthFirstSearch(problem: SearchProblem) -> List[Directions]:
         new_fringe = fringe.copy()
         
         # Para cada sucessor, os insere no começo da fila
-        for s, dir, _ in problem.getSuccessors(node):
-            new_fringe.insert(0, (s, path + [dir]))
+        for s, dir, cost in problem.getSuccessors(node):
+            new_fringe.insert(0, (s, path + [dir], cost))
         
         return new_fringe
     
@@ -120,9 +120,9 @@ def breadthFirstSearch(problem: SearchProblem) -> List[Directions]:
     def insertEnd(node, fringe: list, path) -> List:
         new_fringe = fringe.copy()
         
-        # Para cada sucessor, os insere no começo da fila
-        for s, dir, _ in problem.getSuccessors(node):
-            new_fringe.append((s, path + [dir]))
+        # Para cada sucessor, os insere no final da fila
+        for s, dir, cost in problem.getSuccessors(node):
+            new_fringe.append((s, path + [dir], cost))
         
         return new_fringe
     
@@ -131,7 +131,27 @@ def breadthFirstSearch(problem: SearchProblem) -> List[Directions]:
 
 def uniformCostSearch(problem: SearchProblem) -> List[Directions]:
     """Search the node of least total cost first."""
-    "*** YOUR CODE HERE ***"
+    def insertAscOrder(node, fringe: list, path, costToNode) -> List:
+        new_fringe = fringe.copy()
+        
+        # Para cada sucessor, os insere ordenado na fila
+        for s, dir, cost in problem.getSuccessors(node):
+            if len(new_fringe) == 0:
+                new_fringe.append((s, path + [dir], costToNode+cost))
+            else:
+                pos = 0
+                # Acha posicao de insercao
+                while pos < len(new_fringe):
+                    if costToNode+cost >= new_fringe[pos][2]:
+                        pos += 1
+                    else:
+                        break
+                new_fringe.insert(pos, (s, path + [dir], costToNode+cost))
+                        
+        
+        return new_fringe
+    
+    return generic_search(problem, insertAscOrder)
     util.raiseNotDefined()
 
 def nullHeuristic(state, problem=None) -> float:
