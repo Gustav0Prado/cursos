@@ -79,6 +79,21 @@ def generic_search(problem: SearchProblem, insertFunction) -> List[Directions]:
             fringe = insertFunction(node, fringe, path, cost)
 
 
+def heuristic_search(problem: SearchProblem, insertFunction, heuristic) -> List[Directions]:
+    # Fronteira começa com o estado inicial e caminho até a solução começa vazio
+    fringe = [(problem.getStartState(), [], 0, heuristic(problem.getStartState(), problem))]
+    path = []
+    visited = []
+    
+    # Enquanto a fronteira não é vazia, explora ela
+    while len(fringe) > 0:
+        node, path, cost, _ = fringe.pop(0)
+        if node not in visited:
+            visited.append(node)
+            if problem.isGoalState(node):
+                return path
+            fringe = insertFunction(node, fringe, path, cost)
+
 def tinyMazeSearch(problem: SearchProblem) -> List[Directions]:
     """
     Returns a sequence of moves that solves tinyMaze.  For any other maze, the
@@ -136,17 +151,18 @@ def uniformCostSearch(problem: SearchProblem) -> List[Directions]:
         
         # Para cada sucessor, os insere ordenado na fila
         for s, dir, cost in problem.getSuccessors(node):
+            new_cost = costToNode+cost
             if len(new_fringe) == 0:
-                new_fringe.append((s, path + [dir], costToNode+cost))
+                new_fringe.append((s, path + [dir], new_cost))
             else:
                 pos = 0
                 # Acha posicao de insercao
                 while pos < len(new_fringe):
-                    if costToNode+cost >= new_fringe[pos][2]:
+                    if new_cost >= new_fringe[pos][2]:
                         pos += 1
                     else:
                         break
-                new_fringe.insert(pos, (s, path + [dir], costToNode+cost))
+                new_fringe.insert(pos, (s, path + [dir], new_cost))
                         
         
         return new_fringe
@@ -163,7 +179,27 @@ def nullHeuristic(state, problem=None) -> float:
 
 def aStarSearch(problem: SearchProblem, heuristic=nullHeuristic) -> List[Directions]:
     """Search the node that has the lowest combined cost and heuristic first."""
-    "*** YOUR CODE HERE ***"
+    def insertHeuristicOrder(node, fringe: list, path, costToNode) -> List:
+        new_fringe = fringe.copy()
+        
+        # Para cada sucessor, os insere ordenado na fila
+        for s, dir, cost in problem.getSuccessors(node):
+            new_cost = costToNode+cost
+            f = new_cost + heuristic(s, problem)
+            if len(new_fringe) == 0:
+                new_fringe.append((s, path + [dir], new_cost, heuristic(s, problem)))
+            else:
+                pos = 0
+                # Acha posicao de insercao
+                while pos < len(new_fringe):
+                    if f >= new_fringe[pos][2] + new_fringe[pos][3]:
+                        pos += 1
+                    else:
+                        break
+                new_fringe.insert(pos, (s, path + [dir], new_cost, heuristic(s, problem)))
+        return new_fringe
+    
+    return heuristic_search(problem, insertHeuristicOrder, heuristic)
     util.raiseNotDefined()
 
 # Abbreviations
