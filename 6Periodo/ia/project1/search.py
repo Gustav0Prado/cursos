@@ -83,13 +83,17 @@ def heuristic_search(problem: SearchProblem, insertFunction, heuristic) -> List[
     # Fronteira começa com o estado inicial e caminho até a solução começa vazio
     fringe = [(problem.getStartState(), [], 0, heuristic(problem.getStartState(), problem))]
     path = []
-    visited = []
+    
+    # Dicionario mantem o nó visitado e o menor custo até chegar aquele nó
+    visited = {}
     
     # Enquanto a fronteira não é vazia, explora ela
     while len(fringe) > 0:
         node, path, cost, _ = fringe.pop(0)
-        if node not in visited:
-            visited.append(node)
+        
+        # Visita nó novamente apenas caso o custo para chegar enle for menor que o anteriormente registrado
+        if node not in visited or visited[node] > cost:
+            visited.update({node: cost})
             if problem.isGoalState(node):
                 return path
             fringe = insertFunction(node, fringe, path, cost)
@@ -117,7 +121,7 @@ def depthFirstSearch(problem: SearchProblem) -> List[Directions]:
     print("Is the start a goal?", problem.isGoalState(problem.getStartState()))
     print("Start's successors:", problem.getSuccessors(problem.getStartState()))
     """
-    def insertBeginning(node, fringe: list, path) -> List:
+    def insertBeginning(node, fringe: list, path, _) -> List:
         new_fringe = fringe.copy()
         
         # Para cada sucessor, os insere no começo da fila
@@ -132,7 +136,7 @@ def depthFirstSearch(problem: SearchProblem) -> List[Directions]:
 def breadthFirstSearch(problem: SearchProblem) -> List[Directions]:
     """Search the shallowest nodes in the search tree first."""
     
-    def insertEnd(node, fringe: list, path) -> List:
+    def insertEnd(node, fringe: list, path, _) -> List:
         new_fringe = fringe.copy()
         
         # Para cada sucessor, os insere no final da fila
