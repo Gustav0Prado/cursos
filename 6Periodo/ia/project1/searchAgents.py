@@ -357,7 +357,10 @@ class CornersProblem(search.SearchProblem):
             if self.walls[x][y]: return 999999
         return len(actions)
 
-
+def manhattanDistance( posA, posB ):
+    """ Returns the Manhattan Distance between the specified positions.
+        Each position must be an iterable with X-coordinate as element 0, and Y-coordinate as element 1. """
+    return abs(posA[0] - posB[0]) + abs(posA[1] - posB[1])
 
 def cornersHeuristic(state: Any, problem: CornersProblem):
     """
@@ -375,9 +378,21 @@ def cornersHeuristic(state: Any, problem: CornersProblem):
     corners = problem.corners # These are the corner coordinates
     walls = problem.walls # These are the walls of the maze, as a Grid (game.py)
 
-    "*** YOUR CODE HERE ***"
-    return 0 # Default to trivial solution
-
+    if problem.isGoalState(state):
+        return 0
+    
+    # Retorna a distancia de manhattan entre o estado atual e um canto
+    visited = state[1]
+    maxCornerDistance = -1
+    for c in corners:
+        if c not in visited:
+            cornerDistance = manhattanDistance(state[0], c)
+            if cornerDistance > maxCornerDistance:
+                maxCornerDistance = cornerDistance
+        
+    # Retorna a distancia até o canto mais longe
+    # Como sempre retorna o maior valor possível, nunca vai subestimar
+    return maxCornerDistance
 
 
 class AStarCornersAgent(SearchAgent):
@@ -466,8 +481,26 @@ def foodHeuristic(state: Tuple[Tuple, List[List]], problem: FoodSearchProblem):
     problem.heuristicInfo['wallCount']
     """
     position, foodGrid = state
-    "*** YOUR CODE HERE ***"
-    return 0
+    food = foodGrid.asList()
+    maxDist = 0
+    
+    if problem.isGoalState(state):
+        return 0
+    
+    # Procura por dois dots mais distantes um do outro
+    first = food[0]
+    second = food[0]
+    for i in range(len(food)):
+        for j in range(i + 1, len(food)):
+            dist = manhattanDistance(food[i], food[j])
+            if dist > maxDist:
+                maxDist = dist
+                first = food[i]
+                second = food[j]
+    
+    # Retorna a distância máxima entre 2 dots não "comidos" ainda, mais a distância mínima
+    # entre a posição atual e algum deles
+    return min((manhattanDistance(position, first), manhattanDistance(position, second))) + maxDist
 
 
 class ClosestDotSearchAgent(SearchAgent):
@@ -498,7 +531,7 @@ class ClosestDotSearchAgent(SearchAgent):
         walls = gameState.getWalls()
         problem = AnyFoodSearchProblem(gameState)
 
-        "*** YOUR CODE HERE ***"
+        return search.bfs(problem)
         util.raiseNotDefined()
 
 class AnyFoodSearchProblem(PositionSearchProblem):
@@ -534,7 +567,7 @@ class AnyFoodSearchProblem(PositionSearchProblem):
         """
         x,y = state
 
-        "*** YOUR CODE HERE ***"
+        return self.food[x][y]
         util.raiseNotDefined()
 
 def mazeDistance(point1: Tuple[int, int], point2: Tuple[int, int], gameState: pacman.GameState) -> int:
