@@ -42,6 +42,7 @@ import util
 import time
 import search
 import pacman
+import math
 
 class GoWestAgent(Agent):
     "An agent that goes West until it can't."
@@ -383,16 +384,14 @@ def cornersHeuristic(state: Any, problem: CornersProblem):
     
     # Retorna a distancia de manhattan entre o estado atual e um canto
     visited = state[1]
-    maxCornerDistance = -1
+    cornerDistance = []
     for c in corners:
         if c not in visited:
-            cornerDistance = manhattanDistance(state[0], c)
-            if cornerDistance > maxCornerDistance:
-                maxCornerDistance = cornerDistance
-        
+            cornerDistance.append(manhattanDistance(state[0], c))\
+    
     # Retorna a distancia até o canto mais longe
-    # Como sempre retorna o maior valor possível, nunca vai subestimar
-    return maxCornerDistance
+    # Como sempre retorna o maior valor possível, nunca vai superestimar
+    return (max(cornerDistance) + min(cornerDistance))
 
 
 class AStarCornersAgent(SearchAgent):
