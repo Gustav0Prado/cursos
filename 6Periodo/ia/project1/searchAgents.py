@@ -389,8 +389,8 @@ def cornersHeuristic(state: Any, problem: CornersProblem):
         if c not in visited:
             cornerDistance.append(manhattanDistance(state[0], c))\
     
-    # Retorna a distancia até o canto mais longe
-    # Como sempre retorna o maior valor possível, nunca vai superestimar
+    # Retorna a distancia até o canto mais longe + distancia até o mais próximo
+    # Como distancia de Manhattan é bem menor que a real, nunca vai superestimar
     return (max(cornerDistance) + min(cornerDistance))
 
 
