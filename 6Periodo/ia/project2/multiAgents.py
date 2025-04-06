@@ -169,7 +169,42 @@ class MinimaxAgent(MultiAgentSearchAgent):
         gameState.isLose():
         Returns whether or not the game state is a losing state
         """
-        "*** YOUR CODE HERE ***"
+        def max_value(gameState, currAgent, currDepth):
+            if gameState.isWin() or gameState.isLose() or currDepth == self.depth:
+                return self.evaluationFunction(gameState)
+            
+            v = float("-inf")
+            actions = gameState.getLegalActions(currAgent)
+            for a in actions:
+                v = max(v, min_value(gameState.generateSuccessor(currAgent, a), currAgent+1, currDepth))
+            return v
+        
+        def min_value(gameState, currAgent, currDepth):
+            if gameState.isWin() or gameState.isLose() or currDepth == self.depth:
+                return self.evaluationFunction(gameState)
+            
+            v = float("inf")
+            actions = gameState.getLegalActions(currAgent)
+            for a in actions:
+                # Caso seja o ultimo fantasma, chama o pacman e aumenta a profundidade
+                if currAgent == gameState.getNumAgents() - 1:
+                    v = min(v, max_value(gameState.generateSuccessor(currAgent, a), 0, currDepth+1))
+                # Caso contrario, chama para o proximo fantasma
+                else:
+                    v = min(v, min_value(gameState.generateSuccessor(currAgent, a), currAgent+1, currDepth))
+            return v
+        
+        # Movimento inicial do Pacman
+        v = float("-inf")
+        actions = gameState.getLegalActions(0)
+        maxAction = ''
+        for a in actions:
+            new_v = max(v, min_value(gameState.generateSuccessor(0, a), 1, 0))
+            if new_v > v:
+                v = new_v
+                maxAction = a
+        return maxAction
+        
         util.raiseNotDefined()
 
 class AlphaBetaAgent(MultiAgentSearchAgent):
