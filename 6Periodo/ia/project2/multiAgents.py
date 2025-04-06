@@ -216,7 +216,49 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         """
         Returns the minimax action using self.depth and self.evaluationFunction
         """
-        "*** YOUR CODE HERE ***"
+        def max_value(gameState, currAgent, currDepth, alpha, beta):
+            if gameState.isWin() or gameState.isLose() or currDepth == self.depth:
+                return self.evaluationFunction(gameState)
+            
+            v = float("-inf")
+            actions = gameState.getLegalActions(currAgent)
+            for a in actions:
+                v = max(v, min_value(gameState.generateSuccessor(currAgent, a), currAgent+1, currDepth, alpha, beta))
+                if v > beta: return v
+                alpha = max(alpha, v)
+            return v
+        
+        def min_value(gameState, currAgent, currDepth, alpha, beta):
+            if gameState.isWin() or gameState.isLose() or currDepth == self.depth:
+                return self.evaluationFunction(gameState)
+            
+            v = float("inf")
+            actions = gameState.getLegalActions(currAgent)
+            for a in actions:
+                # Caso seja o ultimo fantasma, chama o pacman e aumenta a profundidade
+                if currAgent == gameState.getNumAgents() - 1:
+                    v = min(v, max_value(gameState.generateSuccessor(currAgent, a), 0, currDepth+1, alpha, beta))
+                # Caso contrario, chama para o proximo fantasma
+                else:
+                    v = min(v, min_value(gameState.generateSuccessor(currAgent, a), currAgent+1, currDepth, alpha, beta))
+                if v < alpha: return v
+                beta = min(beta, v)
+            return v
+        
+        # Movimento inicial do Pacman
+        v = float("-inf")
+        alpha = float("-inf")
+        beta = float("inf")
+        actions = gameState.getLegalActions(0)
+        maxAction = ''
+        for a in actions:
+            new_v = max(v, min_value(gameState.generateSuccessor(0, a), 1, 0, alpha, beta))
+            if new_v > v:
+                v = new_v
+                maxAction = a
+            if v > beta: return maxAction
+            alpha = max(alpha, v)
+        return maxAction
         util.raiseNotDefined()
 
 class ExpectimaxAgent(MultiAgentSearchAgent):
@@ -231,7 +273,42 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
         All ghosts should be modeled as choosing uniformly at random from their
         legal moves.
         """
-        "*** YOUR CODE HERE ***"
+        def max_value(gameState, currAgent, currDepth):
+            if gameState.isWin() or gameState.isLose() or currDepth == self.depth:
+                return self.evaluationFunction(gameState)
+            
+            v = float("-inf")
+            actions = gameState.getLegalActions(currAgent)
+            for a in actions:
+                v = max(v, exp_value(gameState.generateSuccessor(currAgent, a), currAgent+1, currDepth))
+            return v
+        
+        def exp_value(gameState, currAgent, currDepth):
+            if gameState.isWin() or gameState.isLose() or currDepth == self.depth:
+                return self.evaluationFunction(gameState)
+            
+            v = 0
+            actions = gameState.getLegalActions(currAgent)
+            for a in actions:
+                p = 1/len(actions)
+                # Caso seja o ultimo fantasma, chama o pacman e aumenta a profundidade
+                if currAgent == gameState.getNumAgents() - 1:
+                    v += p * max_value(gameState.generateSuccessor(currAgent, a), 0, currDepth+1)
+                # Caso contrario, chama para o proximo fantasma
+                else:
+                    v += p * exp_value(gameState.generateSuccessor(currAgent, a), currAgent+1, currDepth)
+            return v
+        
+        # Movimento inicial do Pacman
+        v = float("-inf")
+        actions = gameState.getLegalActions(0)
+        maxAction = ''
+        for a in actions:
+            new_v = max(v, exp_value(gameState.generateSuccessor(0, a), 1, 0))
+            if new_v > v:
+                v = new_v
+                maxAction = a
+        return maxAction
         util.raiseNotDefined()
 
 def betterEvaluationFunction(currentGameState: GameState):
