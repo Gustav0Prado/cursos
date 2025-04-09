@@ -318,18 +318,21 @@ def betterEvaluationFunction(currentGameState: GameState):
 
     DESCRIPTION: <write something here so we know what you did>
     """
-    score = currentGameState.getScore()
+    # Score inicial
+    score = 5 * currentGameState.getScore()
 
+    # Posicoes e listas
     newPos   = currentGameState.getPacmanPosition()
     food     = currentGameState.getFood().asList()
-    ghosts   = currentGameState.getGhostPositions()
+    ghostStates = currentGameState.getGhostStates()
     capsules = currentGameState.getCapsules()
 
+    # Bonus e penalidades
     winBonus    =  99999999
     losePenalty = -99999999
-    farGhostBonus = 500
-    foodPenalty = -50
-    capsulePenalty = -50
+    farGhostPenalty = -250
+    foodPenalty = -20
+    capsulePenalty = -20
 
     # Caso mais basico, do proximo estado ser vitoria ou derrota
     if currentGameState.isWin():
@@ -338,22 +341,26 @@ def betterEvaluationFunction(currentGameState: GameState):
         score += losePenalty
 
     # Para cada fantasma
-    for g in ghosts:
-        dist = util.manhattanDistance(g, newPos)
-        if dist == 1:
+    for g in ghostStates:
+        dist = util.manhattanDistance(g.getPosition(), newPos)
+        if dist == 2:
             score += losePenalty
+        elif g.scaredTimer > 0:
+            score += farGhostPenalty * dist
         else:
-            score += dist * farGhostBonus
+            score += -farGhostPenalty * dist
 
     # Para cada comida
+    score += foodPenalty * len(food)
     for f in food:
         dist = util.manhattanDistance(f, newPos)
-        score += foodPenalty * dist
+        score += dist * foodPenalty
 
     # Para cada capsula
+    score += capsulePenalty * len(capsules)
     for c in capsules:
         dist = util.manhattanDistance(c, newPos)
-        score += capsulePenalty * dist
+        score += dist * capsulePenalty
 
     return score
     util.raiseNotDefined()
