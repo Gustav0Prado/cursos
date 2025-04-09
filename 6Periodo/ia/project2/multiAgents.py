@@ -318,7 +318,44 @@ def betterEvaluationFunction(currentGameState: GameState):
 
     DESCRIPTION: <write something here so we know what you did>
     """
-    "*** YOUR CODE HERE ***"
+    score = currentGameState.getScore()
+
+    newPos   = currentGameState.getPacmanPosition()
+    food     = currentGameState.getFood().asList()
+    ghosts   = currentGameState.getGhostPositions()
+    capsules = currentGameState.getCapsules()
+
+    winBonus    =  99999999
+    losePenalty = -99999999
+    farGhostBonus = 500
+    foodPenalty = -50
+    capsulePenalty = -50
+
+    # Caso mais basico, do proximo estado ser vitoria ou derrota
+    if currentGameState.isWin():
+        score += winBonus
+    elif currentGameState.isLose():
+        score += losePenalty
+
+    # Para cada fantasma
+    for g in ghosts:
+        dist = util.manhattanDistance(g, newPos)
+        if dist == 1:
+            score += losePenalty
+        else:
+            score += dist * farGhostBonus
+
+    # Para cada comida
+    for f in food:
+        dist = util.manhattanDistance(f, newPos)
+        score += foodPenalty * dist
+
+    # Para cada capsula
+    for c in capsules:
+        dist = util.manhattanDistance(c, newPos)
+        score += capsulePenalty * dist
+
+    return score
     util.raiseNotDefined()
 
 # Abbreviation
