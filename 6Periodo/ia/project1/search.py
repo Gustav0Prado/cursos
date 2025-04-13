@@ -66,23 +66,29 @@ class SearchProblem:
 def generic_search(problem: SearchProblem, insertFunction) -> List[Directions]:
     # Fronteira começa com o estado inicial e caminho até a solução começa vazio
     fringe = [(problem.getStartState(), [], 0)]
-    path = []
+    
+    # Guarda nós já visitados para não os explorar novamente
     visited = []
     
     # Enquanto a fronteira não é vazia, explora ela
     while len(fringe) > 0:
         node, path, cost = fringe.pop(0)
+        
+        # Caso nó não tenha sido explorado ainda
         if node not in visited:
             visited.append(node)
+            
+            # Se é um estado final, retorna o caminho até eke
             if problem.isGoalState(node):
                 return path
+            
+            # Insere na fronteira com a função passada como parâmetro
             fringe = insertFunction(node, fringe, path, cost)
 
 
 def heuristic_search(problem: SearchProblem, insertFunction, heuristic) -> List[Directions]:
     # Fronteira começa com o estado inicial e caminho até a solução começa vazio
     fringe = [(problem.getStartState(), [], 0, heuristic(problem.getStartState(), problem))]
-    path = []
     
     # Dicionario mantem o nó visitado e o menor custo até chegar aquele nó
     visited = {}
@@ -94,8 +100,12 @@ def heuristic_search(problem: SearchProblem, insertFunction, heuristic) -> List[
         # Visita nó novamente apenas caso o custo para chegar enle for menor que o anteriormente registrado
         if node not in visited or visited[node] > cost:
             visited.update({node: cost})
+            
+            # Se é um estado final, retorna o caminho até eke
             if problem.isGoalState(node):
                 return path
+            
+            # Insere na fronteira com a função passada como parâmetro
             fringe = insertFunction(node, fringe, path, cost)
 
 def tinyMazeSearch(problem: SearchProblem) -> List[Directions]:
@@ -122,12 +132,14 @@ def depthFirstSearch(problem: SearchProblem) -> List[Directions]:
     print("Start's successors:", problem.getSuccessors(problem.getStartState()))
     """
     def insertBeginning(node, fringe: list, path, _) -> List:
+        # Cria cópia da fronteira
         new_fringe = fringe.copy()
         
         # Para cada sucessor, os insere no começo da fila
         for s, dir, cost in problem.getSuccessors(node):
             new_fringe.insert(0, (s, path + [dir], cost))
         
+        # Retorna nova fronteira com nó inserido no início
         return new_fringe
     
     return generic_search(problem, insertBeginning)
@@ -137,12 +149,14 @@ def breadthFirstSearch(problem: SearchProblem) -> List[Directions]:
     """Search the shallowest nodes in the search tree first."""
     
     def insertEnd(node, fringe: list, path, _) -> List:
+        # Cria cópia da fronteira
         new_fringe = fringe.copy()
         
         # Para cada sucessor, os insere no final da fila
         for s, dir, cost in problem.getSuccessors(node):
             new_fringe.append((s, path + [dir], cost))
         
+        # Retorna nova fronteira com nó no final da fila
         return new_fringe
     
     return generic_search(problem, insertEnd)
@@ -150,7 +164,9 @@ def breadthFirstSearch(problem: SearchProblem) -> List[Directions]:
 
 def uniformCostSearch(problem: SearchProblem) -> List[Directions]:
     """Search the node of least total cost first."""
+    
     def insertAscOrder(node, fringe: list, path, costToNode) -> List:
+        # Cria cópia da fronteira
         new_fringe = fringe.copy()
         
         # Para cada sucessor, os insere ordenado na fila
@@ -166,11 +182,13 @@ def uniformCostSearch(problem: SearchProblem) -> List[Directions]:
                         pos += 1
                     else:
                         break
+                # Insere na posição encontrada
                 new_fringe.insert(pos, (s, path + [dir], new_cost))
                         
-        
+        # Retorna nova fronteira
         return new_fringe
     
+    # Chama busca genérica com inserção ordenada
     return generic_search(problem, insertAscOrder)
     util.raiseNotDefined()
 
@@ -189,20 +207,27 @@ def aStarSearch(problem: SearchProblem, heuristic=nullHeuristic) -> List[Directi
         # Para cada sucessor, os insere ordenado na fila
         for s, dir, cost in problem.getSuccessors(node):
             new_cost = costToNode+cost
+            
+            # Ordena pelo custo até o nó + custo da heurística
             f = new_cost + heuristic(s, problem)
+            
+            # Caso seja o primeiro
             if len(new_fringe) == 0:
                 new_fringe.append((s, path + [dir], new_cost, heuristic(s, problem)))
             else:
                 pos = 0
-                # Acha posicao de insercao
+                # Acha posicao de insercao comparando o f atual com o do nó inserido na fila
                 while pos < len(new_fringe):
-                    if f >= new_fringe[pos][2] + new_fringe[pos][3]:
+                    f_node = new_fringe[pos][2] + new_fringe[pos][3]
+                    if f >= f_node:
                         pos += 1
                     else:
                         break
+                # Insere na posição encontrada
                 new_fringe.insert(pos, (s, path + [dir], new_cost, heuristic(s, problem)))
         return new_fringe
     
+    # Chama busca heurística com inserção ordenada heurística
     return heuristic_search(problem, insertHeuristicOrder, heuristic)
     util.raiseNotDefined()
 
