@@ -350,8 +350,7 @@ def betterEvaluationFunction(currentGameState: GameState):
             score -= pow(max(7 - dist, 0), 2)
 
     # Para cada comida
-    score += foodPenalty * len(food)
-    maxFood = -1e6
+    maxFood = 0
     for f in food:
         dist = 1.0 / util.manhattanDistance(f, newPos)
         if dist > maxFood:
@@ -359,10 +358,9 @@ def betterEvaluationFunction(currentGameState: GameState):
     score += maxFood
 
     # Para cada capsula
-    score += capsulePenalty * len(capsules)
-    maxCapsules = -1e6
+    maxCapsules = 0
     for c in capsules:
-        dist = 1 / util.manhattanDistance(c, newPos)
+        dist = 50 / util.manhattanDistance(c, newPos)
         if dist > maxCapsules:
             maxCapsules = dist
     score += maxCapsules
