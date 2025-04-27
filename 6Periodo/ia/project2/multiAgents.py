@@ -198,8 +198,12 @@ class MinimaxAgent(MultiAgentSearchAgent):
         v = float("-inf")
         actions = gameState.getLegalActions(0)
         maxAction = ''
+        
+        # Inicia o minimax fazendo um movimento max e chamando o min
         for a in actions:
             new_v = max(v, min_value(gameState.generateSuccessor(0, a), 1, 0))
+            
+            # Para cada acao, se for melhor, fica com ela
             if new_v > v:
                 v = new_v
                 maxAction = a
@@ -250,9 +254,13 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         alpha = float("-inf")
         beta = float("inf")
         actions = gameState.getLegalActions(0)
+        
+        # Inicia o Alpha-Beta fazendo um movimento max e chamando min
         maxAction = ''
         for a in actions:
             new_v = max(v, min_value(gameState.generateSuccessor(0, a), 1, 0, alpha, beta))
+            
+            # Para cada acao, se for melhor, fica com ela
             if new_v > v:
                 v = new_v
                 maxAction = a
@@ -290,7 +298,9 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
             v = 0
             actions = gameState.getLegalActions(currAgent)
             for a in actions:
+                # Acoes sao equiprovaveis
                 p = 1/len(actions)
+                
                 # Caso seja o ultimo fantasma, chama o pacman e aumenta a profundidade
                 if currAgent == gameState.getNumAgents() - 1:
                     v += p * max_value(gameState.generateSuccessor(currAgent, a), 0, currDepth+1)
@@ -303,8 +313,12 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
         v = float("-inf")
         actions = gameState.getLegalActions(0)
         maxAction = ''
+        
+        # Inicia o expectimax fazendo movimento max e chamando o exp_value
         for a in actions:
             new_v = max(v, exp_value(gameState.generateSuccessor(0, a), 1, 0))
+            
+            # Para cada acao, se for melhor, fica com ela
             if new_v > v:
                 v = new_v
                 maxAction = a
@@ -330,8 +344,6 @@ def betterEvaluationFunction(currentGameState: GameState):
     # Bonus e penalidades
     winBonus    =  1e6
     losePenalty = -1e6
-    foodPenalty = -50
-    capsulePenalty = -10
 
     # Caso mais basico, do proximo estado ser vitoria ou derrota
     if currentGameState.isWin():
@@ -339,17 +351,22 @@ def betterEvaluationFunction(currentGameState: GameState):
     elif currentGameState.isLose():
         score += losePenalty
 
-    # Para cada fantasma
+    # Para cada fantasma, penaliza baseado na distancia
     for g in ghostStates:
         dist = util.manhattanDistance(g.getPosition(), newPos)
+        
+        # Se estiver perto, dá penalidade
         if dist == 1:
             score += losePenalty
+            
+        # Se o fantasma estiver assustado, dá mais pontos por estar próximo a ele
+        # Caso contrario penaliza por estar perto dele
         if g.scaredTimer > 0:
             score += pow(max(8 - dist, 0), 2)
         else:
             score -= pow(max(7 - dist, 0), 2)
 
-    # Para cada comida
+    # Para cada comida, penaliza baseado na maior distancia entre o pacman e uma comida
     maxFood = 0
     for f in food:
         dist = 1.0 / util.manhattanDistance(f, newPos)
@@ -357,10 +374,10 @@ def betterEvaluationFunction(currentGameState: GameState):
             maxFood = dist
     score += maxFood
 
-    # Para cada capsula
+    # Para cada capsula, penaliza baseado na maior distancia entre o pacman e uma capsula
     maxCapsules = 0
     for c in capsules:
-        dist = 50 / util.manhattanDistance(c, newPos)
+        dist = 1.0 / util.manhattanDistance(c, newPos)
         if dist > maxCapsules:
             maxCapsules = dist
     score += maxCapsules
