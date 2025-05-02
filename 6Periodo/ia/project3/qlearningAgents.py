@@ -71,6 +71,7 @@ class QLearningAgent(ReinforcementAgent):
         legalActions = self.getLegalActions(state)
         if len(legalActions) == 0: return 0.0
         
+        # Retorna Q-Valor da melhor ação que pode ser feita em um estado
         maxQ = float("-inf")
         for action in legalActions:
             maxQ = max(maxQ, self.getQValue(state, action))
@@ -87,8 +88,11 @@ class QLearningAgent(ReinforcementAgent):
         legalActions = self.getLegalActions(state)
         if len(legalActions) == 0: return None
         
+        # Maior valor possível de ação no estado atual
         maxQValue = self.computeValueFromQValues(state)
         bestAction = ""
+        
+        # Procura qual ação retorna esse Q-Valor
         for action in legalActions:
             if maxQValue == self.getQValue(state, action):
                 bestAction = action
@@ -109,14 +113,13 @@ class QLearningAgent(ReinforcementAgent):
         """
         # Pick Action
         legalActions = self.getLegalActions(state)
-        # action = None
-        
-        if len(legalActions) == 0:
-            return None
+        if len(legalActions) == 0: return None
         
         if util.flipCoin(self.epsilon):
+            # Retorna uma ação aleatória
             return random.choice(legalActions)
         else:
+            # Retorna a ação de maior valor no estado atual
             return self.computeActionFromQValues(state)
         util.raiseNotDefined()
 
@@ -129,7 +132,10 @@ class QLearningAgent(ReinforcementAgent):
           it will be called on your behalf
         """
         
+        # Pega Q-Valor antigo
         QValue = self.values[(state, action)]
+        
+        # Calcula sample
         sample = reward + (self.discount * self.computeValueFromQValues(nextState))
         
         # Atualiza Q-Valor na "tabela"
