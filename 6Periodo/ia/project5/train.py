@@ -39,7 +39,7 @@ def train_perceptron(model, dataset):
                 pred = model.get_prediction(x)
                 if pred.item() != y.item():
                     # Atualizar pesos do Perceptron
-                    model.w += y * x
+                    model.w += x*y
                     training_complete = False
 
 

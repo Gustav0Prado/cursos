@@ -61,7 +61,7 @@ class PerceptronModel(Module):
 
         The pytorch function `tensordot` may be helpful here.
         """
-        return (self.w * x).sum()
+        return tensordot(self.w, x)
 
         
 
@@ -73,8 +73,10 @@ class PerceptronModel(Module):
         """
         score = self(x)
 
+        # Se valor maior que 0, retorna 1
         if score.item() >= 0:
             return tensor(1)
+        # Senao, retorna -1
         else:
             return tensor(-1)
 
