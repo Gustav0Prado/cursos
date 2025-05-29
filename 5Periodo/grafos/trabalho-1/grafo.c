@@ -13,6 +13,8 @@ typedef struct vértice{
 typedef struct grafo{
     char nome[MAX_CHARS];
     Vértice *vértices;
+    int num_vertices;
+    int num_arestas;
 } Grafo;
 
 grafo *le_grafo(FILE *f) {
@@ -43,7 +45,7 @@ grafo *le_grafo(FILE *f) {
             }
             // Outras linhas vértices e arestas
             else{
-
+                printf("%s\n", linha);
             }
         }
 
@@ -79,14 +81,14 @@ unsigned int bipartido(grafo *g){
 // devolve o número de vértices em g
 
 unsigned int n_vertices(grafo *g){
-    return;
+    return g->num_vertices;
 }
 
 //------------------------------------------------------------------------------
 // devolve o número de arestas em g
 
 unsigned int n_arestas(grafo *g){
-    return;
+    return g->num_arestas;
 }
 
 //------------------------------------------------------------------------------
