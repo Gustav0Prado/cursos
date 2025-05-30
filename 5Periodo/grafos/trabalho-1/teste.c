@@ -9,8 +9,8 @@ int main(void) {
   char *s;
 
   printf("grafo: %s\n", nome(g));
-  // printf("%d vertices\n", n_vertices(g));
-  // printf("%d arestas\n", n_arestas(g));
+  printf("%d vertices\n", n_vertices(g));
+  printf("%d arestas\n", n_arestas(g));
   // printf("%d componentes\n", n_componentes(g));
 
   // printf("%sbipartido\n", bipartido(g) ? "" : "não ");

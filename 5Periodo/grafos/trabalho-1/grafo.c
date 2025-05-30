@@ -1,21 +1,84 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include "grafo.h"
 
 #define MAX_CHARS 2048
 
-typedef struct vértice{
+typedef struct aresta {
+    char destino[MAX_CHARS];
+    unsigned int peso;
+    struct aresta *prox; 
+} Aresta;
+
+typedef struct vértice {
     char nome[MAX_CHARS];
-    struct vértice *proximo;
+    Aresta *arestas_head;
+    Aresta *arestas_tail;
 } Vértice;
 
-
-typedef struct grafo{
+typedef struct grafo {
     char nome[MAX_CHARS];
-    Vértice *vértices;
-    int num_vertices;
-    int num_arestas;
+    Vértice vertices[1024];
+    unsigned int num_vertices;
+    unsigned int num_arestas;
 } Grafo;
+
+int procura_vertice(grafo *g, char *vertice) {
+    int achou = -1;
+    for (unsigned int i = 0; i < g->num_vertices; i++) {
+        if (strcmp(g->vertices[i].nome, vertice) == 0) achou = i;
+    }
+
+    return achou;
+}
+
+void adiciona_vertice(grafo *g, char *vertice) {
+    Vértice v;
+    g->num_vertices++;
+    strcpy(v.nome, vertice);
+    v.arestas_head = NULL;
+    v.arestas_tail = NULL;
+
+    g->vertices[g->num_vertices-1] = v;
+}
+
+void adiciona_aresta(grafo *g, char *origem, char *destino, int peso) {
+    int ind_origem = procura_vertice(g, origem);
+    int ind_destino = procura_vertice(g, destino);
+    
+    g->num_arestas++;
+
+    Aresta *nova = malloc(sizeof(Aresta));
+    strcpy(nova->destino, destino);
+    nova->peso = peso;
+    nova->prox = NULL;
+
+    // Lista de arestas vazia
+    if (g->vertices[ind_origem].arestas_head == NULL){
+        g->vertices[ind_origem].arestas_head = nova;
+        g->vertices[ind_origem].arestas_tail = nova;
+    }
+    else {
+        g->vertices[ind_origem].arestas_tail->prox = nova;
+        g->vertices[ind_origem].arestas_tail = nova;
+    }
+
+    nova = malloc(sizeof(Aresta));
+    strcpy(nova->destino, origem);
+    nova->peso = peso;
+    nova->prox = NULL;
+
+    // Lista de arestas vazia
+    if (g->vertices[ind_destino].arestas_head == NULL){
+        g->vertices[ind_destino].arestas_head = nova;
+        g->vertices[ind_destino].arestas_tail = nova;
+    }
+    else {
+        g->vertices[ind_destino].arestas_tail->prox = nova;
+        g->vertices[ind_destino].arestas_tail = nova;
+    }
+}
 
 grafo *le_grafo(FILE *f) {
     Grafo *g = malloc(sizeof(Grafo));
@@ -29,27 +92,66 @@ grafo *le_grafo(FILE *f) {
     // Lê da entrada f
     int primeira_linha = 1;
 
-    while (fgets(linha, sizeof(linha), f)) { 
-        // Para quando acha uma linha vazia
-        if (strcmp(linha, "\n") == 0 || linha[0] == '\0') {
-            break;
-        }
+    while (fgets(linha, sizeof(linha), f)) {
+        // Remove \n da linha
+        linha[strcspn(linha, "\n")] = '\0';
 
         // Apenas processa se não for comentario
-        if (strncmp(linha, "//", 2) != 0) {
+        if ((strncmp(linha, "//", 2) != 0) && (linha[0] != '\0')){
             // Primeira linha é o nome do grafo
             if (primeira_linha){
                 primeira_linha = 0;
-                linha[strcspn(linha, "\n")] = '\0';
                 strcpy(g->nome, linha);
             }
-            // Outras linhas vértices e arestas
+            // Outras linhas de vértices e arestas
             else{
-                printf("%s\n", linha);
+                // Linha com arestas
+                if (strstr(linha, "--") != NULL) {
+                    const char delim[] = " ";
+                    char *token, *prim, *seg, *peso;
+
+                    // Primeira ponta da aresta
+                    prim = strtok(linha, delim);
+                    if (procura_vertice(g, prim) == -1) {
+                        adiciona_vertice(g, prim);
+                    }
+
+                    token = strtok(NULL, delim); // --
+                    
+                    // Segunda ponta da aresta
+                    seg = strtok(NULL, delim);
+                    if (procura_vertice(g, seg) == -1) {
+                        adiciona_vertice(g, seg);
+                    }
+
+                    // Peso da aresta
+                    peso = strtok(NULL, delim);
+                    if (peso != NULL) {
+                        int peso_int = atoi(peso);
+                        adiciona_aresta(g, prim, seg, peso_int);
+                    }
+                    else{
+                        adiciona_aresta(g, prim, seg, 0);
+                    }
+                }
+
+                // Linha com vértice sem arestas
+                else adiciona_vertice(g, linha);
             }
         }
 
     }
+
+    /* Printa todos os vertices e arestas lidos*/
+    // for (int i = 0; i < g->num_vertices; i++) {
+    //     printf("Vértice %s: ", g->vertices[i].nome);
+    //     Aresta *a = g->vertices[i].arestas_head;
+    //     while (a != NULL) {
+    //         printf("-> %s(peso %d) ", a->destino, a->peso);
+    //         a = a->prox;
+    //     }
+    //     printf("\n");
+    // }
 
     return g;
 }
@@ -60,7 +162,8 @@ grafo *le_grafo(FILE *f) {
 // devolve 1 em caso de sucesso e 0 em caso de erro
 
 unsigned int destroi_grafo(grafo *g){
-    return;
+    free(g);
+    return 1;
 }
 
 //------------------------------------------------------------------------------
