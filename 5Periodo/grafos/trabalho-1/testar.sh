@@ -1,2 +1,2 @@
 #!/usr/bin/bash
-make clean && make && ./teste < grafo.in
+clear && make clean && make && ./teste < grafo.in

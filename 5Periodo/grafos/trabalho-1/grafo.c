@@ -5,8 +5,9 @@
 
 #define MAX_CHARS 2048
 
+// Structs e operações em grafos ------------------------------------------------------------------------------------------------------------------------
 typedef struct aresta {
-    char destino[MAX_CHARS];
+    struct vértice *destino;
     unsigned int peso;
     struct aresta *prox; 
 } Aresta;
@@ -15,6 +16,9 @@ typedef struct vértice {
     char nome[MAX_CHARS];
     Aresta *arestas_head;
     Aresta *arestas_tail;
+    struct vértice *pai;
+    unsigned int dist;
+    unsigned int estado;
 } Vértice;
 
 typedef struct grafo {
@@ -24,6 +28,7 @@ typedef struct grafo {
     unsigned int num_arestas;
 } Grafo;
 
+// Retorna indice de um vértice no array de vértices
 int procura_vertice(grafo *g, char *vertice) {
     int achou = -1;
     for (unsigned int i = 0; i < g->num_vertices; i++) {
@@ -33,24 +38,32 @@ int procura_vertice(grafo *g, char *vertice) {
     return achou;
 }
 
+// Adiciona vértice no grafo
 void adiciona_vertice(grafo *g, char *vertice) {
     Vértice v;
     g->num_vertices++;
     strcpy(v.nome, vertice);
     v.arestas_head = NULL;
     v.arestas_tail = NULL;
+    v.dist = 0;
+    v.estado = 0;
+    v.pai = NULL;
 
     g->vertices[g->num_vertices-1] = v;
 }
 
+// Adiciona aresta no grafo dado dois vértices que já existem
 void adiciona_aresta(grafo *g, char *origem, char *destino, unsigned int peso) {
     int ind_origem = procura_vertice(g, origem);
     int ind_destino = procura_vertice(g, destino);
     
+    if ((ind_destino == -1) || (ind_origem == -1)) return;
+
     g->num_arestas++;
 
+    // Adiciona aresta origem -> destino
     Aresta *nova = malloc(sizeof(Aresta));
-    strcpy(nova->destino, destino);
+    nova->destino = &(g->vertices[ind_destino]);
     nova->peso = peso;
     nova->prox = NULL;
 
@@ -64,8 +77,9 @@ void adiciona_aresta(grafo *g, char *origem, char *destino, unsigned int peso) {
         g->vertices[ind_origem].arestas_tail = nova;
     }
 
+    // Adiciona aresta destino -> origem
     nova = malloc(sizeof(Aresta));
-    strcpy(nova->destino, origem);
+    nova->destino = &(g->vertices[ind_origem]);
     nova->peso = peso;
     nova->prox = NULL;
 
@@ -80,6 +94,74 @@ void adiciona_aresta(grafo *g, char *origem, char *destino, unsigned int peso) {
     }
 }
 
+// Structs e funções da fila -----------------------------------------------------------------------------------------------------------------------------
+typedef struct nodo {
+    Vértice *v;
+    struct nodo *prox;
+} Nodo;
+
+typedef struct fila {
+    Nodo *fila_head;
+    Nodo *fila_tail;
+} Fila;
+
+Fila *cria_fila() {
+    Fila *f = malloc(sizeof(Fila));
+    f->fila_head = NULL;
+    f->fila_tail = NULL;
+
+    return f;
+}
+
+// Adiciona vértice na fila
+void enfilera(Vértice *v, Fila *f) {
+    Nodo *n = malloc(sizeof(Nodo));
+    n->v = v;
+    n->prox = NULL;
+
+    if (f->fila_head == NULL) {
+        f->fila_head = n;
+        f->fila_tail = n;
+    }
+    else {
+        f->fila_tail->prox = n;
+        f->fila_tail = n;
+    }
+}
+
+// Retira primeiro vértice da fila
+Vértice *desenfilera(Fila *f) {
+    Nodo *n = f->fila_head;
+    f->fila_head = f->fila_head->prox;
+
+    n->prox = NULL;
+    Vértice *v = n->v;
+    free(n);
+    return v;
+}
+
+// Retorna se fila esta vazia ou nao
+int fila_vazia(Fila *f) {
+    if (f->fila_head == NULL) return 1;
+    return 0;
+}
+
+// Destroi uma fila f
+void destroi_fila(Fila *f) {
+    if (!fila_vazia(f)) {
+        Nodo *n = f->fila_head;
+        while (n != NULL) {
+            Nodo *prox = n->prox;
+            free(n);
+            n = prox;
+        }
+    }
+    free(f);
+    f = NULL;
+    return;
+}
+
+// Funções do trabalho em si ----------------------------------------------------------------------------------------------------------------------------
 grafo *le_grafo(FILE *f) {
     Grafo *g = malloc(sizeof(Grafo));
     if (g == NULL) {
@@ -127,7 +209,7 @@ grafo *le_grafo(FILE *f) {
                     // Peso da aresta
                     peso = strtok(NULL, delim);
                     if (peso != NULL) {
-                        int peso_int = atoi(peso);
+                        unsigned int peso_int = atoi(peso);
                         adiciona_aresta(g, prim, seg, peso_int);
                     }
                     else{
@@ -147,7 +229,7 @@ grafo *le_grafo(FILE *f) {
     //     printf("Vértice %s: ", g->vertices[i].nome);
     //     Aresta *a = g->vertices[i].arestas_head;
     //     while (a != NULL) {
-    //         printf("-> %s(peso %d) ", a->destino, a->peso);
+    //         printf("-> %s(peso %d) ", a->destino->nome, a->peso);
     //         a = a->prox;
     //     }
     //     printf("\n");
@@ -178,7 +260,7 @@ unsigned int destroi_grafo(grafo *g){
     // Libera memória do grafo
     free(g);
     g = NULL;
-    return 1;
+    return (g == NULL);
 }
 
 //------------------------------------------------------------------------------
@@ -188,11 +270,65 @@ char *nome(grafo *g){
     return (*g).nome;
 }
 
+// Busca em largura para determinar se grafo é bipartido
+void BuscaBipartido(grafo *g, Vértice *r) {
+    Fila *V = cria_fila();
+    r->dist = 0;
+    enfilera(r, V);
+    r->estado = 1;
+
+    while (!fila_vazia(V)){
+        Vértice *v = desenfilera(V);
+
+        // Itera para todas as arestas de v
+        Aresta *a = v->arestas_head;
+        while (a != NULL) {
+            Vértice *w = a->destino;
+            if(w->estado == 0){
+                w->pai = v;
+                w->dist = w->pai->dist+1;
+                enfilera(w, V);
+                w->estado = 1;
+            }
+
+            a = a->prox;
+        }
+
+        v->estado = 2;
+    }
+
+    destroi_fila(V);
+    return;
+}
+
 //------------------------------------------------------------------------------
 // devolve 1 se g é bipartido e 0 caso contrário
 
 unsigned int bipartido(grafo *g){
-    return;
+    for (unsigned int i = 0; i < g->num_vertices; i++) {
+        g->vertices[i].estado = 0;
+    }
+
+    for (unsigned int i = 0; i < g->num_vertices; i++) {
+        if (g->vertices[i].estado == 0) BuscaBipartido(g, &(g->vertices[i]));
+    }
+
+    unsigned int bipart = 1;
+    for (unsigned int i = 0; i < g->num_vertices; i++) {
+        Vértice *v = &(g->vertices[i]);
+        Aresta *a = v->arestas_head;
+        while (a != NULL){
+            Vértice *w = a->destino;
+            // Procura arestas fora da arvore, ou seja, sem relacao de descendencia
+            if ((v != w->pai) && (w != v->pai)) {
+                // Se tem paridades diferentes, n eh bipartido
+                if ((v->dist % 2) == (w->dist % 2)) bipart = 0;
+            }
+            a = a->prox;
+        }
+    }
+
+    return bipart;
 }
 
 //------------------------------------------------------------------------------
