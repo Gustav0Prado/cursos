@@ -43,7 +43,7 @@ void adiciona_vertice(grafo *g, char *vertice) {
     g->vertices[g->num_vertices-1] = v;
 }
 
-void adiciona_aresta(grafo *g, char *origem, char *destino, int peso) {
+void adiciona_aresta(grafo *g, char *origem, char *destino, unsigned int peso) {
     int ind_origem = procura_vertice(g, origem);
     int ind_destino = procura_vertice(g, destino);
     
@@ -108,7 +108,7 @@ grafo *le_grafo(FILE *f) {
                 // Linha com arestas
                 if (strstr(linha, "--") != NULL) {
                     const char delim[] = " ";
-                    char *token, *prim, *seg, *peso;
+                    char *prim, *seg, *peso;
 
                     // Primeira ponta da aresta
                     prim = strtok(linha, delim);
@@ -116,7 +116,7 @@ grafo *le_grafo(FILE *f) {
                         adiciona_vertice(g, prim);
                     }
 
-                    token = strtok(NULL, delim); // --
+                    strtok(NULL, delim); // --
                     
                     // Segunda ponta da aresta
                     seg = strtok(NULL, delim);
@@ -162,7 +162,22 @@ grafo *le_grafo(FILE *f) {
 // devolve 1 em caso de sucesso e 0 em caso de erro
 
 unsigned int destroi_grafo(grafo *g){
+    // Libera memória de todas as arestas
+    for (unsigned int i = 0; i < g->num_vertices; i++) {
+        Aresta *a = g->vertices[i].arestas_head;
+        Aresta *prox;
+        while (a != NULL) {
+            prox = a->prox;
+            free(a);
+            a = prox;
+        }
+        g->vertices[i].arestas_head = NULL;
+        g->vertices[i].arestas_tail = NULL;
+    }
+
+    // Libera memória do grafo
     free(g);
+    g = NULL;
     return 1;
 }
 
