@@ -19,6 +19,7 @@ typedef struct vértice {
     struct vértice *pai;
     unsigned int dist;
     unsigned int estado;
+    unsigned int componente;
 } Vértice;
 
 typedef struct grafo {
@@ -271,7 +272,7 @@ char *nome(grafo *g){
 }
 
 // Busca em largura para determinar se grafo é bipartido
-void BuscaBipartido(grafo *g, Vértice *r) {
+void BuscaCaminhosMin(grafo *g, Vértice *r) {
     Fila *V = cria_fila();
     r->dist = 0;
     enfilera(r, V);
@@ -287,6 +288,7 @@ void BuscaBipartido(grafo *g, Vértice *r) {
             if(w->estado == 0){
                 w->pai = v;
                 w->dist = w->pai->dist+1;
+                w->componente = w->pai->componente;
                 enfilera(w, V);
                 w->estado = 1;
             }
@@ -310,7 +312,7 @@ unsigned int bipartido(grafo *g){
     }
 
     for (unsigned int i = 0; i < g->num_vertices; i++) {
-        if (g->vertices[i].estado == 0) BuscaBipartido(g, &(g->vertices[i]));
+        if (g->vertices[i].estado == 0) BuscaCaminhosMin(g, &(g->vertices[i]));
     }
 
     unsigned int bipart = 1;
@@ -356,11 +358,17 @@ unsigned int n_componentes(grafo *g){
     unsigned int c = 0;
     for (unsigned int i = 0; i < g->num_vertices; i++) {
         if (g->vertices[i].estado == 0) {
-            c++;
-            BuscaBipartido(g, &(g->vertices[i]));
+            g->vertices[i].componente = c++;
+            BuscaCaminhosMin(g, &(g->vertices[i]));
         }
     }
+
     return c;
+}
+
+// Compara dois numeros (Usado para o qsort)
+int compara(const void *a, const void *b) {
+    return (*(int*)a - *(int*)b);
 }
 
 //------------------------------------------------------------------------------
@@ -368,7 +376,41 @@ unsigned int n_componentes(grafo *g){
 // em ordem não decrescente
 
 char *diametros(grafo *g){
-    return;
+    unsigned int num_comp = n_componentes(g);
+    unsigned int diametros[num_comp];
+
+    char *diam = malloc(MAX_CHARS);
+   
+    // Itera um componente de cada vez
+    for (unsigned int i = 0; i < num_comp; i++) {
+        unsigned int maxdist = 0;
+
+        for (unsigned int j = 0; j < g->num_vertices; j++) {
+            g->vertices[j].estado = 0;
+        }
+
+        // Para todos os vertices do componente, realiza a busca
+        for (unsigned int j = 0; j < g->num_vertices; j++) {
+            if (g->vertices[j].componente == i) BuscaCaminhosMin(g, &(g->vertices[j]));
+
+            // Pega a distancia maxima de cada busca e as compara, deixando sempre a maior
+            for (unsigned int k = 0; k < g->num_vertices; k++){
+                if (g->vertices[k].dist > maxdist) maxdist = g->vertices[k].dist;
+            }
+        }
+
+        diametros[i] = maxdist;
+    }
+
+    // Ordena vetor
+    qsort(diametros, num_comp, sizeof(unsigned int), compara);
+    
+    // Escreve os números em uma string
+    int index = 0;
+    for (unsigned int i=0; i<num_comp; i++)
+        index += sprintf(&diam[index], "%d ", diametros[i]);
+
+    return diam;
 }
 
 //------------------------------------------------------------------------------
