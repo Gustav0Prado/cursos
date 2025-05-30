@@ -349,7 +349,18 @@ unsigned int n_arestas(grafo *g){
 // devolve o número de componentes em g
 
 unsigned int n_componentes(grafo *g){
-    return;
+    for (unsigned int i = 0; i < g->num_vertices; i++) {
+        g->vertices[i].estado = 0;
+    }
+
+    unsigned int c = 0;
+    for (unsigned int i = 0; i < g->num_vertices; i++) {
+        if (g->vertices[i].estado == 0) {
+            c++;
+            BuscaBipartido(g, &(g->vertices[i]));
+        }
+    }
+    return c;
 }
 
 //------------------------------------------------------------------------------
