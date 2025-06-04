@@ -16,7 +16,7 @@ int main(void) {
   printf("%sbipartido\n", bipartido(g) ? "" : "não ");
 
   printf("diâmetros: %s\n", s=diametros(g));
-  // free(s);
+  free(s);
 
   // printf("vértices de corte: %s\n", s=vertices_corte(g));
   // free(s);

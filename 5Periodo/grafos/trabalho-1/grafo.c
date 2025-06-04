@@ -20,6 +20,8 @@ typedef struct vértice {
     unsigned int dist;
     unsigned int estado;
     unsigned int componente;
+    unsigned int lowpoint;
+    unsigned int level;
 } Vértice;
 
 typedef struct grafo {
@@ -413,11 +415,46 @@ char *diametros(grafo *g){
     return diam;
 }
 
+// Busca em profundidade com objetivo de achar lowpoints
+void BuscaLowPoint(grafo *g, Vértice *v) {
+    v->estado = 1;
+
+    // Itera para todas as arestas de v
+        Aresta *a = v->arestas_head;
+        while (a != NULL) {
+            Vértice *w = a->destino;
+            if (w->estado == 1) {
+
+            }
+            else if(w->estado == 0){
+                
+            }
+
+            a = a->prox;
+        }
+
+        v->estado = 2;
+    return;
+}
+
 //------------------------------------------------------------------------------
 // devolve uma "string" com os nomes dos vértices de corte de g em
 // ordem alfabética, separados por brancos
 
 char *vertices_corte(grafo *g){
+    for (unsigned int i = 0; i < g->num_vertices; i++) {
+        g->vertices[i].estado = 0;
+    }
+
+    for (unsigned int i = 0; i < g->num_vertices; i++) {
+        Vértice *v = &(g->vertices[i]);
+        if (v->estado == 0) {
+            v->lowpoint = 0;
+            v->level = 0;
+            BuscaLowPoint(g, v);
+        }
+    }
+
     return;
 }
 
@@ -429,5 +466,18 @@ char *vertices_corte(grafo *g){
 // "a z b x c y"
 
 char *arestas_corte(grafo *g){
+    for (unsigned int i = 0; i < g->num_vertices; i++) {
+        g->vertices[i].estado = 0;
+    }
+
+    for (unsigned int i = 0; i < g->num_vertices; i++) {
+        Vértice *v = &(g->vertices[i]);
+        if (v->estado == 0) {
+            v->lowpoint = 0;
+            v->level = 0;
+            BuscaLowPoint(g, v);
+        }
+    }
+
     return;
 }
