@@ -132,6 +132,31 @@ void enfilera(Vértice *v, Fila *f) {
     }
 }
 
+// Adiciona vértice na fila ordenado pelo custo
+void enfilera_ordenado(Vértice *v, Fila *f) {
+    Nodo *n = malloc(sizeof(Nodo));
+    n->v = v;
+    n->prox = NULL;
+
+    if (f->fila_head == NULL) {
+        f->fila_head = n;
+        f->fila_tail = n;
+    }
+    else if (v->dist < f->fila_head->v->dist) {
+        n->prox = f->fila_head;
+        f->fila_head = n;
+    }
+    else {
+        Nodo *atual = f->fila_head;
+        while (atual->prox != NULL && atual->prox->v->dist < v->dist) {
+            atual = atual->prox;
+        }
+
+        n->prox = atual->prox;
+        atual->prox = n;
+    }
+}
+
 // Retira primeiro vértice da fila
 Vértice *desenfilera(Fila *f) {
     Nodo *n = f->fila_head;
@@ -216,7 +241,7 @@ grafo *le_grafo(FILE *f) {
                         adiciona_aresta(g, prim, seg, peso_int);
                     }
                     else{
-                        adiciona_aresta(g, prim, seg, 0);
+                        adiciona_aresta(g, prim, seg, 1);
                     }
                 }
 
@@ -368,6 +393,43 @@ unsigned int n_componentes(grafo *g){
     return c;
 }
 
+// Busca usando Dijkstra para determinar se grafo é bipartido
+void BuscaDijkstra(grafo *g, Vértice *r) {
+    Fila *V = cria_fila();
+    r->dist = 0;
+    r->estado = 1;
+    enfilera_ordenado(r, V);
+
+    while (!fila_vazia(V)){
+        Vértice *v = desenfilera(V);
+
+        // Itera para todas as arestas de v
+        Aresta *a = v->arestas_head;
+        while (a != NULL) {
+            Vértice *u = a->destino;
+            if (u->estado == 1) {
+                if (v->dist + a->peso < u->dist){
+                    u->pai = v;
+                    u->dist = v->dist + a->peso;
+                }
+            }
+            else if(u->estado == 0){
+                u->pai = v;
+                u->dist = v->dist + a->peso;
+                u->componente = u->pai->componente;
+                enfilera_ordenado(u, V);
+                u->estado = 1;
+            }
+
+            a = a->prox;
+        }
+        v->estado = 2;
+    }
+
+    destroi_fila(V);
+    return;
+}
+
 // Compara dois numeros (Usado para o qsort)
 int compara(const void *a, const void *b) {
     return (*(int*)a - *(int*)b);
@@ -387,13 +449,13 @@ char *diametros(grafo *g){
     for (unsigned int i = 0; i < num_comp; i++) {
         unsigned int maxdist = 0;
 
-        for (unsigned int j = 0; j < g->num_vertices; j++) {
-            g->vertices[j].estado = 0;
-        }
-
         // Para todos os vertices do componente, realiza a busca
         for (unsigned int j = 0; j < g->num_vertices; j++) {
-            if (g->vertices[j].componente == i) BuscaCaminhosMin(g, &(g->vertices[j]));
+            for (unsigned int j = 0; j < g->num_vertices; j++) {
+                g->vertices[j].estado = 0;
+                g->vertices[j].dist = 0;
+            }
+            if (g->vertices[j].componente == i) BuscaDijkstra(g, &(g->vertices[j]));
 
             // Pega a distancia maxima de cada busca e as compara, deixando sempre a maior
             for (unsigned int k = 0; k < g->num_vertices; k++){
