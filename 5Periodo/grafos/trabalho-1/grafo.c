@@ -21,7 +21,8 @@ typedef struct vértice {
     unsigned int estado;
     unsigned int componente;
     unsigned int lowpoint;
-    unsigned int level;
+    unsigned int nivel;
+    unsigned int num_filhos;
 } Vértice;
 
 typedef struct grafo {
@@ -314,6 +315,7 @@ void BuscaCaminhosMin(grafo *g, Vértice *r) {
             Vértice *w = a->destino;
             if(w->estado == 0){
                 w->pai = v;
+                v->num_filhos++;
                 w->dist = w->pai->dist+1;
                 w->componente = w->pai->componente;
                 enfilera(w, V);
@@ -409,12 +411,15 @@ void BuscaDijkstra(grafo *g, Vértice *r) {
             Vértice *u = a->destino;
             if (u->estado == 1) {
                 if (v->dist + a->peso < u->dist){
+                    u->pai->num_filhos--;
                     u->pai = v;
+                    v->num_filhos++;
                     u->dist = v->dist + a->peso;
                 }
             }
             else if(u->estado == 0){
                 u->pai = v;
+                v->num_filhos++;
                 u->dist = v->dist + a->peso;
                 u->componente = u->pai->componente;
                 enfilera_ordenado(u, V);
@@ -427,7 +432,6 @@ void BuscaDijkstra(grafo *g, Vértice *r) {
     }
 
     destroi_fila(V);
-    return;
 }
 
 // Compara dois numeros (Usado para o qsort)
@@ -451,9 +455,9 @@ char *diametros(grafo *g){
 
         // Para todos os vertices do componente, realiza a busca
         for (unsigned int j = 0; j < g->num_vertices; j++) {
-            for (unsigned int j = 0; j < g->num_vertices; j++) {
-                g->vertices[j].estado = 0;
-                g->vertices[j].dist = 0;
+            for (unsigned int k = 0; k < g->num_vertices; k++) {
+                g->vertices[k].estado = 0;
+                g->vertices[k].dist = 0;
             }
             if (g->vertices[j].componente == i) BuscaDijkstra(g, &(g->vertices[j]));
 
@@ -478,25 +482,35 @@ char *diametros(grafo *g){
 }
 
 // Busca em profundidade com objetivo de achar lowpoints
-void BuscaLowPoint(grafo *g, Vértice *v) {
-    v->estado = 1;
-
+void BuscaLowPoint(grafo *g, Vértice *r) {
+    r->estado = 1;
     // Itera para todas as arestas de v
-        Aresta *a = v->arestas_head;
-        while (a != NULL) {
-            Vértice *w = a->destino;
-            if (w->estado == 1) {
-
-            }
-            else if(w->estado == 0){
-                
-            }
-
-            a = a->prox;
+    Aresta *a = r->arestas_head;
+    while (a != NULL) {
+        Vértice *w = a->destino;
+        if ((w->estado == 1) && (w->nivel < r->lowpoint) && (r->pai != w)) r->lowpoint = w->nivel;
+        else if(w->estado == 0){
+            w->pai = r;
+            w->lowpoint = r->nivel + 1;
+            w->nivel = r->nivel + 1;
+            BuscaLowPoint(g, w);
+            if (w->lowpoint < r->lowpoint) r->lowpoint = w->lowpoint;
         }
+        a = a->prox;
+    }
+    r->estado = 2;
+}
 
-        v->estado = 2;
-    return;
+// Comparador para qsort
+int compara_nomes(const void* a, const void* b) {
+    char* nome1 = *(char**)a;
+    char* nome2 = *(char**)b;
+    return strcmp(nome1, nome2);
+}
+
+int eh_raiz(Grafo *g, Vértice *v) {
+    if (v->pai == NULL) return 1;
+    return 0;
 }
 
 //------------------------------------------------------------------------------
@@ -504,20 +518,53 @@ void BuscaLowPoint(grafo *g, Vértice *v) {
 // ordem alfabética, separados por brancos
 
 char *vertices_corte(grafo *g){
+    char *cortes = malloc(MAX_CHARS);
+    strcpy(cortes, "");
+
     for (unsigned int i = 0; i < g->num_vertices; i++) {
+        g->vertices[i].pai = NULL;
         g->vertices[i].estado = 0;
     }
 
+    // Roda busca em todo o grafo
     for (unsigned int i = 0; i < g->num_vertices; i++) {
         Vértice *v = &(g->vertices[i]);
         if (v->estado == 0) {
             v->lowpoint = 0;
-            v->level = 0;
+            v->nivel = 0;
             BuscaLowPoint(g, v);
         }
     }
 
-    return;
+    // Cria vetor de ponteiros para os nomes
+    char** nomes = malloc(g->num_vertices * sizeof(char*));
+    int ind_nome = 0;
+
+    // Procura vértices de corte
+    for (unsigned int i = 0; i < g->num_vertices; i++) {
+        Vértice *v = &(g->vertices[i]);
+        
+        // Se eh raiz e tem mais de um filho
+        if (eh_raiz(g, v)){
+            if (v->num_filhos > 1) nomes[ind_nome] = v->nome;
+        }
+        // ou se nao eh raiz e tem filho w tal que nivel(v) <= lowpoint(w)
+        else{
+
+        }
+    }
+
+    printf("\tvertices de corte: ");
+    for (int i = 0; i < ind_nome; ++i) {
+        printf("%s ", nomes[i]);
+    }
+    printf("\n");
+
+    return cortes;
+}
+
+int compara_strings(const void *a, const void *b) {
+    return strcmp((const char *)a, (const char *)b);
 }
 
 //------------------------------------------------------------------------------
@@ -528,7 +575,11 @@ char *vertices_corte(grafo *g){
 // "a z b x c y"
 
 char *arestas_corte(grafo *g){
+    char *cortes = malloc(MAX_CHARS);
+    strcpy(cortes, "");
+
     for (unsigned int i = 0; i < g->num_vertices; i++) {
+        g->vertices[i].pai = NULL;
         g->vertices[i].estado = 0;
     }
 
@@ -536,10 +587,40 @@ char *arestas_corte(grafo *g){
         Vértice *v = &(g->vertices[i]);
         if (v->estado == 0) {
             v->lowpoint = 0;
-            v->level = 0;
+            v->nivel = 0;
             BuscaLowPoint(g, v);
         }
     }
 
-    return;
+    // Cria vetor de ponteiros para os nomes
+    const char nomes[g->num_vertices][MAX_CHARS];
+    int ind_nome = 0;
+
+    // Procura arestas de corte
+    for (unsigned int i = 0; i < g->num_vertices; i++) {
+        Vértice *u = &(g->vertices[i]);
+
+        Aresta *a = u->arestas_head;
+        while (a != NULL) {
+            Vértice *v = a->destino;
+            // u é pai de v e L(u) < l(v)
+            if ((v->pai == u) && (u->nivel < v->lowpoint)) {
+                sprintf(nomes[ind_nome], "%s %s", u->nome, v->nome);
+                ind_nome++;
+            }
+            a = a->prox;
+        }
+    }
+
+    // Ordena vetor
+    qsort(nomes, g->num_vertices, MAX_CHARS, compara_strings);
+
+    for (int i = 0; i < ind_nome; i++) {
+        strcat(cortes, nomes[i]);
+        if (i < ind_nome - 1) {
+            strcat(cortes, " ");
+        }
+    }
+
+    return cortes;
 }
