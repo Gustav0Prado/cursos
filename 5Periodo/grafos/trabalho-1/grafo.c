@@ -22,7 +22,6 @@ typedef struct vértice {
     unsigned int componente;
     unsigned int lowpoint;
     unsigned int nivel;
-    unsigned int num_filhos;
 } Vértice;
 
 typedef struct grafo {
@@ -315,7 +314,6 @@ void BuscaCaminhosMin(grafo *g, Vértice *r) {
             Vértice *w = a->destino;
             if(w->estado == 0){
                 w->pai = v;
-                v->num_filhos++;
                 w->dist = w->pai->dist+1;
                 w->componente = w->pai->componente;
                 enfilera(w, V);
@@ -411,15 +409,12 @@ void BuscaDijkstra(grafo *g, Vértice *r) {
             Vértice *u = a->destino;
             if (u->estado == 1) {
                 if (v->dist + a->peso < u->dist){
-                    u->pai->num_filhos--;
                     u->pai = v;
-                    v->num_filhos++;
                     u->dist = v->dist + a->peso;
                 }
             }
             else if(u->estado == 0){
                 u->pai = v;
-                v->num_filhos++;
                 u->dist = v->dist + a->peso;
                 u->componente = u->pai->componente;
                 enfilera_ordenado(u, V);
@@ -476,7 +471,12 @@ char *diametros(grafo *g){
     // Escreve os números em uma string
     int index = 0;
     for (unsigned int i=0; i<num_comp; i++)
-        index += sprintf(&diam[index], "%d ", diametros[i]);
+        if (i == num_comp-1){
+            index += sprintf(&diam[index], "%d", diametros[i]);
+        } 
+        else {
+            index += sprintf(&diam[index], "%d ", diametros[i]);
+        }
 
     return diam;
 }
@@ -537,7 +537,7 @@ char *vertices_corte(grafo *g){
     }
 
     // Cria vetor de ponteiros para os nomes
-    char** nomes = malloc(g->num_vertices * sizeof(char*));
+    const char nomes[g->num_arestas][MAX_CHARS];
     int ind_nome = 0;
 
     // Procura vértices de corte
@@ -546,25 +546,40 @@ char *vertices_corte(grafo *g){
         
         // Se eh raiz e tem mais de um filho
         if (eh_raiz(g, v)){
-            if (v->num_filhos > 1) nomes[ind_nome] = v->nome;
+            int num_filhos = 0;
+            for (unsigned int j = 0; j < g->num_vertices; j++) {
+                Vértice *w = &(g->vertices[j]);
+                if (w->pai == v) num_filhos++;
+            }
+
+            if (num_filhos > 1) {
+                sprintf(nomes[ind_nome], "%s", v->nome);
+                ind_nome++;
+            }
         }
         // ou se nao eh raiz e tem filho w tal que nivel(v) <= lowpoint(w)
         else{
-
+            for (unsigned int j = 0; j < g->num_vertices; j++) {
+                Vértice *w = &(g->vertices[j]);
+                if (w->pai == v && v->nivel <= w->lowpoint) {
+                    sprintf(nomes[ind_nome], "%s", v->nome);
+                    ind_nome++;
+                }
+            }
         }
     }
 
-    printf("\tvertices de corte: ");
-    for (int i = 0; i < ind_nome; ++i) {
-        printf("%s ", nomes[i]);
+    // Ordena vetor
+    qsort(nomes, ind_nome, MAX_CHARS, strcmp);
+
+    for (int i = 0; i < ind_nome; i++) {
+        strcat(cortes, nomes[i]);
+        if (i < ind_nome - 1) {
+            strcat(cortes, " ");
+        }
     }
-    printf("\n");
 
     return cortes;
-}
-
-int compara_strings(const void *a, const void *b) {
-    return strcmp((const char *)a, (const char *)b);
 }
 
 //------------------------------------------------------------------------------
@@ -593,7 +608,7 @@ char *arestas_corte(grafo *g){
     }
 
     // Cria vetor de ponteiros para os nomes
-    const char nomes[g->num_vertices][MAX_CHARS];
+    const char nomes[g->num_arestas][MAX_CHARS];
     int ind_nome = 0;
 
     // Procura arestas de corte
@@ -605,7 +620,12 @@ char *arestas_corte(grafo *g){
             Vértice *v = a->destino;
             // u é pai de v e L(u) < l(v)
             if ((v->pai == u) && (u->nivel < v->lowpoint)) {
-                sprintf(nomes[ind_nome], "%s %s", u->nome, v->nome);
+                if (strcmp(u->nome, v->nome) < 0) {
+                    sprintf(nomes[ind_nome], "%s %s", u->nome, v->nome);
+                }
+                else {
+                    sprintf(nomes[ind_nome], "%s %s", v->nome, u->nome);
+                }
                 ind_nome++;
             }
             a = a->prox;
@@ -613,7 +633,7 @@ char *arestas_corte(grafo *g){
     }
 
     // Ordena vetor
-    qsort(nomes, g->num_vertices, MAX_CHARS, compara_strings);
+    qsort(nomes, ind_nome, MAX_CHARS, strcmp);
 
     for (int i = 0; i < ind_nome; i++) {
         strcat(cortes, nomes[i]);
