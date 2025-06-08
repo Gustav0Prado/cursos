@@ -31,6 +31,11 @@ typedef struct grafo {
     unsigned int num_arestas;
 } Grafo;
 
+// Funcoes em grafos--------------------------------------------------------------------------------------------------------------------------
+int procura_vertice(grafo *g, char *vertice);
+void adiciona_vertice(grafo *g, char *vertice);
+void adiciona_aresta(grafo *g, char *origem, char *destino, unsigned int peso);
+
 // Retorna indice de um vértice no array de vértices
 int procura_vertice(grafo *g, char *vertice) {
     int achou = -1;
@@ -108,7 +113,15 @@ typedef struct fila {
     Nodo *fila_tail;
 } Fila;
 
-Fila *cria_fila() {
+// Funcoes em filas-------------------------------------------------------------------------------------------------------------------
+Fila *cria_fila(void);
+void enfilera(Vértice *v, Fila *f);
+void enfilera_ordenado(Vértice *v, Fila *f);
+Vértice *desenfilera(Fila *f);
+int fila_vazia(Fila *f);
+void destroi_fila(Fila *f);
+
+Fila *cria_fila(void) {
     Fila *f = malloc(sizeof(Fila));
     f->fila_head = NULL;
     f->fila_tail = NULL;
@@ -190,6 +203,13 @@ void destroi_fila(Fila *f) {
 }
 
 // Funções do trabalho em si ----------------------------------------------------------------------------------------------------------------------------
+void BuscaCaminhosMin(Vértice *r);
+void BuscaDijkstra(Vértice *r);
+int compara(const void *a, const void *b);
+void BuscaLowPoint(grafo *g, Vértice *r);
+int compara_nomes(const void* a, const void* b);
+int eh_raiz(Vértice *v);
+
 grafo *le_grafo(FILE *f) {
     Grafo *g = malloc(sizeof(Grafo));
     if (g == NULL) {
@@ -299,7 +319,7 @@ char *nome(grafo *g){
 }
 
 // Busca em largura para determinar se grafo é bipartido
-void BuscaCaminhosMin(grafo *g, Vértice *r) {
+void BuscaCaminhosMin(Vértice *r) {
     Fila *V = cria_fila();
     r->dist = 0;
     enfilera(r, V);
@@ -322,7 +342,6 @@ void BuscaCaminhosMin(grafo *g, Vértice *r) {
 
             a = a->prox;
         }
-
         v->estado = 2;
     }
 
@@ -339,7 +358,7 @@ unsigned int bipartido(grafo *g){
     }
 
     for (unsigned int i = 0; i < g->num_vertices; i++) {
-        if (g->vertices[i].estado == 0) BuscaCaminhosMin(g, &(g->vertices[i]));
+        if (g->vertices[i].estado == 0) BuscaCaminhosMin(&(g->vertices[i]));
     }
 
     unsigned int bipart = 1;
@@ -386,7 +405,7 @@ unsigned int n_componentes(grafo *g){
     for (unsigned int i = 0; i < g->num_vertices; i++) {
         if (g->vertices[i].estado == 0) {
             g->vertices[i].componente = c++;
-            BuscaCaminhosMin(g, &(g->vertices[i]));
+            BuscaCaminhosMin(&(g->vertices[i]));
         }
     }
 
@@ -394,7 +413,7 @@ unsigned int n_componentes(grafo *g){
 }
 
 // Busca usando Dijkstra para determinar se grafo é bipartido
-void BuscaDijkstra(grafo *g, Vértice *r) {
+void BuscaDijkstra(Vértice *r) {
     Fila *V = cria_fila();
     r->dist = 0;
     r->estado = 1;
@@ -454,7 +473,7 @@ char *diametros(grafo *g){
                 g->vertices[k].estado = 0;
                 g->vertices[k].dist = 0;
             }
-            if (g->vertices[j].componente == i) BuscaDijkstra(g, &(g->vertices[j]));
+            if (g->vertices[j].componente == i) BuscaDijkstra(&(g->vertices[j]));
 
             // Pega a distancia maxima de cada busca e as compara, deixando sempre a maior
             for (unsigned int k = 0; k < g->num_vertices; k++){
@@ -508,7 +527,7 @@ int compara_nomes(const void* a, const void* b) {
     return strcmp(nome1, nome2);
 }
 
-int eh_raiz(Grafo *g, Vértice *v) {
+int eh_raiz(Vértice *v) {
     if (v->pai == NULL) return 1;
     return 0;
 }
@@ -537,7 +556,7 @@ char *vertices_corte(grafo *g){
     }
 
     // Cria vetor de ponteiros para os nomes
-    const char nomes[g->num_arestas][MAX_CHARS];
+    char nomes[g->num_arestas][MAX_CHARS];
     int ind_nome = 0;
 
     // Procura vértices de corte
@@ -545,7 +564,7 @@ char *vertices_corte(grafo *g){
         Vértice *v = &(g->vertices[i]);
         
         // Se eh raiz e tem mais de um filho
-        if (eh_raiz(g, v)){
+        if (eh_raiz(v)){
             int num_filhos = 0;
             for (unsigned int j = 0; j < g->num_vertices; j++) {
                 Vértice *w = &(g->vertices[j]);
@@ -608,7 +627,7 @@ char *arestas_corte(grafo *g){
     }
 
     // Cria vetor de ponteiros para os nomes
-    const char nomes[g->num_arestas][MAX_CHARS];
+    char nomes[g->num_arestas][MAX_CHARS];
     int ind_nome = 0;
 
     // Procura arestas de corte
