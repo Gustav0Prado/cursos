@@ -1,0 +1,10 @@
+completo_parcial_com_vértice
+v1 -- v2 8
+v1 -- v3 13
+v1 -- v4 5
+v2 -- v3 6
+v2 -- v4 7
+v3 -- v4 4
+v4 -- v5 10
+v2 -- v5 9
+v6

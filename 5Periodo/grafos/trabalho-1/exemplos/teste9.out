@@ -1,0 +1,8 @@
+grafo: grafo_arvore_com_vértice
+9 vertices
+7 arestas
+2 componentes
+bipartido
+diâmetros: 0 28
+vértices de corte: a b f raiz
+arestas de corte: a c a d a raiz b e b f b raiz f g

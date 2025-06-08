@@ -1,6 +1,13 @@
 #!/usr/bin/bash
 make clean; make; clear;
-for file in exemplos/*.in; do
+for file in $(ls -v exemplos/*.in); do
     grafo=$(basename $file .in)
-    diff <(./teste < exemplos/$grafo.in) exemplos/$grafo.out
+    echo -n "$grafo: "
+    saida=$(diff <(./teste < exemplos/$grafo.in) exemplos/$grafo.out)
+    if [[ $saida ]]; then
+        echo "$saida"
+    else
+        echo "OK"
+    fi
+
 done

@@ -1,0 +1,9 @@
+grafo_malha_com_vértice
+a -- b 10
+a -- c 15
+b -- c 12
+b -- d 7
+c -- d 9
+c -- e 11
+d -- e 6
+f
