@@ -1,0 +1,28 @@
+p2_2024
+a -- c
+a -- h
+c -- h
+
+a -- b
+a -- d
+b -- d
+
+d -- e
+e -- g
+g -- i
+i -- k
+k -- d
+
+d -- f
+d -- j
+d -- m
+
+f -- j
+f -- l
+f -- m
+f -- o
+f -- p
+j -- n
+n -- f
+l -- o
+m -- p
