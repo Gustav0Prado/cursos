@@ -22,6 +22,7 @@ typedef struct vértice {
     unsigned int componente;
     unsigned int lowpoint;
     unsigned int nivel;
+    unsigned int corte;
 } Vértice;
 
 typedef struct grafo {
@@ -502,21 +503,26 @@ char *diametros(grafo *g){
 
 // Busca em profundidade com objetivo de achar lowpoints
 void BuscaLowPoint(grafo *g, Vértice *r) {
+    unsigned int filhos = 0;
     r->estado = 1;
+    
     // Itera para todas as arestas de v
     Aresta *a = r->arestas_head;
     while (a != NULL) {
         Vértice *w = a->destino;
         if ((w->estado == 1) && (w->nivel < r->lowpoint) && (r->pai != w)) r->lowpoint = w->nivel;
         else if(w->estado == 0){
+            filhos += 1;
             w->pai = r;
             w->lowpoint = r->nivel + 1;
             w->nivel = r->nivel + 1;
             BuscaLowPoint(g, w);
             if (w->lowpoint < r->lowpoint) r->lowpoint = w->lowpoint;
+            if ((r->pai != NULL) && (r->nivel <= w->lowpoint)) r->corte = 1;
         }
         a = a->prox;
     }
+    if (r->pai == NULL && (filhos > 1)) r->corte = 1;
     r->estado = 2;
 }
 
@@ -543,6 +549,7 @@ char *vertices_corte(grafo *g){
     for (unsigned int i = 0; i < g->num_vertices; i++) {
         g->vertices[i].pai = NULL;
         g->vertices[i].estado = 0;
+        g->vertices[i].corte = 0;
     }
 
     // Roda busca em todo o grafo
@@ -563,28 +570,9 @@ char *vertices_corte(grafo *g){
     for (unsigned int i = 0; i < g->num_vertices; i++) {
         Vértice *v = &(g->vertices[i]);
         
-        // Se eh raiz e tem mais de um filho
-        if (eh_raiz(v)){
-            int num_filhos = 0;
-            for (unsigned int j = 0; j < g->num_vertices; j++) {
-                Vértice *w = &(g->vertices[j]);
-                if (w->pai == v) num_filhos++;
-            }
-
-            if (num_filhos > 1) {
-                sprintf(nomes[ind_nome], "%s", v->nome);
-                ind_nome++;
-            }
-        }
-        // ou se nao eh raiz e tem filho w tal que nivel(v) <= lowpoint(w)
-        else{
-            for (unsigned int j = 0; j < g->num_vertices; j++) {
-                Vértice *w = &(g->vertices[j]);
-                if (w->pai == v && v->nivel <= w->lowpoint) {
-                    sprintf(nomes[ind_nome], "%s", v->nome);
-                    ind_nome++;
-                }
-            }
+        if (v->corte) {
+            sprintf(nomes[ind_nome], "%s", v->nome);
+            ind_nome++;
         }
     }
 
@@ -615,6 +603,7 @@ char *arestas_corte(grafo *g){
     for (unsigned int i = 0; i < g->num_vertices; i++) {
         g->vertices[i].pai = NULL;
         g->vertices[i].estado = 0;
+        g->vertices[i].corte = 0;
     }
 
     for (unsigned int i = 0; i < g->num_vertices; i++) {
