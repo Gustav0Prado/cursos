@@ -10,7 +10,7 @@ Your code will not pass if the gradescope autograder detects any changed imports
 from torch import optim, tensor
 from losses import regression_loss, digitclassifier_loss, languageid_loss, digitconvolution_Loss
 from torch import movedim
-
+import torch
 
 """
 ##################
@@ -30,17 +30,21 @@ def train_perceptron(model, dataset):
     """
     with no_grad():
         dataloader = DataLoader(dataset, batch_size=1, shuffle=True)
-        training_complete = False
-        while not training_complete:
-            training_complete = True
+        while True:
+            all_correct = True
             for batch in dataloader:
                 x = batch['x']
                 y = batch['label']
+
                 pred = model.get_prediction(x)
+
                 if pred.item() != y.item():
-                    # Atualizar pesos do Perceptron
-                    model.w += x*y
-                    training_complete = False
+                    # Atualiza os pesos
+                    model.w += x.squeeze() * y.item()
+                    all_correct = False
+
+            if all_correct:
+                break
 
 
 def train_regression(model, dataset):
@@ -58,15 +62,68 @@ def train_regression(model, dataset):
         dataset: a PyTorch dataset object containing data to be trained on
         
     """
-    "*** YOUR CODE HERE ***"
+    LRATE = 0.01
+    MAX_EPOCHS = 5000
+    BREAK_THRES = 0.02
 
+    dataloader = DataLoader(dataset, batch_size=32, shuffle=True)
+    optimizer = optim.Adam(model.parameters(), LRATE)
+
+    for epoch in range(MAX_EPOCHS):
+        total_loss = 0.0
+
+        for batch in dataloader:
+            x = batch['x']
+            y = batch['label']
+
+            predictions = model(x)
+            loss = regression_loss(predictions, y)
+
+            optimizer.zero_grad()
+            loss.backward()
+            optimizer.step()
+
+            total_loss += loss.item()
+
+        avg_loss = total_loss / len(dataloader)
+        if avg_loss < BREAK_THRES:
+            break
+         
 
 def train_digitclassifier(model, dataset):
     """
     Trains the model.
     """
     model.train()
-    """ YOUR CODE HERE """
+    LRATE = 0.001
+    MAX_EPOCHS = 15
+    BREAK_THRES = 0.95
+
+    dataloader = DataLoader(dataset, batch_size=64, shuffle=True)
+    optimizer = optim.Adam(model.parameters(), LRATE)
+
+    for epoch in range(MAX_EPOCHS):
+        total_loss = 0.0
+
+        for batch in dataloader:
+            x = batch['x']
+            y = batch['label']
+
+            predictions = model(x)
+            loss = regression_loss(predictions, y)
+
+            optimizer.zero_grad()
+            loss.backward()
+            optimizer.step()
+
+            total_loss += loss.item()
+        # Verifica acurácia do treinamento
+        model.eval()
+        accuracy = dataset.get_validation_accuracy()
+        model.train()
+
+        if accuracy >= BREAK_THRES:
+            break
 
 
 def train_languageid(model, dataset):

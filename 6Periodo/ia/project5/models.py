@@ -77,8 +77,7 @@ class PerceptronModel(Module):
         if score.item() >= 0:
             return tensor(1)
         # Senao, retorna -1
-        else:
-            return tensor(-1)
+        return tensor(-1)
 
 
 
@@ -91,8 +90,10 @@ class RegressionModel(Module):
 
     def __init__(self):
         # Initialize your model parameters here
-        "*** YOUR CODE HERE ***"
         super().__init__()
+        self.linear_layer1 = Linear( 1, 64)
+        self.linear_layer2 = Linear(64, 64)
+        self.linear_layer3 = Linear(64,  1)
    
 
     def forward(self, x):
@@ -104,7 +105,9 @@ class RegressionModel(Module):
         Returns:
             A node with shape (batch_size x 1) containing predicted y-values
         """
-        "*** YOUR CODE HERE ***"
+        h1 = relu(self.linear_layer1(x))
+        h2 = relu(self.linear_layer2(h1))
+        return self.linear_layer3(h2)
 
 
 class DigitClassificationModel(Module):
@@ -127,7 +130,10 @@ class DigitClassificationModel(Module):
         super().__init__()
         input_size = 28 * 28
         output_size = 10
-        "*** YOUR CODE HERE ***"
+
+        self.linear_layer1 = Linear(input_size, 256)
+        self.linear_layer2 = Linear(256, 128)
+        self.linear_layer3 = Linear(128, output_size)
 
 
     def forward(self, x):
@@ -144,9 +150,9 @@ class DigitClassificationModel(Module):
             A node with shape (batch_size x 10) containing predicted scores
                 (also called logits)
         """
-        """ YOUR CODE HERE """
-
-
+        h1 = relu(self.linear_layer1(x))
+        h2 = relu(self.linear_layer2(h1))
+        return self.linear_layer3(h2)
 
 class LanguageIDModel(Module):
     """

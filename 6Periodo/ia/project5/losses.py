@@ -1,4 +1,5 @@
-from torch.nn.functional import mse_loss, cross_entropy
+from torch.nn.functional import mse_loss, cross_entropy, log_softmax
+from torch import mean
 
 def regression_loss(y_pred, y):
     """
@@ -10,7 +11,7 @@ def regression_loss(y_pred, y):
             to be used for training
     Returns: a tensor of size 1 containing the loss
     """
-    "*** YOUR CODE HERE ***"
+    return mse_loss(y_pred, y)
 
 
 
@@ -27,7 +28,7 @@ def digitclassifier_loss(y_pred, y):
         y: a node with shape (batch_size x 10)
     Returns: a loss tensor
     """
-    """ YOUR CODE HERE """
+    return cross_entropy(y_pred, y)
 
 
 def languageid_loss(y_pred, y):
