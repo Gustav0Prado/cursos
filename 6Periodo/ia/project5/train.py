@@ -64,7 +64,7 @@ def train_regression(model, dataset):
     """
     LRATE = 0.01
     MAX_EPOCHS = 5000
-    BREAK_THRES = 0.02
+    BREAK_THRES = 0.015
 
     dataloader = DataLoader(dataset, batch_size=32, shuffle=True)
     optimizer = optim.Adam(model.parameters(), LRATE)

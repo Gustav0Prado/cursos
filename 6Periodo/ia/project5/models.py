@@ -319,8 +319,6 @@ class Attention(Module):
 
         # (QK^T) / sqrt(d_k)
         d_k = self.layer_size
-        
-        # Q @ K^T: (B, T, C) @ (B, C, T) -> (B, T, T)
         scores = matmul(Q, K.transpose(-2, -1)) / (d_k ** 0.5)
 
         # Aplica a mascara
