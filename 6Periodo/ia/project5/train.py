@@ -97,26 +97,23 @@ def train_digitclassifier(model, dataset):
     model.train()
     LRATE = 0.001
     MAX_EPOCHS = 15
-    BREAK_THRES = 0.95
+    BREAK_THRES = 0.975
 
     dataloader = DataLoader(dataset, batch_size=64, shuffle=True)
     optimizer = optim.Adam(model.parameters(), LRATE)
 
     for epoch in range(MAX_EPOCHS):
-        total_loss = 0.0
-
         for batch in dataloader:
             x = batch['x']
             y = batch['label']
 
             predictions = model(x)
-            loss = regression_loss(predictions, y)
+            loss = digitclassifier_loss(predictions, y)
 
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
 
-            total_loss += loss.item()
         # Verifica acurácia do treinamento
         model.eval()
         accuracy = dataset.get_validation_accuracy()
@@ -141,7 +138,24 @@ def train_languageid(model, dataset):
     For more information, look at the pytorch documentation of torch.movedim()
     """
     model.train()
-    "*** YOUR CODE HERE ***"
+    LRATE = 0.001
+    MAX_EPOCHS = 25
+
+    dataloader = DataLoader(dataset, batch_size=32, shuffle=True)
+    optimizer = optim.Adam(model.parameters(), LRATE)
+
+    for epoch in range(MAX_EPOCHS):
+        for batch in dataloader:
+            x = batch['x']
+            y = batch['label']
+
+            x_moved = movedim(x, 1, 0)
+            predictions = model(x_moved)
+            loss = languageid_loss(predictions, y)
+
+            optimizer.zero_grad()
+            loss.backward()
+            optimizer.step()
 
 
 
@@ -149,4 +163,29 @@ def Train_DigitConvolution(model, dataset):
     """
     Trains the model.
     """
-    """ YOUR CODE HERE """
+    LRATE = 0.001
+    MAX_EPOCHS = 20
+    BREAK_THRES = 0.80
+
+    dataloader = DataLoader(dataset, batch_size=32, shuffle=True)
+    optimizer = optim.Adam(model.parameters(), LRATE)
+
+    for epoch in range(MAX_EPOCHS):
+        for batch in dataloader:
+            x = batch['x']
+            y = batch['label']
+            
+            predictions = model(x)
+            loss = digitconvolution_Loss(predictions, y)
+
+            optimizer.zero_grad()
+            loss.backward()
+            optimizer.step()
+
+        # Verifica acurácia do treinamento
+        model.eval()
+        accuracy = dataset.get_validation_accuracy()
+        model.train()
+
+        if accuracy >= BREAK_THRES:
+            break

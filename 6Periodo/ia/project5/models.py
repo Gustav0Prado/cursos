@@ -8,7 +8,7 @@ Please avoid importing any other functions or modules.
 Your code will not pass if the gradescope autograder detects any changed imports
 """
 # import torch
-from torch.nn import Parameter, Linear
+from torch.nn import Parameter, Linear, GRU
 from torch import tensor, tensordot, ones, matmul, zeros 
 from torch.nn.functional import relu, softmax
 from torch import movedim
@@ -171,9 +171,11 @@ class LanguageIDModel(Module):
         self.num_chars = 47
         self.languages = ["English", "Spanish", "Finnish", "Dutch", "Polish"]
         super(LanguageIDModel, self).__init__()
-        "*** YOUR CODE HERE ***"
-        # Initialize your model parameters here
 
+        # Initialize your model parameters here
+        self.hidden_size = 128
+        self.rnn = GRU(self.num_chars, self.hidden_size, batch_first=False)
+        self.outputlayer = Linear(self.hidden_size, len(self.languages))
 
 
     def forward(self, xs):
@@ -205,7 +207,9 @@ class LanguageIDModel(Module):
             A node with shape (batch_size x 5) containing predicted scores
                 (also called logits)
         """
-        "*** YOUR CODE HERE ***"
+        _, h_n = self.rnn(xs)
+        last_hidden =  h_n[-1]
+        return self.outputlayer(last_hidden)
 
 
 
@@ -228,9 +232,15 @@ def Convolve(input: tensor, weight: tensor):
     input_tensor_dimensions = input.shape
     weight_dimensions = weight.shape
     Output_Tensor = tensor(())
-    "*** YOUR CODE HERE ***"
-
-    "*** End Code ***"
+    
+    out_y = input_tensor_dimensions[0] - weight_dimensions[0] + 1
+    out_x = input_tensor_dimensions[1] - weight_dimensions[1] + 1
+    Output_Tensor = zeros((out_y, out_x))
+    for i in range(out_y):
+        for j in range(out_x):
+            region = input[i:i+weight_dimensions[0], j:j+weight_dimensions[1]]
+            Output_Tensor[i, j] = tensordot(region, weight, dims=2)
+    
     return Output_Tensor
 
 
@@ -252,7 +262,8 @@ class DigitConvolutionalModel(Module):
         output_size = 10
 
         self.convolution_weights = Parameter(ones((3, 3)))
-        """ YOUR CODE HERE """
+        self.hidden_layer = Linear(784, 128)
+        self.output_layer = Linear(128, output_size)
 
 
     def forward(self, x):
@@ -260,12 +271,9 @@ class DigitConvolutionalModel(Module):
         The convolutional layer is already applied, and the output is flattened for you. You should treat x as
         a regular 1-dimensional datapoint now, similar to the previous questions.
         """
-        x = x.reshape(len(x), 28, 28)
-        x = stack(
-            list(map(lambda sample: Convolve(sample, self.convolution_weights), x))
-        )
-        x = x.flatten(start_dim=1)
-        """ YOUR CODE HERE """
+        x = x.reshape(-1, 784)
+        x = relu(self.hidden_layer(x))
+        return self.output_layer(x)
 
 
 class Attention(Module):
@@ -281,7 +289,7 @@ class Attention(Module):
         self.q_layer = Linear(layer_size, layer_size)
         self.v_layer = Linear(layer_size, layer_size)
 
-        # Masking part of attention layer
+        # Mascarando parte da layer
         self.register_buffer(
             "mask",
             tril(ones(block_size, block_size)).view(1, 1, block_size, block_size),
@@ -302,7 +310,26 @@ class Attention(Module):
         For the softmax activation, it should be applied to the last dimension of the input,
         Take a look at the "dim" argument of torch.nn.functional.softmax to figure out how to do this.
         """
-        B, T, C = input.size()
+        _, T, _ = input.size()
 
-        """YOUR CODE HERE"""
+        # Gera as Matrizes Q, K, V
+        Q = self.q_layer(input)
+        K = self.k_layer(input)
+        V = self.v_layer(input)
 
+        # (QK^T) / sqrt(d_k)
+        d_k = self.layer_size
+        
+        # Q @ K^T: (B, T, C) @ (B, C, T) -> (B, T, T)
+        scores = matmul(Q, K.transpose(-2, -1)) / (d_k ** 0.5)
+
+        # Aplica a mascara
+        scores = scores.masked_fill(self.mask[:, :, :T, :T] == 0, float('-inf'))
+
+        # Aplica o softmax
+        attention_weights = softmax(scores, dim=-1)
+
+        # Multiplica os pesos com V
+        output = matmul(attention_weights, V)
+
+        return output
